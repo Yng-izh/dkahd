@@ -63,14 +63,19 @@ EXPECTED_NODES = {
     "openings_unify",
     # 柱两阶段：形态候选 -> 墙网拓扑复核
     "columns_verify",
+    # AI 增强（PR-2/PR-3）：残余图元发现 + 受约束假设（含模型调用 -> 不缓存）
+    "pattern_discovery", "ai_hypotheses",
 }
 
 
 def test_recognition_dag_shape():
     dag = build_recognition_dag()
     assert set(dag.nodes) == EXPECTED_NODES
-    assert len(dag.nodes) == 46
-    assert dag.deps("export") == ("assemble", "final_audit", "adaptive_controller")
+    # 节点总数不是协议固定值（方案 §2）：当前 48 = 原 46 + pattern_discovery
+    # + ai_hypotheses，新增能力只占用这两个外层节点。
+    assert len(dag.nodes) == 48
+    assert dag.deps("export") == ("assemble", "final_audit", "adaptive_controller",
+                                  "ai_hypotheses")
     assert dag.deps("walls_merge") == ("walls_seg", "wall_model", "doors", "windows",
                                        "openings_select", "final_candidate_state")
     assert dag.deps("wall_model") == ("walls_seg", "load")
@@ -89,6 +94,13 @@ def test_recognition_dag_shape():
     assert dag.deps("repair_planner")[0] == "quality_gate"
     assert dag.deps("plan_compile")[0] == "quality_gate"
     assert "repair_planner" in dag.deps("plan_compile")
+    assert "ai_hypotheses" in dag.deps("plan_compile")
+    assert "pattern_discovery" in dag.deps("quality_gate")
+    assert "pattern_discovery" in dag.deps("evidence_graph")
+    assert dag.deps("pattern_discovery") == ("load", "defect_detect", "walls_seg",
+                                             "columns", "openings_select",
+                                             "spaces_seed")
+    assert dag.deps("ai_hypotheses")[0] == "quality_gate"
     assert dag.deps("adaptive_controller")[0] == "quality_gate"
     assert "plan_compile" in dag.deps("adaptive_controller")
     assert dag.deps("finalize_patch") == ("adaptive_controller",)
@@ -566,7 +578,7 @@ def test_run_recognition_export_target(tmp_path):
     assert run.output["schema"] == "dwg-components-records/1.1"
     assert run.output["basemap"]["file"] == "bm.png"
     assert {"assemble", "export"} <= set(run.outputs)
-    assert len(run.stats) == 46
+    assert len(run.stats) == 48
 
     default = run_recognition(str(path), targets=None)
     assert default.output["schema"] == "dwg-components-records/1.1"

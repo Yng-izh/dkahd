@@ -1,6 +1,6 @@
 # 识别 DAG
 
-`src/dwg_reader/recognition/` 是一个 46 节点的构件识别 DAG（有向无环图）：
+`src/dwg_reader/recognition/` 是一个 48 节点的构件识别 DAG（有向无环图）：
 从 DXF 解析、图层角色推导、墙/柱/门窗/房间等识别，到缺陷诊断、修复建议、
 导出，全部按节点声明依赖，可并行、可按目标裁剪、结果按内容哈希缓存。
 
@@ -16,18 +16,49 @@
 | `rooms.py` / `spaces.py` | 房间：面域优先 + 房名挂载 |
 | `layer_roles_infer.py` | 图层角色：几何指纹 ⊗ 图层名先验 |
 | `llm_credentials.py` | 大模型凭据入口（key 不入库，全链路一处配置） |
+| `param_registry.py` | 运行时参数表：绝对授权区间 + 单位 + 归一化基准 + 真实消费者 |
+| `pattern_discovery.py` | 第 47 节点：残余图元聚类 -> PatternCase（无模型、不改构件） |
+| `ai_planner.py` | 第 48 节点：两段式推理，只出假设与计划，坐标一律拒收 |
+| `model_gateway.py` | 唯一网络出口：预算 / 脱敏 / 图像授权 / 结构化解析 / 审计 |
+| `vision.py` | ROI 局部矢量渲染：灰=背景、橙=目标、绿=墙、蓝=文字 |
+| `experiment_runner.py` | 同一 baseline 试多组参数、去重、闭集失败码、预算刹车 |
+| `rule_memory.py` | 三层规则记忆（candidate -> project -> cross_project），召回只产生提议 |
 
-## 两条设计约束
+## AI 自适应增强（默认关闭）
+
+`ai_mode` 三档：`off`（默认，纯几何）/ `propose`（只出提议，不改结果）/
+`enhance`（提议 → 受约束编译 → 同一 baseline 上试多组参数 → 影子+全局验收 →
+通过才合并）。没配 key、模型故障、超预算、验收不过，全部回滚到"没有 AI"的结果。
+
+```text
+raw_evidence -> defect_detect -> pattern_discovery[新]
+evidence_graph/quality_gate（登记 pattern:<hash>）
+quality_gate -> ai_hypotheses[新] -> plan_compile -> adaptive_controller
+```
+
+新增三条硬边界（有单测守着）：提议里出现坐标/代码/路径整条拒收；被编译进来
+却没被任何算子读取的参数判失败；需要升级 `confirmed` 的候选必须有独立来源证据。
+
+## 三条设计约束
 
 1. **判据不许写死毫米数**：除 `scale.py` 的 `STRUCTURE` 表，其它模块不准新增
    数值阈值常量，有单测强制（`tests/test_generalization.py`）。
-2. **大模型只做判断，不做几何**：它只能从闭集里挑角色或否决候选，坐标、尺寸、
-   阈值一律由程序算；每次运行的 `meta.llm` 会写明到底有没有用到模型。
+2. **大模型只做判断，不做几何**：它只能从闭集里挑角色或否决候选、给参数区间，
+   坐标、尺寸、阈值一律由程序算；`meta.llm` 与 `meta.ai_recognition` 会写明
+   到底有没有用到模型、发了几张图、花了多少次调用。
+3. **参数必须真被读**：可调参数只能来自 `param_registry`，运行时以不可变
+   `RecognitionConfig` 显式传给算子；没被 `take()` 过的参数会进 `params_unused`。
 
 ## 运行
 
 ```bash
 pip install -e .[dxf]
+
+# AI 增强（默认关闭；不给 --ai-mode 就是纯几何）
+dwg-reader components 图纸.dxf --ai-mode propose --ai-config ai_recognition.json -o proposals.json
+dwg-reader components 图纸.dxf --ai-mode enhance --ai-config ai_recognition.json -o enhanced.json
+dwg-reader components 图纸.dxf --ai-mode enhance --no-ai-vision   # 不发截图，只用结构特征
+
 python scripts/identify_components.py 图纸.dxf --format json -o 结果.json
 ```
 

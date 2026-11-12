@@ -49,6 +49,7 @@ from . import openzone as OZ
 from . import room_merge as RMERGE
 from . import llm_space_judge as SPACEJUDGE
 from . import adaptive_controller as ADAPT
+from . import experiment_runner as ADAPT_RUNNER
 from . import llm_interpret as LINT
 from . import opening_cases as OPCASES
 from . import layer_names as LNAMES
@@ -1492,7 +1493,7 @@ def _filter_components(components, scale=None):
     th = SC.thresholds(scale) if scale else {}
     door_w = float(th.get("door_w") or SC.DEFAULT_DOOR_W)
     thick = float(th.get("thickness") or SC.DEFAULT_THICKNESS)
-    wide = max(door_w * float(SC.STRUCTURE["gap_max_door"]), 12.0 * thick)
+    wide = max(door_w * float(SC.k("gap_max_door")), 12.0 * thick)
     keep, dropped, seen = [], [], {}
     for c in components:
         layers = {str(s.get("layer") or "")
@@ -2160,11 +2161,128 @@ def node_export(ctx):
     if isinstance(doc, dict):
         from . import llm_credentials as CRED
         doc.setdefault("meta", {})["llm"] = CRED.describe()
+        # AI 增强：模式、预算、提议、实验、记忆库，一个字段都不含糊
+        ctrl = (ctx.inputs.get("adaptive_controller") or {})
+        ai_node = (ctx.inputs.get("ai_hypotheses") or {})
+        if ctrl.get("ai_mode") and ctrl.get("ai_mode") != "off":
+            doc["meta"]["ai_recognition"] = {
+                "schema": "ai-recognition/1.0",
+                "mode": ctrl.get("ai_mode"),
+                "config": ai_node.get("config") or {},
+                "gateway": ai_node.get("gateway") or {},
+                "patterns": ai_node.get("pattern_summary") or {},
+                "vision": ai_node.get("vision") or {},
+                "proposals": ai_node.get("proposals") or {},
+                "plans_compiled": ai_node.get("plans_compiled") or 0,
+                "experiments": ctrl.get("ai") or {},
+            }
+        else:
+            doc["meta"]["ai_recognition"] = {"schema": "ai-recognition/1.0",
+                                             "mode": ctrl.get("ai_mode") or "off"}
     # 语义覆盖缓存只在 MAIN 节点落盘（PURE 节点不写文件），且原子替换
     staged = (ctx.inputs.get("adaptive_controller") or {}).get("layer_role_staged") or []
     if staged:
         LROLES.commit_staged(staged)
     return doc
+
+
+def node_pattern_discovery(ctx):
+    """PURE：残余图元发现 —— 把"没解释的几何"整理成 PatternCase 队列。
+
+    这一步没有模型、不改任何构件：只做聚类与特征计算。它的输出在
+    ``ai_mode=off`` 时只是审计材料（谁没被解释、重复了几次），不影响识别结果。
+    """
+    from . import pattern_discovery as PD
+    i = ctx.inputs
+    ai = dict((ctx.params or {}).get("ai_config") or {})
+    mode = str((ctx.params or {}).get("ai_mode") or ai.get("mode") or "off")
+    limit = None
+    render = None
+    if mode != "off":
+        limit = int((ai.get("budget") or {}).get("max_regions") or 12)
+        if bool((ai.get("provider") or {}).get("vision", True)):
+            # 视觉链路：本地把整块 ROI 画成小图（内存里，不落盘、不联网）
+            from . import vision as VISION
+            scale = (i.get("load") or {}).get("scale") or {}
+            render = VISION.case_renderer(
+                i["load"]["snapshot"],
+                walls=(i.get("walls_seg") or {}).get("walls_seg") or (),
+                thickness=float(scale.get("thickness") or 0.0),
+                max_images=int((ai.get("budget") or {}).get(
+                    "max_diagnostic_images") or VISION.RENDER["max_images"]))
+    out = PD.discover(snapshot=i["load"]["snapshot"],
+                      ledger=(i.get("defect_detect") or {}).get("ledger") or {},
+                      walls_seg=(i.get("walls_seg") or {}).get("walls_seg") or (),
+                      columns=i.get("columns") or (),
+                      doors=(i.get("openings_select") or {}).get("doors") or (),
+                      windows=(i.get("openings_select") or {}).get("windows") or (),
+                      spaces=i.get("spaces_seed") or {},
+                      scale=(i.get("load") or {}).get("scale") or {},
+                      render=render, limit=limit)
+    if render is not None:
+        from . import vision as VISION
+        out["vision"] = VISION.summary(out.get("cases"))
+    return out
+
+
+def _controller_state(i):
+    """候选状态的初始快照（与 adaptive_controller 节点用的是同一份口径）。"""
+    sel = i.get("openings_select") or {}
+    return {"walls": list((i.get("walls_seg") or {}).get("walls_seg") or ()),
+            "columns": list(i.get("columns") or ()),
+            "doors": list(sel.get("doors") or ()),
+            "windows": list(sel.get("windows") or ()),
+            "faces": list((i.get("spaces_seed") or {}).get("faces") or ()),
+            "inferred_edges": [], "unresolved": []}
+
+
+def node_ai_hypotheses(ctx):
+    """含模型调用：为未识别形态产出**假设 + 计划草案**（不执行、不提交）。
+
+    ``ai_mode`` 为 ``off`` 时直接返回空草案（一个请求都不发）。``propose`` 模式
+    到此为止：结果只进 ``meta.ai_recognition``，绝不合并进候选状态。
+    """
+    from . import ai_config as AIC
+    from . import ai_planner as PLANNER
+    from . import model_gateway as GATEWAY
+    from . import pattern_discovery as PD
+
+    i = ctx.inputs
+    cfg = (ctx.params or {}).get("ai_config") or AIC.load()
+    mode = str((ctx.params or {}).get("ai_mode") or cfg.get("mode") or "off")
+    cases = list((i.get("quality_gate") or {}).get("patterns") or ())
+    if mode == "off":
+        return {"schema": PLANNER.SCHEMA, "status": "off", "mode": "off",
+                "proposals": {}, "plans": {}, "cases": len(cases),
+                "config": AIC.summary(cfg)}
+    gateway = GATEWAY.gateway_from_config(cfg)
+    budget = dict(cfg.get("budget") or {})
+    max_cases = int(budget.get("max_regions") or 12)
+    proposals: dict = {}
+    plans: dict = {}
+    for case in cases[:max_cases]:
+        prop = PLANNER.draft(case, gateway=gateway, budget=budget,
+                             tools=ADAPT._readonly_tools(i.get("evidence_graph") or {},
+                                                         _controller_state(i)))
+        proposals[str(case.get("id"))] = PLANNER.summary(prop)
+        compiled = ADAPT.plans_from_proposal(case, prop,
+                                            index=i.get("evidence_graph") or {},
+                                            ledger=(i.get("defect_detect")
+                                                    or {}).get("ledger") or {},
+                                            budget=budget)
+        plans[str(case.get("id"))] = [p.as_dict() for p in compiled
+                                      if p.ok and not p.empty]
+    compiled_count = sum(len(v) for v in plans.values())
+    return {"schema": PLANNER.SCHEMA,
+            "status": "ok" if gateway.available else "unavailable",
+            "mode": mode, "proposals": proposals, "plans": plans,
+            "cases": len(cases), "plans_compiled": compiled_count,
+            "pattern_summary": PD.summary(i.get("pattern_discovery") or {}),
+            "gateway": gateway.describe(), "config": AIC.summary(cfg),
+            "vision": dict((i.get("pattern_discovery") or {}).get("vision") or {},
+                           images_sent=int((gateway.describe() or {}).get("images_sent")
+                                           or 0)),
+            "operator_catalog": OPSPEC.summary()}
 
 
 # --------------------------------------------------------------------------- 注册
@@ -2341,7 +2459,8 @@ def node_evidence_graph(ctx):
                       wall_model=i["wall_model"]["wall_model"],
                       spaces=i["spaces_seed"],
                       doors=i["doors"], windows=i["windows"], columns=i["columns"],
-                      room_labels=(i["room_labels_seed"] or {}).get("labels") or ())
+                      room_labels=(i["room_labels_seed"] or {}).get("labels") or (),
+                      patterns=(i.get("pattern_discovery") or {}).get("cases") or ())
 
 
 def node_quality_gate(ctx):
@@ -2357,7 +2476,8 @@ def node_quality_gate(ctx):
                       openings_selected=i["openings_select"],
                       ledger=i["defect_detect"].get("ledger") or {},
                       defects=i["defect_detect"].get("defects") or (),
-                      regions=i["load"].get("regions") or ())
+                      regions=i["load"].get("regions") or (),
+                      patterns=(i.get("pattern_discovery") or {}).get("cases") or ())
 
 
 def node_llm_reason(ctx):
@@ -2474,6 +2594,16 @@ def node_plan_compile(ctx):
                                             allowed_regions=allowed,
                                             source="llm_action"):
             _add(plan)
+    # 2.5) AI 增强通道编译好的计划（来自 ai_hypotheses，key 是 PatternCase id）
+    for cid, lst in ((i.get("ai_hypotheses") or {}).get("plans") or {}).items():
+        for data in lst:
+            plan = COMPILER.plan_from_dict(data)
+            if plan.case_id:
+                plans.setdefault(plan.case_id, []).append(plan)
+            else:
+                errors.append({"case_id": cid, "strategy": plan.strategy_id,
+                               "source": plan.source, "errors": plan.errors})
+
     # 3) 确定性兜底：模型没给出可编译策略时，按"先便宜后激进"编译策略
     auto = ADAPT.deterministic_plans(gate.get("cases"), index=index, ledger=ledger,
                                      budget=budget)
@@ -2520,6 +2650,42 @@ def node_adaptive_controller(ctx):
         budget={"max_ms": float(os.environ.get("DWG_CONTROLLER_MAX_MS", "20000")),
                 "max_cases": int(os.environ.get("DWG_CONTROLLER_MAX_CASES", "12")),
                 "max_runs": int(os.environ.get("DWG_CONTROLLER_MAX_RUNS", "24"))})
+    # ---- AI 增强通道（``ai_mode=enhance``）：在老通道的结果状态上继续做局部试验
+    ai_cfg = dict((ctx.params or {}).get("ai_config") or {})
+    ai_mode = str((ctx.params or {}).get("ai_mode") or ai_cfg.get("mode") or "off")
+    ai_node = i.get("ai_hypotheses") or {}
+    ai_result = None
+    if ai_mode == "enhance" and (gate.get("patterns") or ()):
+        from . import model_gateway as GATEWAY
+        compiled = {cid: [COMPILER.plan_from_dict(d) for d in lst]
+                    for cid, lst in (ai_node.get("plans") or {}).items() if lst}
+        base = result.get("state") or state
+        ai_result = ADAPT.enhance(
+            state=base, index=i.get("evidence_graph") or {},
+            patterns=gate.get("patterns") or (),
+            ledger=(i.get("defect_detect") or {}).get("ledger") or {},
+            columns=i.get("columns") or (), partitions=i.get("partitions") or (),
+            thick=(i.get("wall_model") or {}).get("thickness"),
+            labels=(i.get("label_filter") or {}).get("labels") or (),
+            repairs=i.get("repair_options") or (),
+            hooks={"layer_role": _layer_role_hook(i)},
+            gateway=GATEWAY.gateway_from_config(ai_cfg),
+            ai=ai_cfg,
+            memory_dir=str((ai_cfg.get("memory") or {}).get("directory") or
+                           (ctx.params or {}).get("memory_dir") or ""),
+            diagnostics_path=(ctx.params or {}).get("diagnostics_path"),
+            budget={"max_ms": float(os.environ.get("DWG_CONTROLLER_MAX_MS", "20000"))},
+            plans_by_case=compiled)
+        result["ai"] = ADAPT.ai_audit(ai_result)
+        result["ai_state"] = ai_result.get("state")
+        if ai_result.get("status") == "applied":
+            result["state"] = ai_result.get("state")
+            result["patch"] = ADAPT._diff(state, ai_result.get("state") or base)
+            result["applied"] = list(result.get("applied") or ()) + list(
+                ai_result.get("applied") or ())
+            result["rejected"] = list(result.get("rejected") or ()) + list(
+                ai_result.get("rejected") or ())
+    result["ai_mode"] = ai_mode
     result["layer_role_staged"] = LROLES.stage(
         {r["layer"]: r["roles"] for r in result.get("layer_role_staged") or ()
          if r.get("roles")},
@@ -2543,6 +2709,39 @@ def node_finalize_patch(ctx):
         return {"status": "skipped", "schema": "candidate-patch/2",
                 "reason": "NO_GEOMETRY_CHANGE",
                 "applied_cases": [a.get("case_id") for a in ctrl.get("applied") or ()]}
+    # AI 通道的每个新增构件都要能一键追到"规则 / 案例 / 实验 / 参数"
+    ai = (ctrl.get("ai") or {})
+    ai_rows = {str(a.get("case_id")): a for a in (ai.get("applied") or ())}
+    changes = {}
+    for bucket, delta in (patch.get("changes") or {}).items():
+        upserts = []
+        for rec in delta.get("upsert") or ():
+            if not isinstance(rec, dict):
+                upserts.append(rec)
+                continue
+            rec = dict(rec)
+            prov = dict(rec.get("provenance") or {})
+            prov.setdefault("origin", "ai" if ai_rows else "deterministic")
+            for row in ai_rows.values():
+                if str(rec.get("case_id") or "") == str(row.get("case_id")) \
+                        or rec.get("action") in (row.get("strategy") or ()):
+                    prov.update({"case_id": row.get("case_id"),
+                                 "experiment_id": row.get("experiment_id"),
+                                 "rule_id": ",".join(row.get("strategy") or ()) or None,
+                                 "parameter_hash": ADAPT_RUNNER.digest_params(
+                                     row.get("params") or {}) if row.get("params") else None})
+                    break
+            if ai_rows:
+                rec["provenance"] = prov
+                if prov.get("origin") == "ai":
+                    rec["source_handles"] = list(rec.get("handles") or
+                                                 rec.get("source_handles") or ())
+            upserts.append(rec)
+        if upserts or delta.get("remove_ids"):
+            changes[bucket] = {"upsert": upserts,
+                               "remove_ids": list(delta.get("remove_ids") or ())}
+    if changes:
+        patch = dict(patch, changes=changes)
     inferred = list((ctrl.get("state") or {}).get("inferred_edges") or ())
     out = dict(patch, status="accepted", schema="candidate-patch/2",
                faces_inferred=bool(inferred and patch.get("faces_changed")),
@@ -2631,6 +2830,9 @@ def node_final_audit(ctx):
             "defects": (ctx.inputs.get("defect_detect") or {}).get("counts") or {},
             "repairs": ctx.inputs.get("repair_audit") or {},
             "space_routing": (ctx.inputs.get("space_routing") or {}).get("counts") or {},
+            # AI 增强通道的过程摘要（``ai_mode=off`` 时是空壳，不假装跑过）
+            "ai": ctrl.get("ai") or {"mode": ctrl.get("ai_mode") or "off"},
+            "patterns": (ctx.inputs.get("pattern_discovery") or {}).get("stats") or {},
             "unresolved": (ctrl.get("state") or {}).get("unresolved") or []}
 
 
@@ -2699,13 +2901,23 @@ def build_recognition_dag() -> DAG:
         Node("space_judge", node_space_judge, cacheable=False, deps=("space_cases",)),
         Node("space_routing", node_space_routing,
              deps=("space_cases", "space_judge")),
+        # 残余图元发现（无模型、不改构件）：给证据图与闸门提供"未识别形态"
+        # params=("ai_mode",)：``off`` 与 ``enhance`` 的输出不同（后者带 ROI 小图），
+        # 缓存键必须跟着模式走，否则改开关会拿到旧的、没有图的缓存
+        Node("pattern_discovery", node_pattern_discovery,
+             deps=("load", "defect_detect", "walls_seg", "columns",
+                   "openings_select", "spaces_seed"),
+             params=("ai_mode", "ai_config"),
+             summarize=lambda out: {"cases": len(out.get("cases") or ()),
+                                    "stats": out.get("stats") or {}}),
         Node("evidence_graph", node_evidence_graph,
              deps=("load", "walls_seg", "wall_model", "spaces_seed", "doors",
-                   "windows", "columns", "room_labels_seed")),
+                   "windows", "columns", "room_labels_seed", "pattern_discovery")),
         Node("quality_gate", node_quality_gate, cacheable=False,
              deps=("load", "evidence_graph", "defect_detect", "repair_options",
                    "label_filter", "walls_seg", "wall_model", "spaces_seed",
-                   "doors", "windows", "columns", "openings_select")),
+                   "doors", "windows", "columns", "openings_select",
+                   "pattern_discovery")),
         # ---- 规划：Repair Planner（条件）+ 旧版疑难分析（条件）+ 闭集校验
         Node("repair_planner", node_repair_planner, cacheable=False,
              deps=("quality_gate", "evidence_graph", "defect_detect")),
@@ -2713,15 +2925,21 @@ def build_recognition_dag() -> DAG:
              deps=("quality_gate", "evidence_graph")),
         Node("validate_proposal", node_validate_proposal,
              deps=("quality_gate", "llm_reason", "evidence_graph")),
+        # AI 假设：只在 ai_mode != off 时真正调用模型（PURE 但含外部调用 -> 不缓存）
+        Node("ai_hypotheses", node_ai_hypotheses, cacheable=False,
+             deps=("quality_gate", "evidence_graph", "pattern_discovery", "load",
+                   "walls_seg", "columns", "openings_select", "spaces_seed",
+                   "defect_detect")),
         Node("plan_compile", node_plan_compile,
-             deps=("quality_gate", "repair_planner",
+             deps=("quality_gate", "repair_planner", "ai_hypotheses",
                    "validate_proposal", "evidence_graph", "defect_detect")),
         # ---- 控制层：动态局部子 DAG + 影子验收 + 事务式提交
         Node("adaptive_controller", node_adaptive_controller, cacheable=False,
              deps=("quality_gate", "plan_compile", "walls_seg", "columns",
                    "doors", "windows", "spaces_seed", "openings_select",
                    "partitions", "wall_model", "evidence_graph", "texts", "load",
-                   "repair_options", "defect_detect", "label_filter")),
+                   "repair_options", "defect_detect", "label_filter",
+                   "ai_hypotheses", "pattern_discovery")),
         Node("affected_recompute", node_affected_recompute,
              deps=("quality_gate", "adaptive_controller")),
         Node("finalize_patch", node_finalize_patch,
@@ -2755,8 +2973,8 @@ def build_recognition_dag() -> DAG:
             "spaces_seed", "openings_select", "final_audit",
             "final_candidate_state")),
         Node("export", node_export, kind="main", cacheable=False,
-             deps=("assemble", "final_audit", "adaptive_controller"),
-             params=("basemap_file",)),
+             deps=("assemble", "final_audit", "adaptive_controller", "ai_hypotheses"),
+             params=("basemap_file", "ai_mode", "ai_config")),
     ])
 
 

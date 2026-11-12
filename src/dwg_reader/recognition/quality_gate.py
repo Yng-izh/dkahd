@@ -167,7 +167,7 @@ def _group_of(case, regions) -> str:
 def check(*, snapshot, plan, prims=None, walls_seg=(), wall_model=None, spaces=None,
           doors=(), windows=(), columns=(), rooms=(), room_labels=(),
           evidence=None, openings_selected=None, ledger=None, defects=None,
-          regions=None) -> dict:
+          regions=None, patterns=()) -> dict:
     cases: list[dict] = []
     codes: set[str] = set()
     ents = snapshot.get("entities", ()) or ()
@@ -306,7 +306,15 @@ def check(*, snapshot, plan, prims=None, walls_seg=(), wall_model=None, spaces=N
     kept = selected
 
     need = bool(kept)
+    # 未识别形态（pattern_discovery 的 PatternCase）单独挂在 ``patterns`` 上：
+    # 它们**不参与** ``need_llm`` 的判定——``ai_mode=off`` 时这条链路必须与
+    # 改造前逐条一致，AI 节点自己去读这份列表。
+    pattern_list = [c for c in (patterns or ()) if isinstance(c, dict)]
     return {"schema": "quality-gate/2.1", "need_llm": need,
+            "patterns": pattern_list,
+            "pattern_stats": {"count": len(pattern_list),
+                              "kinds": sorted({str(c.get("kind"))
+                                               for c in pattern_list})},
             "reason_codes": sorted({c["reason"] for c in kept}),
             "regions": [c["region"] for c in kept if c.get("region")],
             "affected_nodes": sorted({n for c in kept for n in c["affected_nodes"]}),

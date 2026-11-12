@@ -369,3 +369,59 @@ def _overlap_1d(a0, a1, b0, b1) -> float:
     if hi <= lo:
         return 0.0
     return (hi - lo) / max(1e-9, min(a1 - a0, b1 - b0))
+
+
+# ------------------------------------------------------------------ 多模态案例
+def case_payload(case: dict, index: dict, *, catalog=None, roi=None) -> dict:
+    """PatternCase -> **可重放**的案例包：结构事实 + 图元上下文 + 可用算子/参数。
+
+    关键点是"可重放"：给同一份 payload（同样的几何与同样的算子目录），换任何人
+    重跑都应该得到同一组候选。所以这里只做取数，不做任何判断：
+
+    * ``targets``    —— 允许被改动/新增构件的图元（``source_handles``）；
+    * ``context``    —— 只读上下文（相邻墙、房名），模型可以看、不能改；
+    * ``highlights`` —— 渲染时要高亮的图元（就是 targets）；
+    * ``catalog``    —— 可用算子与可调参数（口径，不含图纸专属数值）。
+    """
+    items = (index or {}).get("items") or {}
+    by_handle: dict = {}
+    for rid, rec in items.items():
+        handle = rec.get("handle")
+        if handle:
+            by_handle.setdefault(str(handle), []).append(rid)
+
+    def _pick(handles):
+        rows: list[dict] = []
+        for handle in handles or ():
+            for rid in by_handle.get(str(handle), ()):
+                rec = items.get(rid) or {}
+                rows.append({"evidence_id": rid, "handle": str(handle),
+                             "kind": rec.get("kind"), "layer": rec.get("layer"),
+                             "bbox": rec.get("bbox")})
+        return rows
+
+    targets = _pick(case.get("source_handles") or case.get("target_handles"))
+    context = _pick(case.get("context_handles"))
+    from . import operator_specs as OPSPEC
+    from . import param_registry as PARAMS
+    return {
+        "schema": "pattern-case-payload/1.0",
+        "case_id": case.get("id"),
+        "kind": case.get("kind"),
+        "region": case.get("region"),
+        "bbox": case.get("bbox"),
+        "features": case.get("features") or {},
+        "baseline": case.get("baseline") or {},
+        "targets": targets,
+        "context": context,
+        "highlights": [row["evidence_id"] for row in targets],
+        "instances": case.get("instances") or [],
+        "image_ref": case.get("image_ref"),
+        "roi": roi or {},
+        "catalog": catalog if catalog is not None else {
+            "operators": OPSPEC.llm_selectable_operators(),
+            "params": PARAMS.main_public_catalog(),
+            "strategies": sorted(OPSPEC.STRATEGIES),
+        },
+        "permissions": {"targets": "read_write", "context": "read_only"},
+    }

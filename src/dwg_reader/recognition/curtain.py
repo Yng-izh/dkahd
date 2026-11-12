@@ -123,12 +123,12 @@ def detect(snapshot, layers, *, thickness=None, wall_layers=None):
     """找出幕墙带。返回 (bands, diag)，band 记录与墙同构（role="curtain"）。"""
     base_t = float(thickness or SC.DEFAULT_THICKNESS)
     wall_layers = set(wall_layers if wall_layers is not None else (layers or ()))
-    gap_tol = SC.STRUCTURE["curtain_gap_tol"]
-    max_gap = SC.STRUCTURE["curtain_band_max_thickness"] * base_t
-    cover_ratio = SC.STRUCTURE["curtain_cover_ratio"]
-    min_len = SC.STRUCTURE["curtain_min_len_thickness"] * base_t
-    pos_tol = SC.STRUCTURE["curtain_pos_tol_thickness"] * base_t
-    piece_min = SC.STRUCTURE["curtain_piece_min_thickness"] * base_t
+    gap_tol = SC.k("curtain_gap_tol")
+    max_gap = SC.k("curtain_band_max_thickness") * base_t
+    cover_ratio = SC.k("curtain_cover_ratio")
+    min_len = SC.k("curtain_min_len_thickness") * base_t
+    pos_tol = SC.k("curtain_pos_tol_thickness") * base_t
+    piece_min = SC.k("curtain_piece_min_thickness") * base_t
 
     raw = _lines(snapshot, layers)
     bands, rejected = [], collections.Counter()

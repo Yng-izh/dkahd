@@ -64,7 +64,7 @@ def barrier_segments(items, *, thick=200.0, scale=None) -> list:
     th = SC.thresholds(scale or {})
     door_w = float(th.get("door_w") or SC.DEFAULT_DOOR_W)
     # 上界来自 STRUCTURE（无量纲倍率 × 图内门宽），不在这里写死毫米数
-    cap = float(SC.STRUCTURE["barrier_max_gap_door"]) * door_w
+    cap = float(SC.k("barrier_max_gap_door")) * door_w
     floor = float(thick or th.get("thickness") or SC.DEFAULT_THICKNESS)
     out = []
     for item in items or ():

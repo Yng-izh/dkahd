@@ -16,11 +16,15 @@ _KIND_OF_TYPE = {"LINE": "entity", "LWPOLYLINE": "entity", "POLYLINE": "entity",
 
 
 def build(*, snapshot, prims=None, walls_seg=(), wall_model=None, spaces=None,
-          doors=(), windows=(), columns=(), rooms=(), room_labels=()) -> dict:
+          doors=(), windows=(), columns=(), rooms=(), room_labels=(),
+          patterns=()) -> dict:
     """构建证据索引（纯函数，输出 JSON-native）。
 
     ``prims`` 缺省时在内部从快照提取原语——线支撑必须进图，否则 LLM 的
     ``group_line_bundle`` / ``pair_parallel`` 类建议找不到合法 target。
+
+    ``patterns`` 是 :mod:`pattern_discovery` 产出的 PatternCase：登记成
+    ``pattern:<hash>`` 原语，模型与编译器都能引用它（权限仍是"只读证据"）。
     """
     if prims is None:
         try:
@@ -86,6 +90,18 @@ def build(*, snapshot, prims=None, walls_seg=(), wall_model=None, spaces=None,
                       "loops": h.get("loops"), "bbox": bbox_of({"points": (h.get("loops") or [[]])[0]})}
         if h.get("handle"):
             rel.append({"src": hid, "dst": f"ev:{h['handle']}", "type": "from_entity"})
+
+    # 形态案例（残余图元聚类）也是可引用证据：kind="pattern"
+    for i, case in enumerate(patterns or ()):
+        if not isinstance(case, dict):
+            continue
+        rid = str(case.get("id") or f"pattern:{i}")
+        items[rid] = {"kind": "pattern", "bbox": case.get("bbox"),
+                      "pattern_kind": case.get("kind"),
+                      "priority": case.get("priority"),
+                      "handles": [str(h) for h in (case.get("source_handles") or ())]}
+        for h in (case.get("source_handles") or ()):
+            rel.append({"src": rid, "dst": f"ev:{h}", "type": "pattern_of"})
 
     def add(prefix, seq, kind):
         for n, rec in enumerate(seq or (), 1):

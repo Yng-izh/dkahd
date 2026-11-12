@@ -641,29 +641,29 @@ def thresholds(scale, keys=None) -> dict:
         # 基准量本身
         "thickness": t, "door_w": w, "text_h": h, "bay": bay, "noise": n,
         # 柱（相对墙厚 / 门宽）
-        "col_short_min": max(STRUCTURE["col_short_min_thickness"] * t, 6.0 * n),
-        "col_short_max": STRUCTURE["col_short_max_door"] * w,
-        "col_long_max": STRUCTURE["col_long_max_door"] * w,
-        "col_dedupe": max(STRUCTURE["tol_dedupe_noise"] * n, 0.10 * w),
+        "col_short_min": max(k("col_short_min_thickness") * t, 6.0 * n),
+        "col_short_max": k("col_short_max_door") * w,
+        "col_long_max": k("col_long_max_door") * w,
+        "col_dedupe": max(k("tol_dedupe_noise") * n, 0.10 * w),
         "pier_short_min": 0.75 * t,
         # 洞口下界：优先用"图里实际洞口宽度分布的低簇上沿"；没有墙信息才用比率。
         # 上界**必须**留比率（4 倍门宽）：它的作用只是排掉"整间房/整条走廊"那种
         # 跨度，用分布分位当上界会把真实窗（1500）判成超宽洞口整批砍掉。
-        "gap_min": float(sc.get("open_min") or STRUCTURE["gap_min_door"] * w),
-        "gap_max": STRUCTURE["gap_max_door"] * w,
+        "gap_min": float(sc.get("open_min") or k("gap_min_door") * w),
+        "gap_max": k("gap_max_door") * w,
         # 面域（相对字高）
-        "face_min_area": (STRUCTURE["face_min_text"] * h) ** 2,
-        "seal_max": STRUCTURE["seal_max_door"] * w,
+        "face_min_area": (k("face_min_text") * h) ** 2,
+        "seal_max": k("seal_max_door") * w,
         # 容差（相对图纸自噪声）—— 全系统统一来源
-        "tol_align": clamp(STRUCTURE["tol_align_noise"] * n, 0.5, 1.0 * w),
-        "tol_join": clamp(STRUCTURE["tol_join_noise"] * n, 1.0, 0.5 * w),
-        "tol_dedupe": clamp(STRUCTURE["tol_dedupe_noise"] * n, 1.0, 0.5 * w),
-        "end_tol": clamp(STRUCTURE["tol_join_noise"] * n, 1.0, 0.5 * w),
+        "tol_align": clamp(k("tol_align_noise") * n, 0.5, 1.0 * w),
+        "tol_join": clamp(k("tol_join_noise") * n, 1.0, 0.5 * w),
+        "tol_dedupe": clamp(k("tol_dedupe_noise") * n, 1.0, 0.5 * w),
+        "end_tol": clamp(k("tol_join_noise") * n, 1.0, 0.5 * w),
         # 房间（相对字高 / 自噪声）
-        "label_inside_tol": STRUCTURE["label_inside_text"] * h + 2.0 * n,
+        "label_inside_tol": k("label_inside_text") * h + 2.0 * n,
         "label_near_tol": 8.0 * h,
-        "same_name_adj": STRUCTURE["same_name_text"] * h,
-        "split_res": clamp(STRUCTURE["split_res_text"] * h, 20.0, 200.0),
+        "same_name_adj": k("same_name_text") * h,
+        "split_res": clamp(k("split_res_text") * h, 20.0, 200.0),
         "split_min_cell": (h * h) / 4.0,
         # 计算分辨率（量化精度，不参与判别；由字高决定）
         "room_res": clamp(h / 40.0, 5.0, 20.0),
@@ -692,8 +692,8 @@ def drop_artifact_gaps(widths, *, thickness=None, noise=None) -> list:
     """
     t = float(thickness or 0.0)
     n = float(noise or DEFAULT_NOISE)
-    band = STRUCTURE["gap_artifact_thickness"] * t if t > 0 else 0.0
-    floor = STRUCTURE["gap_noise_join"] * n
+    band = k("gap_artifact_thickness") * t if t > 0 else 0.0
+    floor = k("gap_noise_join") * n
     out = []
     for w in widths or ():
         w = float(w)
@@ -796,3 +796,99 @@ def plausible_span(scale, span_mm) -> bool:
     except (TypeError, ValueError):
         return False
     return GEO.PLAN_SPAN_MM[0] <= s <= GEO.PLAN_SPAN_MM[1]
+
+
+# ------------------------------------------------------------------ 运行时上下文
+# 上面那张 ``STRUCTURE`` 表是**默认值**，在 import 时从环境变量读一次。它的用途
+# 是"给一次运行一个起点"，不是"运行时全局旋钮"：并发跑两个区域、或者一次实验
+# 要试十几组参数时，改模块级常量会让两次试验互相污染（还会让缓存键失真）。
+#
+# 所以这里给一层显式的运行时上下文：
+#
+#   * :func:`k` 是唯一读取倍率的入口，先看当前上下文的覆盖值，再看默认表；
+#   * :class:`ScaleContext` 是不可变对象，装在 ``contextvars`` 里，线程/任务隔离；
+#   * 不进入上下文时行为与以前**逐字节一致**（``k`` 等同于 ``STRUCTURE[...]``）。
+import contextvars as _ctx
+from types import MappingProxyType as _MP
+
+#: import 时的默认表快照（只读）：运行时覆盖永远只影响当前上下文
+STRUCTURE_DEFAULTS = _MP(dict(STRUCTURE))
+
+_RUNTIME: "_ctx.ContextVar[dict | None]" = _ctx.ContextVar("dwg_scale_runtime",
+                                                           default=None)
+
+
+def k(name: str, default=None):
+    """读一个倍率：运行时覆盖 > 默认表 > ``default``。"""
+    over = _RUNTIME.get()
+    if over and name in over:
+        return over[name]
+    return STRUCTURE_DEFAULTS.get(name, default)
+
+
+class ScaleContext:
+    """一张图的尺度 + 一组可覆盖倍率（不可变、可审计）。
+
+    ``basis`` 是 ``measure()`` 量出来的基准量（thickness / door_w / noise …）；
+    ``overrides`` 只允许覆盖 STRUCTURE 里**已存在**的键，避免运行时偷偷长出新阈值。
+    """
+
+    __slots__ = ("basis", "overrides", "digest")
+
+    def __init__(self, basis=None, overrides=None):
+        self.basis = _MP(dict(basis or {}))
+        clean = {}
+        for name, value in dict(overrides or {}).items():
+            if name not in STRUCTURE_DEFAULTS:
+                raise KeyError(f"未知倍率: {name}（不得在运行时新增阈值）")
+            clean[str(name)] = float(value)
+        self.overrides = _MP(clean)
+        raw = json_dumps([dict(self.basis), dict(self.overrides)])
+        self.digest = _sha12(raw)
+
+    # ---- 读
+    def get(self, name: str, default=None):
+        return self.overrides.get(name, STRUCTURE_DEFAULTS.get(name, default))
+
+    def thresholds(self, keys=None) -> dict:
+        """在当前覆盖下算阈值（与 :func:`thresholds` 同一套公式）。"""
+        token = _RUNTIME.set(dict(self.overrides))
+        try:
+            return thresholds(dict(self.basis), keys)
+        finally:
+            _RUNTIME.reset(token)
+
+    def as_dict(self) -> dict:
+        return {"basis": dict(self.basis), "overrides": dict(self.overrides),
+                "digest": self.digest}
+
+    def __enter__(self):
+        self._token = _RUNTIME.set(dict(self.overrides))
+        return self
+
+    def __exit__(self, *exc):
+        _RUNTIME.reset(self._token)
+        return False
+
+
+def runtime(context: ScaleContext | None):
+    """上下文管理器：在这段代码里让 ``k()`` 用 ``context`` 的覆盖值。"""
+    return context if isinstance(context, ScaleContext) else _NullContext()
+
+
+class _NullContext:
+    def __enter__(self):
+        return None
+
+    def __exit__(self, *exc):
+        return False
+
+
+def json_dumps(obj) -> str:
+    import json as _json
+    return _json.dumps(obj, sort_keys=True, ensure_ascii=False, default=str)
+
+
+def _sha12(text: str) -> str:
+    import hashlib as _hashlib
+    return _hashlib.sha256(text.encode("utf-8")).hexdigest()[:12]

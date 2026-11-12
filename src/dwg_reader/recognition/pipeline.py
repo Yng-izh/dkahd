@@ -46,7 +46,11 @@ def run_recognition(dxf_path: str, *, jobs: int = 1,
                     llm_verify: bool = False,
                     llm_review: bool = True,
                     llm_review_vision: bool = True,
-                    llm_api_key: str | None = None) -> DagRun:
+                    llm_api_key: str | None = None,
+                    ai_mode: str = "off",
+                    ai_config: str | dict | None = None,
+                    ai_memory_dir: str | None = None,
+                    ai_diagnostics: str | None = None) -> DagRun:
     """编排 API：按 DAG 执行识别，可并行 / 部分执行 / 缓存 / 收集统计。
 
     默认行为与 ``recognize()`` 一致（串行、无缓存、目标 ``assemble``）；
@@ -54,7 +58,14 @@ def run_recognition(dxf_path: str, *, jobs: int = 1,
 
     ``profile`` 未显式给出时，按 DXF 内容哈希查 profile 注册表（离线 LLM 适配
     的结果会自动生效）；``use_registry=False`` 可强制使用确定性默认方案。
+
+    ``ai_mode`` 是 AI 增强的唯一开关（``off`` / ``propose`` / ``enhance``，
+    见 :mod:`ai_config`）：``off`` 时不实例化网关、不发请求、不加任何判定，
+    输出与改造前逐条一致。
     """
+    from . import ai_config as AIC
+    ai_cfg = _ai_config(ai_config, ai_mode)
+    ai_mode = str(ai_mode or (ai_cfg or {}).get("mode") or "off")
     digest = _file_digest(dxf_path)
     if profile is None and use_registry:
         profile = registry.lookup(digest=digest)
@@ -63,6 +74,10 @@ def run_recognition(dxf_path: str, *, jobs: int = 1,
               "llm_verify": bool(llm_verify), "llm_review": bool(llm_review),
               "llm_review_vision": bool(llm_review_vision),
               "llm_api_key": llm_api_key,
+              "ai_mode": ai_mode,
+              "ai_config": ai_cfg if ai_mode != "off" else None,
+              "memory_dir": ai_memory_dir,
+              "diagnostics_path": ai_diagnostics,
               "cache_dir": str(cache_dir) if cache_dir else None}
     context = NodeContext(dxf_path=dxf_path, file_digest=digest,
                           params=params, live=live)
@@ -71,6 +86,16 @@ def run_recognition(dxf_path: str, *, jobs: int = 1,
                    targets=targets, jobs=jobs, cache_dir=cache_dir,
                    collect_stats=collect_stats, fail_fast=fail_fast,
                    raise_on_error=raise_on_error)
+
+
+def _ai_config(ai_config, ai_mode: str) -> dict:
+    """解析 ``ai_config``：可以是 dict、JSON 路径，或 None（用默认值 + 该模式）。"""
+    from . import ai_config as AIC
+    if isinstance(ai_config, dict):
+        return AIC.load(mode=ai_mode or ai_config.get("mode"), overrides=ai_config)
+    if ai_config:
+        return AIC.load(str(ai_config), mode=ai_mode or None)
+    return AIC.load(mode=ai_mode or "off")
 
 
 def recognize(dxf_path: str):

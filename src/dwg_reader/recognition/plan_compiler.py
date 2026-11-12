@@ -13,13 +13,16 @@
 ``NO_DECISION`` ``UNKNOWN_DECISION`` ``UNKNOWN_STRATEGY`` ``UNKNOWN_OPERATOR``
 ``TARGET_NOT_FOUND`` ``TARGET_KIND_MISMATCH`` ``TOO_MANY_TARGETS``
 ``HYPOTHESIS_NOT_ALLOWED`` ``TOO_MANY_STEPS`` ``OUT_OF_BUDGET``
-``REGION_NOT_ALLOWED`` ``SOLVER_ONLY`` ``EMPTY_PLAN``
+``REGION_NOT_ALLOWED`` ``SOLVER_ONLY`` ``EMPTY_PLAN`` ``UNKNOWN_PARAM``
+``PARAM_NOT_AUTHORIZED`` ``PARAM_RANGE_INVALID`` ``PARAM_UNCONSUMED``
+``ROLE_NOT_ALLOWED`` ``DUPLICATE_PLAN``
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
 from . import operator_specs as OPSPEC
+from . import param_registry as PARAMS
 
 MAX_PLANS_PER_CASE = 3
 MAX_HYPOTHESIS_LEN = 40
@@ -72,6 +75,15 @@ class Plan:
     source: str = "deterministic"
     region: list | None = None
     budget: dict = field(default_factory=dict)
+    #: 参数方案：``param_values`` 是这一版试验用的具体值，
+    #: ``param_ranges`` 是模型给的授权区间（供实验器生成更多实验点）
+    param_values: dict = field(default_factory=dict)
+    param_ranges: dict = field(default_factory=dict)
+    #: 编译器自己校验过的参数（不需要算子再读一遍，但仍算"已消费"）
+    param_consumed: tuple = ()
+    plan_hash: str = ""
+    case_kind: str = ""
+    evidence_ids: tuple = ()
 
     @property
     def ok(self) -> bool:
@@ -107,7 +119,12 @@ class Plan:
                 "errors": [dict(e) for e in self.errors],
                 "warnings": list(self.warnings),
                 "affects": list(self.affects()),
-                "budget": dict(self.budget)}
+                "budget": dict(self.budget),
+                "param_values": dict(self.param_values),
+                "param_ranges": {k: dict(v) for k, v in self.param_ranges.items()},
+                "param_consumed": list(self.param_consumed),
+                "plan_hash": self.plan_hash, "case_kind": self.case_kind,
+                "evidence_ids": list(self.evidence_ids)}
 
 
 # ------------------------------------------------------------------ 目标归一化
@@ -238,9 +255,15 @@ def compile_plan(proposal: dict, *, index: dict, ledger: dict | None = None,
             return plan
 
     # 5) 展开成算子序列 + 推导步骤依赖
+    #    模型可以**指定算子子集**（``operators``），但顺序只当偏好：真正的执行
+    #    顺序由 ``STAGE_DEPS`` 的拓扑深度决定，模型不能改依赖图。
     steps: list[dict] = []
     produced: set[str] = set()
-    for name in OPSPEC.steps_of(strategy.name):
+    sequence = _operator_sequence(proposal.get("operators"), strategy=strategy,
+                                  errors=plan.errors, warnings=plan.warnings)
+    if plan.errors:
+        return plan
+    for name in sequence:
         spec = OPSPEC.REGISTRY.get(name)
         if spec is None:
             plan.errors.append(_error("UNKNOWN_OPERATOR", operator=name))
@@ -270,6 +293,7 @@ def compile_plan(proposal: dict, *, index: dict, ledger: dict | None = None,
             "affects": list(spec.affects),
             "decision_only": bool(spec.decision_only),
             "max_targets": spec.max_targets,
+            "params": list(spec.params),
             "deps": [],
         })
     if plan.errors:
@@ -288,6 +312,36 @@ def compile_plan(proposal: dict, *, index: dict, ledger: dict | None = None,
         step["deps"] = [s["index"] for s in steps
                         if s["index"] != step["index"] and s["stage"] in ancestors]
     plan.steps = steps
+
+    # 6) 参数：区间求交 -> 默认点；必须被本计划的算子真正读取
+    values, ranges, consumed, perrors, pwarns = compile_params(
+        proposal.get("search_space") or {}, steps=steps)
+    plan.param_values = values
+    plan.param_ranges = ranges
+    plan.param_consumed = tuple(consumed)
+    plan.errors.extend(perrors)
+    for w in pwarns:
+        plan.warnings.append(f"PARAM_DROPPED:{w.get('param')}")
+
+    # 7) 区域图层角色：只能写在授权闭集里（且显式给了 region_layer_roles 时更严）
+    if plan.roles:
+        allowed_roles = set(PARAMS.spec("region_layer_roles").allowed)
+        if "region_layer_roles" in values:
+            allowed_roles = {str(values["region_layer_roles"])}
+            if "region_layer_roles" not in consumed:
+                consumed.add("region_layer_roles")
+                plan.param_consumed = tuple(consumed)
+        bad_roles = sorted({str(r) for seq in plan.roles for r in seq
+                            if str(r) not in allowed_roles})
+        if bad_roles:
+            plan.errors.append(_error("ROLE_NOT_ALLOWED", roles=bad_roles,
+                                      allowed=sorted(allowed_roles)))
+
+    plan.plan_hash = _hash_of(plan)
+    seen = budget.get("seen_plans") or ()
+    if plan.plan_hash and plan.plan_hash in set(seen):
+        plan.errors.append(_error("DUPLICATE_PLAN", plan_hash=plan.plan_hash))
+        return plan
 
     max_runs = int(budget.get("subdag_runs", strategy.budget.get("subdag_runs", 1)))
     if max_runs < 1:
@@ -311,6 +365,13 @@ def plan_from_dict(data: dict) -> Plan:
     plan.roles = [list(r) if isinstance(r, (list, tuple)) else [str(r)]
                   for r in (data.get("roles") or ())]
     plan.steps = [dict(s) for s in (data.get("steps") or ())]
+    plan.param_values = dict(data.get("param_values") or {})
+    plan.param_ranges = {str(k): dict(v) for k, v in
+                         (data.get("param_ranges") or {}).items()}
+    plan.param_consumed = tuple(data.get("param_consumed") or ())
+    plan.plan_hash = str(data.get("plan_hash") or "")
+    plan.case_kind = str(data.get("case_kind") or "")
+    plan.evidence_ids = tuple(data.get("evidence_ids") or ())
     return plan
 
 
@@ -374,6 +435,128 @@ def compile_actions(actions, *, index: dict, case_id: str = "", region=None,
     return out[:MAX_PLANS_PER_CASE * max(1, len(actions or ()))]
 
 
+def _operator_sequence(declared, *, strategy, errors, warnings) -> tuple[str, ...]:
+    """模型给的算子子集 -> 按阶段依赖排序的执行序列。
+
+    * 未注册 / 不可委托的算子直接报错（``UNKNOWN_OPERATOR`` / ``SOLVER_ONLY``）；
+    * 不在该策略步骤里的算子只记一条警告（允许探索，但审计里看得见）；
+    * 空列表或没给就退回策略自己的步骤序列。
+    """
+    names: list[str] = []
+    for op in (declared or ()):
+        name = op.get("name") if isinstance(op, dict) else str(op)
+        spec = OPSPEC.REGISTRY.get(str(name))
+        if spec is None:
+            errors.append(_error("UNKNOWN_OPERATOR", operator=str(name)))
+            continue
+        if not spec.executable_by_llm:
+            errors.append(_error("SOLVER_ONLY", operator=str(name)))
+            continue
+        if name not in names:
+            names.append(str(name))
+    if not names:
+        return OPSPEC.steps_of(strategy.name)
+    outside = [n for n in names if n not in OPSPEC.steps_of(strategy.name)]
+    if outside:
+        warnings.append("OPERATORS_OUTSIDE_STRATEGY:" + ",".join(outside))
+    # 注意：key 里不能再读正在被排序的那个列表（CPython 排序期间列表是空的），
+    # 所以先把"谁给谁供料"算成固定的键，再排序。
+    snapshot = tuple(names)
+    order = {n: i for i, n in enumerate(snapshot)}
+    keys: dict = {}
+    for name in snapshot:
+        spec = OPSPEC.REGISTRY[name]
+        feed = set()
+        for other in snapshot:
+            if other != name:
+                feed |= set(OPSPEC.REGISTRY[other].output_kinds)
+        # 输入要靠别人产出的算子排后面（同阶段内的数据流顺序）
+        needs = 1 if (set(spec.input_kinds) & feed) else 0
+        keys[name] = (len(_stage_ancestors(OPSPEC.stage_of(name))), needs, order[name])
+    names.sort(key=lambda n: keys[n])
+    if len(names) > strategy.max_steps:
+        errors.append(_error("TOO_MANY_STEPS", count=len(names),
+                             limit=strategy.max_steps))
+    return tuple(names)
+
+
+def compile_params(space: dict, *, steps) -> tuple[dict, dict, set, list, list]:
+    """把模型的搜索空间编译成"本版试验的具体值 + 授权区间"。
+
+    规则（每条都能拒绝）：
+
+    * 参数名必须在 :mod:`param_registry` 里（``UNKNOWN_PARAM``）；
+    * 区间与绝对授权区间求交，空集即 ``PARAM_RANGE_INVALID``；
+    * 枚举/布尔必须给值，且落在闭集内；
+    * **参数必须被本计划的算子真正读取**，否则 ``PARAM_UNCONSUMED``——宁可报错，
+      也不让一个没人读的参数混进试验记录冒充"调过了"。
+    """
+    read_by_plan: set = set()
+    for step in (steps or ()):
+        read_by_plan |= {str(n) for n in (step.get("params") or ())}
+    values: dict = {}
+    ranges: dict = {}
+    consumed: set = set()
+    errors: list[dict] = []
+    warnings: list[dict] = []
+    for name, rng in (space or {}).items():
+        try:
+            spec = PARAMS.spec(str(name))
+        except PARAMS.ParameterError:
+            errors.append(_error("UNKNOWN_PARAM", param=str(name)))
+            continue
+        if not isinstance(rng, dict):
+            errors.append(_error("PARAM_RANGE_INVALID", param=spec.name))
+            continue
+        if spec.value_type in ("float", "int"):
+            try:
+                lo = float(rng.get("min", spec.bounds()[0]))
+                hi = float(rng.get("max", spec.bounds()[1]))
+                lo, hi = spec.within(min(lo, hi), max(lo, hi))
+            except (TypeError, ValueError):
+                errors.append(_error("PARAM_RANGE_INVALID", param=spec.name))
+                continue
+            except PARAMS.ParameterError as exc:
+                errors.append(_error("PARAM_NOT_AUTHORIZED", param=spec.name,
+                                     detail=exc.detail))
+                continue
+            ranges[spec.name] = {"type": spec.value_type, "min": lo, "max": hi}
+            point = spec.default if lo <= float(spec.default) <= hi else (lo + hi) / 2.0
+            values[spec.name] = spec.check(point)
+        else:
+            value = rng.get("value", rng.get("default", spec.default))
+            try:
+                values[spec.name] = spec.check(value)
+            except PARAMS.ParameterError as exc:
+                errors.append(_error("PARAM_RANGE_INVALID", param=spec.name,
+                                     detail=exc.detail))
+                continue
+        if spec.name not in read_by_plan:
+            # 模型猜了一个"这套算子根本不读"的参数：这不是安全问题，是没读懂目录。
+            # 明确记一条警告并把该参数从试验里拿掉——试验照跑（用默认值），
+            # 但审计里看得见"这个参数没被用"，不会有"假装调过"的记录。
+            warnings.append(_error("PARAM_UNCONSUMED", param=spec.name,
+                                   readers=sorted(read_by_plan)))
+            values.pop(spec.name, None)
+            ranges.pop(spec.name, None)
+        else:
+            consumed.add(spec.name)
+    return values, ranges, consumed, errors, warnings
+
+
+def _hash_of(plan) -> str:
+    """计划指纹：策略 + 算子 + 目标 + 参数值，任一变化就是另一份计划。"""
+    import hashlib
+    import json as _json
+    body = {"case": plan.case_id, "strategy": plan.strategy_id,
+            "hypothesis": plan.hypothesis,
+            "targets": list(plan.target_ids),
+            "steps": [s.get("operator") for s in plan.steps],
+            "params": dict(plan.param_values)}
+    raw = _json.dumps(body, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
 # ------------------------------------------------------------------ 工具
 def _stage_ancestors(stage: str) -> set[str]:
     out: set[str] = set()
@@ -404,4 +587,7 @@ def summary(plans) -> dict:
             "no_action": sum(1 for p in plans if p.ok and p.empty),
             "strategies": sorted({p.strategy_id for p in ok if p.strategy_id}),
             "errors": [e for p in plans for e in p.errors][:12],
-            "affects": sorted({n for p in ok for n in p.affects()})}
+            "affects": sorted({n for p in ok for n in p.affects()}),
+            "params": sorted({name for p in ok for name in p.param_values}),
+            "param_values": {p.plan_hash: dict(p.param_values)
+                             for p in ok if p.param_values}}

@@ -208,10 +208,16 @@ def counts(state: dict) -> dict:
 # ------------------------------------------------------------------ 子 DAG 执行
 def execute_local_subdag(compiled_plan, *, state: dict, index: dict,
                          columns=(), partitions=(), thick=None, labels=None,
-                         actions_by_op=None, budget=None, hooks=None) -> dict:
+                         actions_by_op=None, budget=None, hooks=None,
+                         config=None) -> dict:
     """按编译好的计划执行一段真实局部重算（事务式，不改入参）。
 
-    返回 ``{"state", "trace", "stages", "changed", "implicit", "status", "ms"}``。
+    返回 ``{"state", "trace", "stages", "changed", "implicit", "status", "ms",
+    "config", "params_used"}``。
+
+    ``config`` 是这一版试验的**运行时参数**（:class:`param_registry.RecognitionConfig`）。
+    同一次基线状态下跑多组参数时，每组各拿一份 config，算子读到的就是自己那份；
+    没被任何算子读过的参数会在 ``params_unused`` 里报出来（编译器/实验器据此判失败）。
 
     ``hooks`` 目前由控制器在调用**之前**应用（语义重算需要整图快照），这里只
     接受参数以保持签名稳定。
@@ -279,7 +285,7 @@ def execute_local_subdag(compiled_plan, *, state: dict, index: dict,
             patch = EXEC.execute_operator(
                 operator, target_ids=action.get("target_ids") or targets,
                 region=getattr(compiled_plan, "region", None), evidence_index=index,
-                candidate_state=work, action=action)
+                candidate_state=work, action=action, config=config)
         except Exception as exc:                     # 执行体异常 -> 该步不生效
             failed_indices.add(step_idx)
             if operator == "try_virtual_boundary":
@@ -322,9 +328,16 @@ def execute_local_subdag(compiled_plan, *, state: dict, index: dict,
     changed["faces_geometry_changed"] = work.get("faces") != state.get("faces")
     if not any(changed.values()) and not implicit:
         status = "budget" if status == "budget" else "no_change"
+    declared = set(getattr(compiled_plan, "param_values", {}) or {})
+    compiled = set(getattr(compiled_plan, "param_consumed", ()) or ())
+    used = set(config.consumed()) if hasattr(config, "consumed") else set()
     return {"state": work, "trace": trace, "stages": stages,
             "implicit": implicit, "changed": changed, "status": status,
             "counts_before": base, "counts_after": after,
+            "config": (config.as_dict() if hasattr(config, "as_dict") else None),
+            "params_declared": sorted(declared),
+            "params_used": sorted(used | compiled),
+            "params_unused": sorted(declared - compiled - used),
             "executed_nodes": sorted({n for s in trace
                                       for n in OPSPEC.STAGE_NODES.get(s["stage"], ())})}
 

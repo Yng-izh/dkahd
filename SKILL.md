@@ -632,10 +632,11 @@ DIMENSION 实体的测量值，对应图纸的尺寸标注。
 
 ## 版本与变更记录
 
-当前版本：**0.7.0**（与 `pyproject.toml`、`src/dwg_reader/__init__.py::__version__` 一致）。
+当前版本：**0.7.1**（与 `pyproject.toml`、`src/dwg_reader/__init__.py::__version__` 一致）。
 
 | 版本 | 日期 | 变更 |
 | --- | --- | --- |
+| 0.7.1 | 2026-11-12 | **AI 自适应增强（默认关闭）**：新增 `ai_mode=off｜propose｜enhance`、运行时参数表 `param_registry`（绝对授权区间 + 真实消费者校验）、残余图元发现 `pattern_discovery`（48 节点）、受约束提议 `ai_planner`、模型网关 `model_gateway`、多试验执行 `experiment_runner`、全局一致性验收、三层规则记忆 `rule_memory`、`dwg-reader ai-eval`。`ai_mode=off` 输出与 0.7.0 逐条一致；模型不写坐标/阈值/不执行代码；未授权不上传图纸。另修：`import dwg_reader` 不再强制要求 ezdxf（改为 PEP 562 懒加载），版本号统一 0.7.1。 |
 | 0.7.0 | 2026-11-07 | 墙体语义：同一墙线上被门窗洞口断开的墙段合并为**连续墙 run**（办公楼.dxf 71 段 → 31 个实例），洞口记入 `attributes.openings`（含 handle/span/type_code），门窗 `wall_id` 指向连续墙；schema 文档重编号后同步重映射 `wall_id` 与 `openings[].id`；房间/台阶/散水仍用未合并墙段，结果不变。 |
 | 0.6.0 | 2026-11-06 | 识别流程 DAG 化：20 节点、`jobs` 并行、`targets` 部分执行、逐节点耗时/摘要、内容寻址缓存与 `clear_cache()`；新增 `run_recognition()` / `build_recognition_dag()`；`recognize()` 改为兼容门面，输出与 CLI/MCP/render 行为不变。 |
 | 0.5.0 | 2026-11-06 | 构件识别升级为实例级 12 类（图框/轴网/指北针/柱/墙/门窗/房间/楼梯/台阶/散水），统一 `dwg-components-records/1.1` 文档；新增 `dwg-reader components`、`render_components.py`。 |

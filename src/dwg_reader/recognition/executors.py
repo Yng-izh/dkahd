@@ -102,6 +102,26 @@ def _expand_through(index: dict, picked: dict) -> dict:
     return out
 
 
+def _cfg(action):
+    """取本次执行显式传入的运行时参数（``RecognitionConfig``）；没有就是老路径。"""
+    cfg = (action or {}).get("config")
+    return cfg if hasattr(cfg, "take") else None
+
+
+def _thickness(state, action) -> float:
+    """图内墙厚（归一化基准）：优先状态里的实测值，其次动作里带的，最后常识值。"""
+    for source in ((state or {}), (action or {})):
+        for key in ("thick", "thickness"):
+            try:
+                val = float(source.get(key) or 0.0)
+            except (TypeError, ValueError):
+                val = 0.0
+            if val > 0:
+                return val
+    from . import scale as SC
+    return float(SC.DEFAULT_THICKNESS)
+
+
 def _empty_patch(reason: str | None = None) -> dict:
     return {"added": [], "removed": [], "drop_ids": [], "updated": [],
             "walls": [], "columns": [], "openings": [], "faces": [], "labels": [],
@@ -147,38 +167,91 @@ def _wall_record(pair: dict, name: str = "wall") -> dict:
 
 # ------------------------------------------------------------------ 各算子实现
 def _op_regenerate_opening(local, action, state=None):
-    """线支撑 -> 洞口候选：直接取"相邻平行线对"的沿向重叠区间（不依赖整层重扫）。"""
+    """线支撑 -> 洞口候选：直接取"相邻平行线对"的沿向重叠区间（不依赖整层重扫）。
+
+    有 ``config`` 时走**参数化路径**：重叠率、平行角容差、面线间距（按墙厚归一化）
+    与"允许不贴墙的窗候选"都由运行时参数决定；没有 ``config`` 时完全是原来的
+    固定规则（兼容性红线：默认路径一个字节都不变）。
+    """
     lines = [l for l in local["prims"]["lines"] if l.get("pos") is not None]
+    cfg = _cfg(action)
+    thick = _thickness(state, action)
+    if cfg is None:
+        gap_max, gap_min, min_len = 500.0, 60.0, 300.0
+        overlap_min, angle_tol, unanchored = 0.0, None, True
+    else:
+        gap_max = max(120.0, float(cfg.take("wall_gap_ratio")) * thick)
+        gap_min = 0.30 * gap_max
+        min_len = 0.60 * gap_max
+        overlap_min = float(cfg.take("min_overlap_ratio"))
+        angle_tol = float(cfg.take("parallel_angle_tol_deg"))
+        unanchored = bool(cfg.take("allow_unanchored_window_candidate"))
     groups: dict[tuple, list] = {}
     for l in lines:
-        groups.setdefault((l.get("layer"), round(float(l.get("angle") or 0.0), 2)),
-                          []).append(l)
+        angle = float(l.get("angle") or 0.0)
+        key = (l.get("layer"),
+               round(angle, 2) if angle_tol is None
+               else round(angle / max(1e-6, angle_tol)))
+        groups.setdefault(key, []).append(l)
     out = []
     for (layer, _angle), members in groups.items():
         members.sort(key=lambda l: float(l["pos"]))
         for i, a in enumerate(members):
             for b in members[i + 1:]:
                 gap = abs(float(b["pos"]) - float(a["pos"]))
-                if gap > 500.0:
+                if gap > gap_max:
                     break
-                if gap < 60.0:
+                if gap < gap_min:
                     continue
                 lo, hi = max(a["lo"], b["lo"]), min(a["hi"], b["hi"])
-                if hi - lo < 300.0:
+                if hi - lo < min_len:
                     continue
+                if overlap_min > 0:
+                    short = min(float(a["hi"]) - float(a["lo"]),
+                                float(b["hi"]) - float(b["lo"]))
+                    if short <= 0 or (hi - lo) / short < overlap_min:
+                        continue
                 dirv = a.get("dir") or (1.0, 0.0)
                 nrm = a.get("nrm") or (0.0, 1.0)
                 pos = (float(a["pos"]) + float(b["pos"])) / 2.0
                 p1 = [pos * nrm[0] + lo * dirv[0], pos * nrm[1] + lo * dirv[1]]
                 p2 = [pos * nrm[0] + hi * dirv[0], pos * nrm[1] + hi * dirv[1]]
-                out.append({"id": "new", "kind": action.get("hypothesis") or "window",
-                            "axis": [p1, p2],
-                            "bbox": EVID.bbox_of({"axis": [p1, p2]}),
-                            "thickness": round(gap, 1), "layer": layer,
-                            "handles": [h for h in (a.get("handle"), b.get("handle")) if h],
-                            "geometry_state": "derived",
-                            "status": "candidate"})
+                rec = {"id": "new", "kind": action.get("hypothesis") or "window",
+                       "axis": [p1, p2],
+                       "bbox": EVID.bbox_of({"axis": [p1, p2]}),
+                       "thickness": round(gap, 1), "layer": layer,
+                       "handles": [h for h in (a.get("handle"), b.get("handle")) if h],
+                       "geometry_state": "derived",
+                       "status": "candidate"}
+                if cfg is not None:
+                    # 参数路径：不贴墙的候选只能进 uncertain，永远不能升 confirmed
+                    anchored = _near_wall(rec["bbox"], state, thick)
+                    rec["anchored"] = bool(anchored)
+                    if not anchored and not unanchored:
+                        continue
+                    if not anchored:
+                        rec["evidence_state"] = "weak"
+                        rec["status"] = "candidate"
+                out.append(rec)
     return out
+
+
+def _near_wall(bbox, state, thick: float) -> bool:
+    """候选是否贴着一道已确认墙（距离 ≤ 2 倍墙厚）。"""
+    if not bbox:
+        return False
+    for wall in (state or {}).get("walls") or ():
+        if not isinstance(wall, dict):
+            continue
+        b = EVID.bbox_of({"start": wall.get("start"), "end": wall.get("end"),
+                          "thickness": wall.get("thickness")})
+        if not b:
+            continue
+        gap_x = max(0.0, max(bbox[0], b[0]) - min(bbox[2], b[2]))
+        gap_y = max(0.0, max(bbox[1], b[1]) - min(bbox[3], b[3]))
+        if math.hypot(gap_x, gap_y) <= 2.0 * max(1e-6, thick):
+            return True
+    return False
 
 
 def _op_regenerate_wall(local, action, state=None):
@@ -200,16 +273,32 @@ def _op_retry_wall_pairing(local, action, state=None):
     out = [_wall_record(dict(p, thickness=p.get("gap")), "w") for p in pairs]
     seen = {(tuple(w["start"]), tuple(w["end"])) for w in out}
     lines = [l for l in local["prims"]["lines"] if l.get("pos") is not None]
+    cfg = _cfg(action)
+    thick = _thickness(state, action)
+    if cfg is None:
+        ang_tol, gap_min, gap_max, ov_min, ov_ratio = 1.5, 40.0, 900.0, 200.0, 0.0
+    else:
+        # 参数路径：全是无量纲量 × 图内墙厚，换成一张图仍然成立
+        ang_tol = float(cfg.take("parallel_angle_tol_deg"))
+        gap_min = 0.20 * thick
+        gap_max = float(cfg.take("wall_gap_ratio")) * thick
+        ov_min = 0.0
+        ov_ratio = float(cfg.take("min_overlap_ratio"))
     for ang in sorted({round(float(l.get("angle") or 0.0), 1) for l in lines}):
-        group = [l for l in lines if abs(round(float(l.get("angle") or 0.0), 1) - ang) <= 1.5]
+        group = [l for l in lines if abs(round(float(l.get("angle") or 0.0), 1) - ang) <= ang_tol]
         for i, a in enumerate(group):
             for b in group[i + 1:]:
                 gap = abs(float(b["pos"]) - float(a["pos"]))
-                if gap < 40.0 or gap > 900.0:
+                if gap < gap_min or gap > gap_max:
                     continue
                 ov = min(float(a["hi"]), float(b["hi"])) - max(float(a["lo"]), float(b["lo"]))
-                if ov < 200.0:
+                if ov < ov_min:
                     continue
+                if ov_ratio > 0:
+                    short = min(float(a["hi"]) - float(a["lo"]),
+                                float(b["hi"]) - float(b["lo"]))
+                    if short <= 0 or ov / short < ov_ratio:
+                        continue
                 rec = _wall_record({"dir": a.get("dir"), "nrm": a.get("nrm"),
                                     "pos": (float(a["pos"]) + float(b["pos"])) / 2.0,
                                     "lo": max(float(a["lo"]), float(b["lo"])),
@@ -247,10 +336,23 @@ def _op_extract_contour(local, action, state=None):
     from . import operators as OPS
     got = OPS.run(["closed_contour", "hatch_region"], {"entities": []},
                   local["layers"], None, None, prims=local["prims"]) or []
-    return [{"id": "new", "bbox": r.get("bbox"), "outline": r.get("outline"),
-             "area": r.get("area"), "evidence": r.get("kind"),
-             "handles": [h for h in (r.get("handles") or ()) if h],
-             "geometry_state": "derived", "status": "candidate"} for r in got]
+    cfg = _cfg(action)
+    aspect_max = float(cfg.take("column_aspect_ratio")) if cfg is not None else 0.0
+    out = []
+    for r in got:
+        box = r.get("bbox")
+        if aspect_max > 0 and box:
+            w = abs(float(box[2]) - float(box[0]))
+            h = abs(float(box[3]) - float(box[1]))
+            short, long_ = min(w, h), max(w, h)
+            if short > 0 and long_ / short > aspect_max:
+                # 参数路径：长条形轮廓按"墙垛/长条"处理，不进方柱候选
+                continue
+        out.append({"id": "new", "bbox": box, "outline": r.get("outline"),
+                    "area": r.get("area"), "evidence": r.get("kind"),
+                    "handles": [h for h in (r.get("handles") or ()) if h],
+                    "geometry_state": "derived", "status": "candidate"})
+    return out
 
 
 def _op_rebuild_contour(local, action, state=None):
@@ -623,9 +725,15 @@ _STATE_HANDLERS = {
 
 # ------------------------------------------------------------------ 入口
 def execute_operator(name: str, *, target_ids=(), region=None, evidence_index=None,
-                     candidate_state=None, action=None) -> dict:
-    """执行一个已校验的算子，返回补丁（不含坐标以外任何 LLM 输入）。"""
+                     candidate_state=None, action=None, config=None) -> dict:
+    """执行一个已校验的算子，返回补丁（不含坐标以外任何 LLM 输入）。
+
+    ``config`` 是本次试验的运行时参数（:class:`param_registry.RecognitionConfig`）：
+    显式传入才走参数化路径，不传就走原有固定规则——并发试验因此不会互相污染。
+    """
     action = dict(action or {})
+    if config is not None:
+        action["config"] = config
     state = dict(candidate_state or {})
     if name == "try_virtual_boundary":
         return execute_inferred_edges(action.get("inferred_edges"),

@@ -1,11 +1,11 @@
 # 识别 DAG · 代码说明
 
 `src/dwg_reader/recognition/` 是这套图纸识别的全部实现。**它不是一串顺序调用的函数，
-而是一张 46 个节点、带依赖、可并行、可部分执行、可缓存、可审计的有向无环图。**
+而是一张 48 个节点、带依赖、可并行、可部分执行、可缓存、可审计的有向无环图。**
 
 一句话概括设计意图：
 
-> 把"识别一张图纸"拆成 46 个各自可单独运行、单独验证、单独替换的纯数据阶段；
+> 把"识别一张图纸"拆成 48 个各自可单独运行、单独验证、单独替换的纯数据阶段；
 > 阶段之间只传 JSON 原生数据；哪个阶段出问题，就只重跑哪个阶段，并且能查到它吃了什么、吐了什么。
 
 ---
@@ -43,8 +43,36 @@
 | `evaluation.py` / `verify.py` / `diagnose.py` / `perturb.py` | 554 / 253 / 112 / 235 | 跨图纸评估、质量指标、失败诊断、受控扰动 |
 | `llm_*.py`（8 个） | 1900+ | **模型只在闭集里做选择**：`opening_judge` / `label_filter` / `space_judge` / `repair_planner` / `llm_reason` / profile / verify |
 | `config.py` / `taxonomy.py` | 27 / 55 | 算法级配置（不含图纸语义阈值）与人工维护的语义闭集 |
+| `param_registry.py` **新** | 330 | 运行时参数表：`ParameterSpec`（绝对授权区间/单位/归一化基准/真实消费者）+ 不可变 `RecognitionConfig` |
+| `ai_config.py` **新** | 200 | `ai-recognition-config/1.0`：`off｜propose｜enhance` 三档 + 预算 + 安全开关 |
+| `pattern_discovery.py` **新** | 620 | 残余图元发现：块族/平行线束/邻近聚类/开放轮廓 -> `PatternCase`（无模型、不改构件） |
+| `ai_planner.py` **新** | 560 | 两段式推理：假设 -> 计划；严格 JSON、坐标一律拒收、区间夹到授权范围内 |
+| `model_gateway.py` **新** | 260 | 唯一网络出口：端点/预算/脱敏/图像授权/结构化解析/审计 |
+| `experiment_runner.py` **新** | 350 | 同一 baseline 上试多组参数、去重、记账、失败原因闭集、预算刹车 |
+| `rule_memory.py` **新** | 230 | 三层规则记忆（candidate -> project -> cross_project），召回只产生提议 |
+| `vision.py` **新** | 280 | 局部矢量渲染：把 ROI 画成小图喂多模态模型（内存里出图，配色带语义） |
 
-> 全部约 **28.5k 行**（含 `scripts/`）。运行时只依赖 `ezdxf`；模型调用是可选的。
+> 全部约 **31k 行**（含 `scripts/`）。运行时只依赖 `ezdxf`；模型调用是可选的。
+
+### AI 增强新增的五个节点关系
+
+```text
+raw_evidence -> defect_detect -> pattern_discovery [新 PURE] --+
+                                                               ├-> evidence_graph（登记 pattern:<hash>）
+                                                               └-> quality_gate（patterns 只作审计，不改 need_llm）
+evidence_graph -> quality_gate -> ai_hypotheses [新 PURE, 不缓存, 含模型调用]
+                                   -> plan_compile（模型给的算子子集 + 参数区间在此编译/求交/校验）
+                                   -> adaptive_controller（局部子 DAG -> 影子+全局验收 -> 事务提交）
+```
+
+三条硬边界（`tests/test_ai_enhance.py` 与 `tests/test_ai_dag_mode.py` 守着）：
+
+1. `ai_mode=off` 时 `ai_hypotheses` 返回 `off`、零调用，输出与改造前逐条一致；
+2. 模型提议里出现坐标/代码/路径 -> 整条拒收（`MODEL_GEOMETRY`）；
+3. 被编译进来却没被任何算子读取的参数 -> 试验判失败（`PARAM_UNCONSUMED`）。
+
+视觉链路的边界（`vision.py`）：只画这一块 ROI、只在内存里出图（纯节点不写文件）、
+配色即语义（灰=背景/橙=目标/绿=墙/蓝=文字），`provider.vision=false` 时连渲染都不做。
 
 ---
 

@@ -552,3 +552,136 @@ def markdown(report, title="识别评估") -> str:
 
 
 _CN = {"walls": "墙", "columns": "柱", "doors": "门", "windows": "窗", "rooms": "房间"}
+
+
+# --------------------------------------------------------------------------- 清单评估
+AI_EVAL_SCHEMA = "ai-eval/1.0"
+MANIFEST_SCHEMA = "ai-eval-manifest/1.0"
+
+#: 清单必填项（缺了就直说，不猜）
+MANIFEST_KEYS = ("drawings",)
+
+_NOTES = (
+    "真值必须是**人工标注**：用基础模式自己的输出当 pseudo-label 只能测自洽，不是准确率。",
+    "train/dev/test 按**项目**划分：同项目的块族会重复，按图纸随机切分会泄漏。",
+    "草稿真值（draft=true）算出的数字不得作为对外基线。",
+)
+
+
+def run_manifest(manifest: dict, *, ai_mode: str = "off", ai_config=None,
+                 run=None, limit: int | None = None) -> dict:
+    """清单评估：基础模式 vs 增强模式，按项目隔离，逐类别给 P/R/F1。
+
+    ``run(dxf_path, mode) -> {"components": [...], ...}`` 可注入（测试用）；
+    缺省走 :func:`dwg_reader.recognition.pipeline.run_recognition`。
+    """
+    problems: list[str] = []
+    if not isinstance(manifest, dict):
+        return {"schema": AI_EVAL_SCHEMA, "error": "MANIFEST_NOT_OBJECT",
+                "notes": list(_NOTES)}
+    for key in MANIFEST_KEYS:
+        if key not in manifest:
+            problems.append(f"缺字段: {key}")
+    drawings = list(manifest.get("drawings") or ())
+    if limit:
+        drawings = drawings[:int(limit)]
+    runner = run or _default_runner(ai_config)
+
+    rows: list[dict] = []
+    for item in drawings:
+        if not isinstance(item, dict) or not item.get("path"):
+            problems.append("drawing 条目缺少 path")
+            continue
+        path = str(item["path"])
+        project = str(item.get("project") or manifest.get("project") or "")
+        gt_path = item.get("gt")
+        if not gt_path:
+            problems.append(f"{path}: 没有真值文件，跳过（无真值不给数字）")
+            continue
+        try:
+            gt = load_gt(gt_path)
+        except Exception as exc:
+            problems.append(f"{path}: 真值读取失败 {type(exc).__name__}")
+            continue
+        base = runner(path, "off")
+        row = {"drawing": path, "project": project,
+               "gt_status": ("draft" if gt.get("draft") else "verified"),
+               "baseline": _score_components(base, gt, path),
+               "ai_mode": ai_mode}
+        if ai_mode != "off":
+            try:
+                row["enhanced"] = _score_components(runner(path, ai_mode), gt, path)
+            except Exception as exc:
+                row["enhanced"] = {"error": type(exc).__name__}
+        rows.append(row)
+
+    aggregate = _aggregate(rows)
+    projects = sorted({r.get("project") for r in rows if r.get("project")})
+    return {"schema": AI_EVAL_SCHEMA,
+            "manifest": {"schema": manifest.get("schema") or MANIFEST_SCHEMA,
+                         "project": manifest.get("project"),
+                         "split": manifest.get("split"),
+                         "drawings": len(drawings)},
+            "ai_mode": ai_mode,
+            "rows": rows,
+            "aggregate": aggregate,
+            "projects": projects,
+            "project_isolated": len(projects) >= 1,
+            "problems": problems,
+            "notes": list(_NOTES)}
+
+
+def _default_runner(ai_config):
+    def run(dxf_path: str, mode: str):
+        from .pipeline import run_recognition
+        run_ = run_recognition(dxf_path, jobs=1, targets=("export",),
+                               ai_mode=mode, ai_config=ai_config)
+        return run_.output
+    return run
+
+
+def _score_components(result: dict, gt: dict, path: str) -> dict:
+    comps = (result or {}).get("components") or ()
+    rep = score(comps, gt, drawing=path, allow_draft=True)
+    return {"final": rep.get("final"), "geometry": rep.get("geometry"),
+            "status": rep.get("status"), "gt_draft": rep.get("gt_draft"),
+            "counts": {c: sum(1 for x in comps if x.get("category") == c)
+                       for c in ("wall", "column", "door", "window", "room")}}
+
+
+def _aggregate(rows) -> dict:
+    """汇总每个类别的匹配数（只汇总有 GT 的行；缺项不补 0，标 None）。"""
+    cats = ("walls", "columns", "doors", "windows", "rooms")
+    out: dict = {"baseline": {}, "enhanced": {}, "delta": {}}
+    for key in ("baseline", "enhanced"):
+        for cat in cats:
+            pred = gt = matched = 0
+            rows_n = 0
+            for row in rows:
+                block = (row.get(key) or {}).get("final") or {}
+                cell = block.get(cat)
+                if not isinstance(cell, dict) or cell.get("gt") is None:
+                    continue
+                pred += int(cell.get("pred") or 0)
+                gt += int(cell.get("gt") or 0)
+                matched += int(cell.get("matched") or 0)
+                rows_n += 1
+            if not rows_n:
+                out[key][cat] = {"precision": None, "recall": None, "f1": None,
+                                 "drawings": 0}
+                continue
+            out[key][cat] = dict(_prf(matched, pred, gt), drawings=rows_n)
+    for cat in cats:
+        b = out["baseline"].get(cat) or {}
+        e = out["enhanced"].get(cat) or {}
+        out["delta"][cat] = {
+            "recall": _delta(b.get("recall"), e.get("recall")),
+            "precision": _delta(b.get("precision"), e.get("precision")),
+            "f1": _delta(b.get("f1"), e.get("f1"))}
+    return out
+
+
+def _delta(a, b):
+    if a is None or b is None:
+        return None
+    return round(float(b) - float(a), 4)

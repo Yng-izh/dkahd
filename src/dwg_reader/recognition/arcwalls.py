@@ -151,14 +151,14 @@ def detect(snapshot, layers, *, thickness=None, thickness_hint=None,
     返回 ``(walls, diag)``，walls 与 :mod:`walls` 的墙记录同构（``orient="A"``）。
     """
     base_t = _num(thickness) or _num(thickness_hint) or SC.DEFAULT_THICKNESS
-    tol = SC.STRUCTURE["arc_center_tol_thickness"] * base_t
-    t_min = SC.STRUCTURE["arc_thickness_min_thickness"] * base_t
-    t_max = SC.STRUCTURE["arc_thickness_max_thickness"] * base_t
-    min_r = SC.STRUCTURE["arc_radius_min_thickness"] * base_t
-    span_overlap = SC.STRUCTURE["arc_span_overlap"]
-    min_sweep = SC.STRUCTURE["arc_min_sweep_deg"]
-    mid_ratio = SC.STRUCTURE["arc_mid_block_ratio"]
-    step_deg = SC.STRUCTURE["arc_tess_deg"]
+    tol = SC.k("arc_center_tol_thickness") * base_t
+    t_min = SC.k("arc_thickness_min_thickness") * base_t
+    t_max = SC.k("arc_thickness_max_thickness") * base_t
+    min_r = SC.k("arc_radius_min_thickness") * base_t
+    span_overlap = SC.k("arc_span_overlap")
+    min_sweep = SC.k("arc_min_sweep_deg")
+    mid_ratio = SC.k("arc_mid_block_ratio")
+    step_deg = SC.k("arc_tess_deg")
     hint = _num(thickness_hint) or base_t
 
     arcs = [a for a in collect_arcs(snapshot, layers) if a["radius"] >= min_r]
@@ -226,13 +226,13 @@ def _curtain_band(cx, cy, members, base_t, step_deg, is_curtain, hint):
     if is_curtain is None or len(members) < 3:
         return None
     gap = members[1]["radius"] - members[0]["radius"]
-    if gap <= 0 or gap > SC.STRUCTURE["curtain_band_max_thickness"] * base_t:
+    if gap <= 0 or gap > SC.k("curtain_band_max_thickness") * base_t:
         return None
-    tol = SC.STRUCTURE["curtain_gap_tol"] * gap
+    tol = SC.k("curtain_gap_tol") * gap
     chain = [members[0], members[1]]
     for arc in members[2:]:
         g = arc["radius"] - chain[-1]["radius"]
-        if abs(g - gap) > tol or g > SC.STRUCTURE["curtain_band_max_thickness"] * base_t:
+        if abs(g - gap) > tol or g > SC.k("curtain_band_max_thickness") * base_t:
             break
         chain.append(arc)
     if len(chain) < 3:
@@ -245,7 +245,7 @@ def _curtain_band(cx, cy, members, base_t, step_deg, is_curtain, hint):
     if ov is None:
         return None
     ov_lo, ov_len = ov
-    if ov_len < SC.STRUCTURE["arc_min_sweep_deg"]:
+    if ov_len < SC.k("arc_min_sweep_deg"):
         return None
     thickness = outer["radius"] - inner["radius"]
     wall = _wall_record(cx, cy, inner, outer, ov_lo, ov_len, thickness,

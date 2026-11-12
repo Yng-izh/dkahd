@@ -250,7 +250,8 @@ def metrics(state, support=None) -> dict:
 
 
 def shadow_evaluate(*, before: dict, after: dict, support=None, plan=None,
-                    region=None, independent: int = 0) -> dict:
+                    region=None, independent: int = 0, global_check: bool = False,
+                    require_independent: bool = False) -> dict:
     """影子验收：先在副本里算，再由独立证据决定能不能提交。
 
     六层判据，任何一层不过就回滚（``verdict`` 以 ``REJECT:`` 开头）：
@@ -322,6 +323,14 @@ def shadow_evaluate(*, before: dict, after: dict, support=None, plan=None,
     layers["no_self_proof"] = {"ok": (not needs_independent) or independent >= 1,
                                "independent": int(independent),
                                "inferred": [b["inferred"], a["inferred"]]}
+    if require_independent:
+        layers["independent_support"] = {
+            "ok": int(independent) >= 1, "independent": int(independent),
+            "require": True}
+    if global_check:
+        gc = global_consistency(before=before, after=after, region=region)
+        layers["global"] = {"ok": gc["ok"], "problems": gc["problems"][:6],
+                            "checks": gc["checks"]}
     failed = [k for k, v in layers.items() if not v["ok"]]
     return {"ok": not failed, "verdict": "ACCEPTED" if not failed else
             "REJECT:" + ",".join(failed),
@@ -603,3 +612,172 @@ def verdict_layers(action, *, before, after, patch, support=None) -> tuple[bool,
                     or after["columns"] > before["columns"])),
         "faces": [before["faces"], after["faces"]]}
     return all(v["ok"] for v in layers.values()), layers
+
+
+# ------------------------------------------------------------------ 独立证据
+#: 一条证据是什么"来源"。同一来源出两条，不算两条独立证据。
+SOURCE_KINDS = {"block": "块族", "geometry": "几何", "arc": "弧线", "hatch": "填充",
+                "opening": "洞口边", "wall_gap": "墙缺口", "text": "文字",
+                "label": "房名", "contour": "轮廓", "line_support": "线支撑"}
+
+
+def evidence_sources(rec: dict) -> set:
+    """一条候选记录能追到的**独立来源**（去重后按来源类别）。"""
+    out: set = set()
+    if not isinstance(rec, dict):
+        return out
+    if rec.get("block") or rec.get("block_name") or rec.get("family"):
+        out.add("block")
+    if rec.get("hinges") or rec.get("swing_angle") is not None or rec.get("arc"):
+        out.add("arc")
+    if rec.get("hatch") or rec.get("fill"):
+        out.add("hatch")
+    if rec.get("outline") or rec.get("contour"):
+        out.add("contour")
+    if rec.get("host_wall") or rec.get("wall_id"):
+        out.add("wall_gap")
+    for h in (rec.get("handles") or ()):
+        out.add("line_support")
+    for src in (rec.get("srcs") or ()):
+        if isinstance(src, dict):
+            out.add(str(src.get("kind") or src.get("role") or "line_support"))
+    if rec.get("text") or rec.get("label"):
+        out.add("text")
+    return {s for s in out if s}
+
+
+def independent_support(*, before: dict, after: dict, support=None,
+                        patch: dict | None = None) -> dict:
+    """本次新增候选的独立证据计数：**不同来源**才算不同证据。
+
+    "同一束线出了两条评分"、"模型说了两次像窗"都不是独立证据。升级 ``confirmed``
+    至少需要 1 项独立支持（配置 ``require_independent_support_for_confirmed``）。
+    """
+    added: list[dict] = []
+    for bucket in ("walls", "columns", "doors", "windows", "openings"):
+        prev = {_sig(r) for r in ((before or {}).get(bucket) or ())
+                if isinstance(r, dict)}
+        for rec in ((after or {}).get(bucket) or ()):
+            if isinstance(rec, dict) and _sig(rec) not in prev:
+                added.append(rec)
+    for rec in ((patch or {}).get("walls") or ()) + ((patch or {}).get("openings") or ()):
+        if isinstance(rec, dict):
+            added.append(rec)
+    rows = []
+    for rec in added:
+        srcs = evidence_sources(rec)
+        rows.append({"id": rec.get("id") or rec.get("handle"),
+                     "sources": sorted(srcs), "independent": len(srcs)})
+    covered = set(str(s) for s in (support or ()))
+    if covered:
+        hit = sum(1 for rec in added
+                  for h in (rec.get("handles") or ()) if str(h) in covered)
+        if hit and not rows:
+            rows.append({"id": "coverage", "sources": ["line_support"],
+                         "independent": 1})
+    best = max((r["independent"] for r in rows), default=0)
+    return {"count": len(rows), "independent": best, "rows": rows[:12]}
+
+
+def confirm_level(*, after: dict, independent: int, require_independent: bool = True,
+                  has_model_text_only: bool = False) -> dict:
+    """``confirmed`` / ``uncertain`` 的判定，连同**理由**一起返回。
+
+    规则：
+    * 只有模型文字判断、没有几何来源 -> ``uncertain``；
+    * 需要独立支持时，独立来源 < 1 -> ``uncertain``；
+    * 其余情况才允许 ``confirmed``（几何合法性由 ``global_consistency`` 另判）。
+    """
+    reasons: list[str] = []
+    if has_model_text_only:
+        reasons.append("MODEL_TEXT_ONLY")
+    if require_independent and int(independent) < 1:
+        reasons.append("INSUFFICIENT_INDEPENDENT_EVIDENCE")
+    inferred_only = any(isinstance(w, dict) and w.get("geometry_state") == "inferred"
+                        for w in ((after or {}).get("walls") or ()))
+    if inferred_only and int(independent) < 1:
+        reasons.append("INFERRED_ONLY")
+    return {"status": "confirmed" if not reasons else "uncertain",
+            "reasons": reasons}
+
+
+# ------------------------------------------------------------------ 全局一致性
+def global_consistency(*, before: dict, after: dict, region=None,
+                       protected=()) -> dict:
+    """跨 ROI 的全局检查：局部过、全局崩的补丁不许提交。
+
+    五项（任一项失败即回滚）：
+
+    ``protected_outside``  区域外被保护的已确认构件不得发生几何变化
+    ``duplicate_ids``      同一状态里 id 不得重复（重复计数是最常见的假增长）
+    ``host_valid``         洞口声称的宿主墙必须存在，且区间能被墙覆盖
+    ``face_sane``          面域不得零面积/巨面积/退化多边形
+    ``id_collision``       新构件 id 不得与既有构件撞号
+    """
+    problems: list[dict] = []
+    before = before or {}
+    after = after or {}
+
+    outside = _changed_outside(before, after, region)
+    if outside:
+        problems.append({"code": "PROTECTED_OUTSIDE_CHANGED", "count": int(outside)})
+
+    ids: dict[str, int] = {}
+    for bucket in ("walls", "columns", "doors", "windows", "faces"):
+        for rec in (after.get(bucket) or ()):
+            if not isinstance(rec, dict):
+                continue
+            rid = rec.get("id") or rec.get("handle")
+            if rid is None:
+                continue
+            key = f"{bucket}:{rid}"
+            ids[key] = ids.get(key, 0) + 1
+    dups = sorted(k for k, n in ids.items() if n > 1)
+    if dups:
+        problems.append({"code": "DUPLICATE_IDS", "ids": dups[:8]})
+
+    wall_ids = {str(w.get("id") or w.get("handle"))
+                for w in (after.get("walls") or ()) if isinstance(w, dict)}
+    bad_hosts = []
+    for bucket in ("doors", "windows", "openings"):
+        for rec in (after.get(bucket) or ()):
+            if not isinstance(rec, dict):
+                continue
+            host = rec.get("wall_id") or rec.get("host_wall")
+            if host in (None, ""):
+                continue
+            if str(host) not in wall_ids and not str(host).startswith("gap:"):
+                bad_hosts.append({"id": rec.get("id") or rec.get("handle"),
+                                  "host": str(host)})
+    if bad_hosts:
+        problems.append({"code": "OPENING_HOST_MISSING", "rows": bad_hosts[:8]})
+
+    bad_faces = []
+    for face in (after.get("faces") or ()):
+        if not isinstance(face, dict):
+            continue
+        area = float(face.get("area") or face.get("poly_area") or 0.0)
+        poly = face.get("polygon") or ()
+        if area <= 0 or len(poly) < 3:
+            bad_faces.append({"id": face.get("id"), "why": "degenerate"})
+        elif area > MAX_FACE_AREA:
+            bad_faces.append({"id": face.get("id"), "why": "too_large"})
+    if bad_faces:
+        problems.append({"code": "FACE_UNSANITARY", "rows": bad_faces[:8]})
+
+    collide = []
+    for bucket in ("walls", "columns", "doors", "windows"):
+        prev = {str(r.get("id") or r.get("handle")) for r in (before.get(bucket) or ())
+                if isinstance(r, dict)}
+        now = [str(r.get("id") or r.get("handle")) for r in (after.get(bucket) or ())
+               if isinstance(r, dict)]
+        for rid in now:
+            if now.count(rid) > 1 and rid in prev:
+                collide.append(f"{bucket}:{rid}")
+    if collide:
+        problems.append({"code": "ID_COLLISION", "ids": sorted(set(collide))[:8]})
+
+    return {"ok": not problems, "problems": problems,
+            "checks": {"protected_outside": outside, "duplicates": len(dups),
+                       "bad_hosts": len(bad_hosts), "bad_faces": len(bad_faces),
+                       "id_collisions": len(set(collide))}}

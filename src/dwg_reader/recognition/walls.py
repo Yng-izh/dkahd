@@ -1398,7 +1398,7 @@ def _net_min_space(context) -> float:
     from . import walls_net as WNET
     scale = (context or {}).get("scale") or {}
     text_h = float(scale.get("text_h") or SC.DEFAULT_TEXT_H)
-    return (SC.STRUCTURE["face_min_text"] * text_h) ** 2 * WNET.SPACE_RATIO
+    return (SC.k("face_min_text") * text_h) ** 2 * WNET.SPACE_RATIO
 
 
 def _net_door_width(context) -> float:

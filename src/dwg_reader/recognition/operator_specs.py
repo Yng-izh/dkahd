@@ -55,6 +55,9 @@ class OperatorSpec:
     solver_only: bool = False
     decision_only: bool = False                  # 只记录决策，不改几何
     budget: dict = field(default_factory=dict)   # {"max_entities": 400, "ms": 800}
+    #: 这个算子**真正读取**的运行时参数（见 ``param_registry``）。
+    #: 编译器据此判定"被编译进来却没人读"的幽灵参数；空元组表示纯确定性算子。
+    params: tuple[str, ...] = ()
 
 
 REGISTRY: dict[str, OperatorSpec] = {}
@@ -92,7 +95,8 @@ register(OperatorSpec(
 register(OperatorSpec(
     "group_line_bundle", "1.0", "geometry",
     input_kinds=("line_support", "pattern"), output_kinds=("pattern", "opening_candidate"),
-    stage="openings", affects=("windows", "doors", "openings_select"), max_targets=120))
+    stage="openings", affects=("windows", "doors", "openings_select"), max_targets=120,
+    params=("min_overlap_ratio", "parallel_angle_tol_deg", "line_bundle_min_count")))
 register(OperatorSpec(
     "extract_arc", "1.0", "geometry",
     input_kinds=("entity", "arc", "line_support"), output_kinds=("arc",),
@@ -116,7 +120,8 @@ register(OperatorSpec(
     stage="walls",
     affects=("walls_seg", "wall_model", "spaces_seed", "openings_select",
              "walls_merge", "rooms"),
-    max_targets=120, budget={"max_entities": 1600, "ms": 1800}))
+    max_targets=120, budget={"max_entities": 1600, "ms": 1800},
+    params=("parallel_angle_tol_deg", "wall_gap_ratio", "min_overlap_ratio")))
 register(OperatorSpec(
     "single_line_wall", "1.0", "rebuild",
     input_kinds=("line_support", "entity", "pattern"), output_kinds=("wall_candidate",),
@@ -135,12 +140,15 @@ register(OperatorSpec(
     input_kinds=("pattern", "wall_candidate", "opening_candidate", "line_support"),
     output_kinds=("opening_candidate",),
     stage="openings", affects=("doors", "windows", "openings_select", "walls_merge", "rooms"),
-    max_targets=40, budget={"max_entities": 600, "ms": 1200}))
+    max_targets=40, budget={"max_entities": 600, "ms": 1200},
+    params=("min_overlap_ratio", "parallel_angle_tol_deg", "wall_gap_ratio",
+            "allow_unanchored_window_candidate")))
 register(OperatorSpec(
     "regenerate_column", "1.0", "rebuild",
     input_kinds=("contour", "pattern", "entity", "line_support", "column_candidate"),
     output_kinds=("column_candidate",),
-    stage="columns", affects=("columns", "spaces_seed"), max_targets=40))
+    stage="columns", affects=("columns", "spaces_seed"), max_targets=40,
+    params=("column_aspect_ratio",)))
 register(OperatorSpec(
     "treat_as_opening", "1.0", "rebuild",
     input_kinds=("wall_candidate", "line_support", "pattern"),
@@ -190,7 +198,7 @@ register(OperatorSpec(
     input_kinds=("layer",), output_kinds=("layer_role", "wall_candidate",
                                           "opening_candidate", "column_candidate"),
     stage="walls", affects=("walls_seg", "columns", "doors", "windows", "spaces_seed"),
-    max_targets=6))
+    max_targets=6, params=("region_layer_roles",)))
 register(OperatorSpec(
     "ignore_layer", "1.0", "semantic",
     input_kinds=("layer",), output_kinds=("layer_role",),
@@ -334,8 +342,21 @@ def audit() -> dict:
 
     for stage in STAGES:
         walk(stage, ())
+    for spec in REGISTRY.values():
+        for name in spec.params:
+            if name not in _PARAM_NAMES():
+                problems.append(f"{spec.name}:UNREGISTERED_PARAM:{name}")
     return {"schema": "operator-registry/1.1", "problems": problems,
             "operators": len(REGISTRY), "strategies": len(STRATEGIES)}
+
+
+def _PARAM_NAMES() -> frozenset:
+    """延迟导入参数注册表（避免循环 import：param_registry 不依赖算子库）。"""
+    try:
+        from . import param_registry as PR
+        return frozenset(PR.PARAMS)
+    except Exception:                                  # pragma: no cover
+        return frozenset()
 
 
 def summary() -> dict:
@@ -345,6 +366,8 @@ def summary() -> dict:
             "solver_only": sorted(n for n, s in REGISTRY.items() if s.solver_only),
             "stages": {s: list(d) for s, d in STAGE_DEPS.items()},
             "versions": {n: s.version for n, s in sorted(REGISTRY.items())},
+            "params": {n: list(s.params) for n, s in sorted(REGISTRY.items())
+                       if s.params},
             "strategies": {n: {"version": s.version, "goal": s.goal,
                                "steps": list(s.steps),
                                "hypotheses": list(s.hypotheses),

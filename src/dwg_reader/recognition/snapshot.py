@@ -15,6 +15,7 @@
 """
 from __future__ import annotations
 
+import math
 from typing import Any, Iterable
 
 #: 块展开时不进入的块名关键字（门窗块已由块参照本身代表，展开只会重复计数）
@@ -429,3 +430,126 @@ def geometry_records(snapshot: dict):
         yield rec
     for rec in snapshot.get("derived", ()):
         yield rec
+
+
+# ------------------------------------------------------------------ ROI 与空间索引
+#: 逻辑预算：一个 ROI 默认最多带多少图元 / 网格单元多大（相对图幅）
+ROI_LIMITS = {"entities": 400, "grid_cells": 256}
+
+
+def roi_snapshot(snapshot: dict, bbox, *, pad: float = 0.0,
+                 limit: int | None = None, halo: bool = True) -> dict:
+    """裁一块 ROI 快照：**只读切片**，原始快照一字节不改。
+
+    ``halo=True`` 表示把窗口按 ``pad`` 外扩——跨 ROI 边界的墙/洞口必须有 halo，
+    否则局部试验会把"本来连着的墙"看成断开，验收也会因此误判。
+    返回里明确区分 ``target_ids``（窗口内的，可改）与 ``context_ids``（halo 里的，
+    只读），权限不同不靠口头约定。
+    """
+    limit = int(ROI_LIMITS["entities"] if limit is None else limit)
+    x0, y0, x1, y1 = (float(bbox[0]), float(bbox[1]), float(bbox[2]), float(bbox[3]))
+    outer = [x0 - pad, y0 - pad, x1 + pad, y1 + pad] if halo else [x0, y0, x1, y1]
+
+    def _box(rec):
+        xs, ys = [], []
+        for key in ("start", "end", "center", "insert"):
+            pt = rec.get(key)
+            if isinstance(pt, (list, tuple)) and len(pt) >= 2:
+                xs.append(float(pt[0]))
+                ys.append(float(pt[1]))
+        for key in ("points", "outline"):
+            pts = rec.get(key)
+            if isinstance(pts, (list, tuple)):
+                for pt in pts:
+                    if isinstance(pt, (list, tuple)) and len(pt) >= 2:
+                        xs.append(float(pt[0]))
+                        ys.append(float(pt[1]))
+        box = rec.get("bbox")
+        if isinstance(box, (list, tuple)) and len(box) == 4:
+            xs.extend([float(box[0]), float(box[2])])
+            ys.extend([float(box[1]), float(box[3])])
+        if not xs:
+            return None
+        return (min(xs), min(ys), max(xs), max(ys))
+
+    def _hit(box, window):
+        if box is None:
+            return False
+        return not (box[2] < window[0] or box[0] > window[2]
+                    or box[3] < window[1] or box[1] > window[3])
+
+    targets: list[dict] = []
+    context: list[dict] = []
+    for rec in list(snapshot.get("entities") or ()) + list(snapshot.get("derived") or ()):
+        box = _box(rec)
+        if not _hit(box, outer):
+            continue
+        row = dict(rec)
+        row["bbox"] = [round(v, 1) for v in box] if box else None
+        if _hit(box, (x0, y0, x1, y1)):
+            targets.append(row)
+        else:
+            context.append(row)
+        if len(targets) + len(context) >= limit:
+            break
+    return {"schema": "roi-snapshot/1.0", "bbox": [round(v, 1) for v in outer],
+            "window": [round(v, 1) for v in (x0, y0, x1, y1)],
+            "entities": targets, "context": context,
+            "target_ids": [str(r.get("handle")) for r in targets if r.get("handle")],
+            "context_ids": [str(r.get("handle")) for r in context if r.get("handle")],
+            "truncated": (len(targets) + len(context)) >= limit}
+
+
+class SpaceIndex:
+    """规则网格空间索引（不引入 R-tree 依赖）。
+
+    用途只有一个：让"这条线附近有什么"从 O(n) 变成 O(k)。网格尺寸默认按图幅
+    对角线 / ``grid_cells`` 取，因此换比例、换单位都不需要改参数。
+    """
+
+    __slots__ = ("cell", "buckets", "boxes", "_items")
+
+    def __init__(self, items, *, cell: float | None = None, cells: int | None = None):
+        self._items = list(items or ())
+        self.boxes: list[list[float]] = []
+        for rec in self._items:
+            box = rec.get("bbox")
+            if isinstance(box, (list, tuple)) and len(box) == 4:
+                self.boxes.append([float(box[0]), float(box[1]),
+                                   float(box[2]), float(box[3])])
+            else:
+                self.boxes.append([0.0, 0.0, 0.0, 0.0])
+        if cell is None:
+            span = 0.0
+            if self.boxes:
+                span = max(max(b[2] for b in self.boxes) - min(b[0] for b in self.boxes),
+                           max(b[3] for b in self.boxes) - min(b[1] for b in self.boxes))
+            n = int(cells or ROI_LIMITS["grid_cells"])
+            cell = (span / max(1, n)) or 1.0
+        self.cell = float(cell) or 1.0
+        self.buckets: dict = {}
+        for i, box in enumerate(self.boxes):
+            for key in self._keys(box):
+                self.buckets.setdefault(key, []).append(i)
+
+    def _keys(self, box):
+        c = self.cell
+        x0, y0 = int(math.floor(box[0] / c)), int(math.floor(box[1] / c))
+        x1, y1 = int(math.floor(box[2] / c)), int(math.floor(box[3] / c))
+        return [(i, j) for i in range(x0, x1 + 1) for j in range(y0, y1 + 1)]
+
+    def near(self, point, radius: float) -> list[int]:
+        """半径附近可能相交的图元**下标**（粗筛；精判由调用方做）。"""
+        c = self.cell
+        x, y = float(point[0]), float(point[1])
+        r = float(radius)
+        lo_i, hi_i = int(math.floor((x - r) / c)), int(math.floor((x + r) / c))
+        lo_j, hi_j = int(math.floor((y - r) / c)), int(math.floor((y + r) / c))
+        hit: set = set()
+        for i in range(lo_i, hi_i + 1):
+            for j in range(lo_j, hi_j + 1):
+                hit.update(self.buckets.get((i, j), ()))
+        return sorted(hit)
+
+    def __len__(self):
+        return len(self._items)

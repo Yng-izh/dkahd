@@ -86,6 +86,32 @@ def build_parser() -> argparse.ArgumentParser:
     comps.add_argument("--out-dir", type=Path, help="output directory for --format files")
     comps.add_argument("--basemap", help="basemap PNG path recorded in the schema output")
     comps.add_argument("--no-convert", action="store_true", help="input is already DXF")
+    # ---- AI 增强（默认关闭：不给这个参数就与老行为逐条一致）
+    comps.add_argument("--ai-mode", choices=("off", "propose", "enhance"), default="off",
+                       help="off=纯几何（默认）| propose=只出提议 | enhance=试验通过才合并")
+    comps.add_argument("--ai-config", type=Path,
+                       help="AI 增强配置文件（JSON，见 ai-recognition-config/1.0）")
+    comps.add_argument("--ai-memory-dir", type=Path,
+                       help="规则记忆库目录（默认取配置里的 memory.directory）")
+    comps.add_argument("--ai-diagnostics", type=Path,
+                       help="实验诊断日志（JSONL，一行一次试验）")
+    # 视觉链路：本地渲染 ROI 小图发给多模态模型（默认跟随配置；这里可强开/强关）
+    comps.add_argument("--ai-vision", dest="ai_vision", action="store_true",
+                       default=None, help="强制打开视觉链路（发 ROI 小图给多模态模型）")
+    comps.add_argument("--no-ai-vision", dest="ai_vision", action="store_false",
+                       default=None, help="强制关闭视觉链路（只用结构特征）")
+
+    eval_ = commands.add_parser("ai-eval",
+                                help="独立真值集对照：基础模式 vs 增强模式")
+    eval_.add_argument("--manifest", type=Path, required=True,
+                       help="清单 JSON：{drawings:[{path, gt}], project}")
+    eval_.add_argument("--out", type=Path, help="评估结果 JSON")
+    eval_.add_argument("--ai-mode", choices=("off", "propose", "enhance"), default="off")
+    eval_.add_argument("--ai-config", type=Path)
+    eval_.add_argument("--ai-vision", dest="ai_vision", action="store_true",
+                       default=None)
+    eval_.add_argument("--no-ai-vision", dest="ai_vision", action="store_false",
+                       default=None)
 
     quantity = commands.add_parser("quantity", help="export a quantity take-off (CSV/XLSX)")
     quantity.add_argument("input", type=Path, help="DWG or DXF file")
@@ -167,6 +193,8 @@ def main(argv: list[str] | None = None) -> int:
             return _read(args)
         if args.command == "components":
             return _components(args)
+        if args.command == "ai-eval":
+            return _ai_eval(args)
         if args.command == "quantity":
             return _quantity(args)
         if args.command == "text":
@@ -247,7 +275,43 @@ def _components(args: argparse.Namespace) -> int:
 
     dxf = resolve_dxf(args.input, convert=not args.no_convert)
 
-    result = recognize(str(dxf))
+    ai_mode = getattr(args, "ai_mode", "off") or "off"
+    if ai_mode == "off":
+        result = recognize(str(dxf))
+    else:
+        # 走编排 API：AI 增强必须能拿到参数/统计/审计，recognize() 的签名保持不变
+        from .recognition import run_recognition
+        overrides = {}
+        if getattr(args, "ai_vision", None) is not None:
+            overrides["provider"] = {
+                "vision": bool(args.ai_vision),
+                "allow_remote_images": bool(args.ai_vision)}
+        ai_arg = None
+        if getattr(args, "ai_config", None):
+            from .recognition import ai_config as AIC
+            ai_arg = AIC.load(str(args.ai_config), mode=ai_mode,
+                              overrides=overrides or None)
+        elif overrides:
+            ai_arg = dict(overrides)
+        run = run_recognition(
+            str(dxf), jobs=1, targets=("export",),
+            ai_mode=ai_mode,
+            ai_config=ai_arg,
+            ai_memory_dir=(str(args.ai_memory_dir)
+                           if getattr(args, "ai_memory_dir", None) else None),
+            ai_diagnostics=(str(args.ai_diagnostics)
+                            if getattr(args, "ai_diagnostics", None) else None))
+        doc = run.output
+        if args.format == "json" or args.format == "files":
+            text = _json.dumps(doc, ensure_ascii=False, indent=1)
+            if args.output:
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                args.output.write_text(text, encoding="utf-8")
+                print(f"已写入: {args.output}", file=sys.stderr)
+            else:
+                print(text)
+            return 0
+        result = doc
     if args.format == "files":
         out_dir = args.out_dir or dxf.parent
         for key, path in write_outputs(result, str(dxf), str(out_dir),
@@ -266,6 +330,31 @@ def _components(args: argparse.Namespace) -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(text, encoding="utf-8")
         print(f"已写入: {args.output}", file=sys.stderr)
+    else:
+        print(text)
+    return 0
+
+
+def _ai_eval(args: argparse.Namespace) -> int:
+    """独立真值集对照（按**项目**隔离，避免同项目块族泄漏）。"""
+    import json as _json
+
+    from .recognition import evaluation as EV
+    from .recognition import ai_config as AIC
+
+    manifest = _json.loads(args.manifest.read_text(encoding="utf-8"))
+    overrides = {}
+    if getattr(args, "ai_vision", None) is not None:
+        overrides["provider"] = {"vision": bool(args.ai_vision),
+                                 "allow_remote_images": bool(args.ai_vision)}
+    cfg = AIC.load(str(args.ai_config) if args.ai_config else None,
+                   mode=args.ai_mode or "off", overrides=overrides or None)
+    report = EV.run_manifest(manifest, ai_mode=cfg.get("mode") or "off", ai_config=cfg)
+    text = _json.dumps(report, ensure_ascii=False, indent=1)
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(text, encoding="utf-8")
+        print(f"已写入: {args.out}", file=sys.stderr)
     else:
         print(text)
     return 0

@@ -2,7 +2,7 @@
 
 读取 DWG/DXF 工程图纸，提取图层、实体、文字标注、尺寸信息，支持中英文及多语言编码，输出结构化解析报告供阅读理解。
 
-当前版本 **0.7.0**（变更记录见 [SKILL.md](SKILL.md#版本与变更记录)）。
+当前版本 **0.7.1**（变更记录见 [SKILL.md](SKILL.md#版本与变更记录)）。
 
 ## 核心能力
 
@@ -14,7 +14,9 @@
 - **阅读顺序**：几何感知排序（先分栏、栏内上→下左→右），适配多栏图纸
 - **按图层聚合**：`--by-layer` 按专业图层分组输出
 - **MTEXT 堆叠**：`\S`（分数/公差）解码为 `top/bottom`，剥离 `\H` 高度控制码
-- **全字体支持**：内置 322 个 SHX 字体（约 159MB），覆盖中文 GBK、韩文 cp949、日文 shift_jis、西文 unifont
+- **字体支持**：配套字体包 322 个 SHX（约 159MB，中文 GBK / 韩文 cp949 / 日文 shift_jis / 西文 unifont）。
+  **字体不入库**（体积与授权原因），缺失时只影响文字渲染/解码，不影响构件识别；
+  需要时按 `fonts/README.md` 自行放置。
 - **自动字体匹配**：解析 DXF 的 STYLE 表，按文本样式自动匹配字体库（支持路径前缀/大小写/后缀容错），无需手动指定
 - **符号支持**：AutoCAD `%%` 转义序列（%%C→Ø、%%D→°、%%P→±）、`\U+XXXX` Unicode、`\M+5XXXX` bigfont 符号区
 - **SHX 反编译**：大字体 SHX → SHP 文本（等价 DUMPSHX / shx2shp 工具）
@@ -217,6 +219,82 @@ PY
   单线墙/块内墙不识别；无 opening 几何的门不参与合并；非 WALL 中心线门 `wall_id=null`（本图 11 个）；
   `evidence.detail` 用组件层洞口编号，结构化 `openings[].id` 才是 schema 记录 id。
 
+## AI 自适应增强（0.7.1，默认关闭）
+
+识别器本身是**纯几何、可复现、离线**的。这一版在这之上加了一条可选通道：
+让模型在"规则没解释的残余几何"上提**假设和受约束的计划**，由确定性算子去试、
+由独立验收决定要不要，试不通就回滚。
+
+一句话总结分工：**模型只出假设和区间，坐标、阈值、是否提交都由程序决定。**
+
+| 模式 | 命令 | 做了什么 | 结果变化 |
+| --- | --- | --- | --- |
+| `off`（默认） | `--ai-mode off` | 什么都不变，不实例化网关、不发请求 | 与老版本逐条一致 |
+| `propose` | `--ai-mode propose --ai-config ai_recognition.json` | 残余几何聚类 → 模型出假设与计划草案 | 只多一段 `meta.ai_recognition`，**不动构件** |
+| `enhance` | `--ai-mode enhance --ai-config ai_recognition.json` | 再往下：编译计划 → 在同一基线上试多组参数 → 影子+全局验收 → 通过才合并 | 只多出"能追到原始 handle 且通过验收"的构件 |
+
+**视觉链路（这一版接的是多模态模型）**：开启 AI 后，程序会把**这一块 ROI** 从原始
+图元渲染成一张小图（720px 宽、通常 2–10 KB），连同结构特征一起发给多模态模型
+（默认 `vision_model`，本地 `llm.local.json` 里配的 `cn:glm-4.6v`）。
+
+- 灰线=背景图元，橙线=这条案例要解释的目标，绿线=已确认的墙，蓝字=图纸原文；
+- **只发这一块小图，不发整张图，也不是屏幕截图**——同一份快照永远画出同一张图；
+- 图只能在提示词里当"形态确认"用，任何尺寸都不许从图里读（尺寸由几何算子给）；
+- 想关掉：`--no-ai-vision`（或配置 `provider.vision=false`），退化成纯结构特征输入；
+- 不想让图纸内容离开本机：`provider.allow_remote_images=false` + `vision=false`。
+
+```bash
+# 关掉视觉链路（只用结构特征，最省 token）
+dwg-reader components 图纸.dxf --ai-mode propose --no-ai-vision -o proposals.json
+
+# 只出提议（不动结果，先看模型怎么想）
+dwg-reader components 图纸.dxf --ai-mode propose --ai-config ai_recognition.json -o proposals.json
+
+# 提议 + 局部试验 + 验收后合并
+dwg-reader components 图纸.dxf --ai-mode enhance --ai-config ai_recognition.json -o enhanced.json
+
+# 独立真值集对照（按项目隔离，避免同项目块族泄漏）
+dwg-reader ai-eval --manifest datasets/manifest.json --out eval.json
+```
+
+配置示例（`ai-recognition-config/1.0`，JSON，不引入 YAML 依赖）：
+
+```json
+{
+  "schema": "ai-recognition-config/1.0",
+  "mode": "enhance",
+  "provider": {"type": "openai-compatible",
+               "base_url_env": "DWG_AI_BASE_URL",
+               "api_key_env": "DWG_AI_API_KEY",
+               "model_env": "DWG_AI_MODEL",
+               "vision_model_env": "DWG_AI_VISION_MODEL",
+               "vision": true,
+               "allow_remote_images": true},
+  "budget": {"max_regions": 12, "max_model_calls": 12, "max_trials_per_case": 12,
+             "max_total_trials": 72, "max_model_rounds_per_case": 2,
+             "max_walltime_seconds": 180},
+  "safety": {"protect_confirmed": true,
+             "require_independent_support_for_confirmed": true,
+             "global_consistency_check": true,
+             "allow_arbitrary_code": false},
+  "memory": {"enabled": true, "scope": "project", "directory": ".dkahd/rule-memory"}
+}
+```
+
+**这条通道明确不承诺的事**（写在这里，免得被当成已实现）：
+
+- 不承诺把任意特殊画法 100% 识别出来；
+- 不承诺"数量变多"就是变好——`confirmed` 必须有独立几何/块/尺寸/拓扑支持，
+  同一束线派生的两条评分不算两条证据；
+- 不承诺自动得到真实 Precision——真值必须人工标注、按**项目**划分，
+  `ai-eval` 只是把这件事做成可执行的流程；
+- 上传的口径是"**只发 ROI 小图**"：不发整张图、不发 DXF 原文件、不发图层清单原文；
+  端点/模型/密钥全部来自你自己的配置，不要就把 `vision` 和 `allow_remote_images` 关掉。
+
+新增的可审计产物：每个 AI 新增构件都带 `provenance`（规则 / 案例 / 实验 /
+参数哈希），`meta.ai_recognition` 记录模式、预算、提议、实验与记忆库命中，
+`--ai-diagnostics exp.jsonl` 可以落一份"每次试验一行"的日志。
+
 ## 天正（TCH）图纸与 T3 格式
 
 天正建筑/结构把墙、门窗、轴号、标注等存为自定义对象（`TCH_*` 类）。
@@ -292,7 +370,7 @@ dwg-reader-skill/
 │   └── mcp_server.py     # MCP stdio 服务
 ├── schema/               # dwg-components-records-1.1.schema.json
 ├── tests/                # pytest（含 test_dag.py / test_dag_executor.py / test_wall_runs.py）
-├── .github/workflows/ci.yml  # CI：lint / test / core / dag / package
+├── .github/workflows/ci.yml  # CI：lint / test / core / dag / package（仓库默认不含，见下文）
 ├── scripts/              # 免安装脚本入口（与包能力等价）
 │   ├── dwg_read.py           # 一站式流水线（推荐入口）
 │   ├── parse_dxf.py          # 结构化解析（实体/文字/图层/尺寸/块，支持 --layer-filter）
@@ -303,7 +381,7 @@ dwg-reader-skill/
 │   ├── component_rules.json  # 旧版规则表（兼容保留）
 │   ├── shxfont.py            # SHX 大字体解析器（多编码）
 │   └── shx_decompile.py      # SHX → SHP 反编译
-└── fonts/               # 322 个 SHX 字体 + index.json
+└── fonts/               # 可选：自行放置 SHX 字体 + index.json（不入库）
 ```
 
 ## License

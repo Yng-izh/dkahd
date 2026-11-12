@@ -193,3 +193,25 @@ def _bbox_of(rec) -> list | None:
         return EVID.bbox_of(rec)
     except Exception:
         return None
+
+
+def residual(ledger: dict, *, explain_handles=()) -> dict:
+    """残余图元（模式发现的输入）：既没用上、也没被明确否决的那部分。
+
+    返回结构区分两种"没解释"：
+
+    * ``unused`` / ``weak`` —— 还有可能是真构件（值得进 PatternCase）；
+    * ``rejected``         —— 已被判过不合适，只作为上下文，不再反复尝试；
+    * ``explained``        —— 已被某个构件采用（不在残余里，但仍登记，便于查覆盖率）。
+    """
+    out = {"unused": [], "weak": [], "rejected": [], "explained": []}
+    explained = {str(h) for h in (explain_handles or ())}
+    for handle, rec in (ledger or {}).items():
+        if not isinstance(rec, dict):
+            continue
+        status = str(rec.get("status") or UNUSED)
+        if handle in explained or status == USED:
+            out["explained"].append(str(handle))
+        elif status in out:
+            out[status].append(str(handle))
+    return {"counts": {k: len(v) for k, v in out.items()}, **out}

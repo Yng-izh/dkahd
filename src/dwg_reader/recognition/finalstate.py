@@ -18,6 +18,9 @@ import os
 from . import recompute as RC
 
 MAX_FACE_AREA = 5.0e9
+
+#: 四种**来源语义**（方案 §8）：可观测 / 可复算 / 推断 / 未决
+PROVENANCE_STATES = ("observed", "derived", "inferred", "unresolved")
 INVARIANT_REASONS = ("WALL_WITHOUT_INTERVAL", "INFERRED_IN_EXPORT", "FACE_TOO_LARGE",
                      "PATCH_NOT_ACCEPTED")
 
@@ -75,6 +78,51 @@ def commit(base: dict, patch: dict) -> dict:
     trial["provenance"]["accepted"] = len(accept)
     trial["accept_state"] = accept
     return trial
+
+
+def provenance_of(rec: dict) -> str:
+    """一条记录的来源语义：观察到的、可复算的、推断的，还是还没定论。
+
+    区分这四种不是学术洁癖：工程量只能算 ``observed`` / ``derived``；
+    ``inferred`` 是"为了让拓扑闭合而假设的几何"，不能当真实构件计价。
+    """
+    if not isinstance(rec, dict):
+        return "unresolved"
+    if rec.get("geometry_state") == "inferred" or rec.get("inferred"):
+        return "inferred"
+    status = str(rec.get("status") or "")
+    if status == "rejected":
+        return "unresolved"
+    if status in ("uncertain", "pending") or rec.get("evidence_state") in ("weak",
+                                                                           "pending"):
+        return "unresolved"
+    if rec.get("geometry_state") == "derived" or rec.get("derived"):
+        return "derived"
+    if rec.get("handles") or rec.get("srcs") or rec.get("block"):
+        return "observed"
+    return "unresolved"
+
+
+def annotate_provenance(state: dict) -> dict:
+    """给每条记录打上 ``provenance_state``，并给出四类计数（只加字段，不改几何）。"""
+    out = _copy_state(state)
+    tally = {k: 0 for k in PROVENANCE_STATES}
+    for bucket in ("walls", "columns", "doors", "windows"):
+        recs = []
+        for rec in (out.get(bucket) or ()):
+            if not isinstance(rec, dict):
+                recs.append(rec)
+                continue
+            row = dict(rec)
+            row["provenance_state"] = provenance_of(row)
+            tally[row["provenance_state"]] += 1
+            recs.append(row)
+        out[bucket] = recs
+    for face in (out.get("faces") or ()):
+        if isinstance(face, dict):
+            tally["derived" if face.get("seal_state") != "hypothesis" else "inferred"] += 1
+    out.setdefault("provenance", {})["states"] = tally
+    return out
 
 
 def invariants(state: dict) -> list[str]:
@@ -313,4 +361,6 @@ def calibrate(state: dict, *, weak_cap: float = WEAK_CAP) -> dict:
                           "undecided_conf": UNDECIDED_CONF,
                           "weak_cap": weak_cap}
     out.setdefault("provenance", {})["calibrated"] = len(undecided)
+    # 来源语义（observed/derived/inferred/unresolved）：只加字段，不动几何
+    out = annotate_provenance(out)
     return out

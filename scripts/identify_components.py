@@ -60,6 +60,9 @@ def main() -> int:
     ap.add_argument("--out-dir", type=Path, help="--format files 的输出目录")
     ap.add_argument("--basemap", help="底图 PNG 路径（仅写入 schema 的 basemap.file）")
     ap.add_argument("--no-convert", action="store_true", help="输入已是 DXF 时跳过转换")
+    ap.add_argument("--ai-mode", choices=("off", "propose", "enhance"), default="off",
+                    help="AI 增强：off=纯几何（默认）| propose=只出提议 | enhance=试验通过才合并")
+    ap.add_argument("--ai-config", type=Path, help="AI 增强配置（JSON）")
     args = ap.parse_args()
 
     if args.emit_schema:
