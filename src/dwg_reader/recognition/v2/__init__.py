@@ -36,15 +36,27 @@ from . import geometry_fitter as FITTER
 from . import geometry_graph as GRAPH
 from . import global_resolver as RESOLVER
 from . import proposal_engines as ENGINES
+from . import space_solver as SPACE
 
 SCHEMA = "recognition-v2/1.0"
 VERSION = "2.0.0-dev"
 
 
 def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
-            doors=(), windows=(), pattern_cases=(), faces=(), gateway=None,
-            ai=None, budget=None, with_agent: bool = True) -> dict:
-    """给定快照与"底座结果"，跑完整的 v2 流程（纯函数，不读 DXF、不写文件）。"""
+            doors=(), windows=(), stairs=(), steps=(), aprons=(), frames=(),
+            grid=None, north=None, pattern_cases=(), faces=(), labels=None,
+            space_walls=(), gateway=None,
+            ai=None, budget=None, with_agent: bool = True,
+            rooms: bool = True) -> dict:
+    """给定快照与"底座结果"，跑完整的 v2 流程（纯函数，不读 DXF、不写文件）。
+
+    ``rooms=True`` 时，房间在**墙/柱/门窗选完之后**由 :mod:`space_solver` 从选中
+    墙网重算（单向链：墙 → 面域 → 房名），不允许反过来用房间造墙。
+
+    ``space_walls`` 可以给一份**更细的墙段**（v1 的 ``walls_seg``）用于闭合面域：
+    合并后的墙 run 便于计数与算量，但面域闭合要的是逐面线的原始墙段——两者混用
+    会让房间数凭空变少（实测 16 vs 44）。给的是几何，不是判定。
+    """
     started = time.perf_counter()
     ai = dict(ai or {})
 
@@ -57,7 +69,10 @@ def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
     if with_agent:
         agent = AGENT.run(ir=ir, graph=graph, gateway=gateway, ai=ai,
                           snapshot=snapshot, walls=walls, columns=columns,
-                          doors=doors, windows=windows, faces=faces,
+                          doors=doors, windows=windows, stairs=stairs,
+                          steps=steps, aprons=aprons, frames=frames, grid=grid,
+                          north=north, faces=faces, space_walls=space_walls,
+                          labels=labels,
                           pattern_cases=pattern_cases, budget=budget)
         pool = agent["pool"]
         resolution = agent["resolution"]
@@ -65,13 +80,36 @@ def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
         vision = agent["vision"]
         failures = agent["failures"]
     else:
+        space_builder = (lambda selected: SPACE.solve(
+            selected=selected, texts=ir.get("texts") or (),
+            bbox=ir.get("bbox"), thick=float((ir.get("basis") or {})
+                                             .get("thickness") or 0.0)))
         pool = ENGINES.generate(ir, graph, walls=walls, columns=columns,
-                               doors=doors, windows=windows,
+                               doors=doors, windows=windows, stairs=stairs,
+                               steps=steps, aprons=aprons, frames=frames,
+                               grid=grid,
                                pattern_cases=pattern_cases, faces=faces)
         resolution = RESOLVER.staged(
             pool, thickness=float((ir.get("basis") or {}).get("thickness") or 200.0),
-            faces=faces)
+            faces=faces, space_builder=space_builder if rooms else None)
         rounds, vision, failures = [], {"ok": False, "reason": "AGENT_OFF"}, []
+
+    # 房间：agent 路径下 staged 还没算过空间阶段，这里在**最终选中**的墙网上补算
+    space = None
+    if rooms and not (resolution.get("stages") or {}).get("spaces", {}).get("status") == "ok":
+        chosen_so_far = (resolution.get("final") or {}).get("selected") or []
+        space = SPACE.solve(selected=list(space_walls) or chosen_so_far,
+                            texts=ir.get("texts") or (),
+                            labels=labels, bbox=ir.get("bbox"),
+                            thick=float((ir.get("basis") or {}).get("thickness") or 0.0))
+        extra = [h for h in (space.get("hypotheses") or ()) if isinstance(h, dict)]
+        if extra:
+            final = dict(resolution.get("final") or {})
+            final["selected"] = list(final.get("selected") or ()) + extra
+            counts = dict(final.get("counts") or {})
+            counts["room"] = counts.get("room", 0) + len(extra)
+            final["counts"] = counts
+            resolution = dict(resolution, final=final)
 
     chosen = (resolution.get("final") or {}).get("selected") or []
     return {"schema": SCHEMA, "version": VERSION,
@@ -90,6 +128,8 @@ def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
                                    for h in chosen],
                       "states": len((resolution.get("final") or {}).get("selected")
                                     or ())},
+            "space": SPACE.summary(space) if space else (
+                ((resolution.get("stages") or {}).get("spaces") or {})),
             "rounds": rounds, "vision": vision, "failures": failures,
             "ai": {"mode": ai.get("mode") or "off"},
             "ms": round((time.perf_counter() - started) * 1000.0, 1),
@@ -125,14 +165,26 @@ def run_drawing(dxf_path: str, *, ai_mode: str = "off", ai_config=None, jobs: in
     walls = merged_runs or (out.get("walls_seg") or {}).get("walls_seg") or ()
     columns = (out.get("columns_verify") or {}).get("columns") or out.get("columns") or ()
     sel = out.get("openings_select") or {}
+    stairs = out.get("stairs") or ()
+    steps = list(out.get("steps") or ()) + list(out.get("entrance_steps") or ())
+    apron = out.get("apron") or ()
+    frame = out.get("frame") or {}
+    grid = out.get("grid") or {}
+    north = out.get("north") or {}
+    # 房名口径与 v1 一致：直接用它 label_filter 的结果（同一套预筛/几何提升）
+    labels = out.get("label_filter") or {}
     pattern_cases = (out.get("pattern_discovery") or {}).get("cases") or ()
     faces = (out.get("spaces_seed") or {}).get("faces") or ()
 
     gateway = GATEWAY.gateway_from_config(cfg) if AIC.enabled(cfg) else None
     result = analyze(snapshot=snapshot, scale=scale, plan=plan, walls=walls,
                      columns=columns, doors=sel.get("doors") or (),
-                     windows=sel.get("windows") or (), pattern_cases=pattern_cases,
-                     faces=faces, gateway=gateway, ai=cfg, budget=budget)
+                     windows=sel.get("windows") or (), stairs=stairs,
+                     steps=steps, aprons=apron,
+                     frames=[frame] if isinstance(frame, dict) and frame else [],
+                     grid=grid, north=north,
+                     pattern_cases=pattern_cases, faces=faces, labels=labels,
+                     gateway=gateway, ai=cfg, budget=budget)
     result["base"] = {"counts": (base.output.get("meta") or {}).get("counts") or {},
                       "ms": round((time.perf_counter() - t0 - float(result.get("ms")
                                                                     or 0) / 1000.0)
@@ -143,7 +195,13 @@ def run_drawing(dxf_path: str, *, ai_mode: str = "off", ai_config=None, jobs: in
                         "walls": len(walls), "columns": len(columns),
                         "doors": len(sel.get("doors") or ()),
                         "windows": len(sel.get("windows") or ()),
-                        "pattern_cases": len(pattern_cases)}
+                        "pattern_cases": len(pattern_cases),
+                        "stairs": len(stairs), "steps": len(steps),
+                        "apron": len(apron),
+                        "frame": bool(frame), "grid_axes": len(
+                            (grid or {}).get("axis_lines") or ()),
+                        "grid_intersections": len((grid or {}).get("intersections")
+                                                  or ())}
 
     if store_dir:
         entry = {"ir_digest": (result.get("ir") or {}).get("digest"),
@@ -187,4 +245,5 @@ def summary(result) -> dict:
 
 
 __all__ = ["AGENT", "ENGINES", "FITTER", "GRAMMAR", "GRAPH", "IR", "RESOLVER",
-           "STORE", "SCHEMA", "VERSION", "analyze", "run_drawing", "summary"]
+           "SPACE", "STORE", "SCHEMA", "VERSION", "analyze", "run_drawing",
+           "summary"]

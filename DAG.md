@@ -72,7 +72,12 @@ cad_ir（统一 uid/几何/多尺度区域）+ geometry_graph（平行/共线/�
 | `v2/proposal_engines.py` | 三引擎并行出候选、统一 schema、去重 |
 | `v2/global_resolver.py` | 冲突图 + 联合选择（墙→洞口→空间，多状态） |
 | `v2/agent_controller.py` | 观察/提问/反馈循环 |
+| `v2/space_solver.py` | 房间：选中墙网 → 面域（分块栅格）→ 房名挂靠 |
 | `v2/experiment_store.py` | 实验记录、比较、规则复用 |
+
+覆盖 **11 类**：墙/柱/门/窗/楼梯/台阶/散水/图框/轴网/指北针/房间。房间必须由
+选中的墙网重算（单向链），目前只做"面域+挂靠"，不含多标签剖分与空间路由 ——
+所以房间数低于 v1，这是已知缺口。
 
 ```bash
 dwg-reader v2 图纸.dxf -o v2.json --store .dkahd/experiments

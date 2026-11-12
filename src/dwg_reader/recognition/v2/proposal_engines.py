@@ -122,8 +122,14 @@ def _uids_for(ir: dict, handles) -> list[str]:
 
 
 def rule_candidates(ir: dict, *, walls=(), columns=(), doors=(), windows=(),
-                    limit: int | None = None) -> dict:
-    """现有识别器的结果 -> 统一候选（不改判据，只换表达）。"""
+                    stairs=(), steps=(), aprons=(), frames=(), grid=None,
+                    rooms=(), limit: int | None = None) -> dict:
+    """现有识别器的结果 -> 统一候选（不改判据，只换表达）。
+
+    覆盖 11 类：墙/柱/门/窗/楼梯/台阶/散水/图框/轴网/房间（+ 门联窗走门窗）。
+    楼梯与台阶在 v1 里是**两个节点**（``stairs`` 与 ``steps``/``entrance_steps``），
+    这里合并成同一类别，来源记在 ``evidence.rule`` 上，不丢出处。
+    """
     out: list[dict] = []
     for wall in walls or ():
         if not isinstance(wall, dict):
@@ -180,10 +186,97 @@ def rule_candidates(ir: dict, *, walls=(), columns=(), doors=(), windows=(),
                 score=RULE_SCORE.get(str(rec.get("evidence_state") or "strong"), 0.6),
                 evidence={"evidence_state": rec.get("evidence_state"),
                           "rule": f"{category}_openings"}))
+    # ---- 楼梯 / 台阶 / 散水：都是"成组轮廓"，几何形态不同但表达方式一致
+    for rec in stairs or ():
+        if not isinstance(rec, dict):
+            continue
+        attrs = rec.get("attributes") or {}
+        handles = [str(h) for h in (rec.get("handles") or ())]
+        out.append(hypothesis(
+            category="stair", subtype="tread_series", source="rule",
+            engine="rule.stairs", region=None, bbox=_bbox_of_record(rec),
+            geometry={"tread_count": attrs.get("tread_count"),
+                      "spacing_mm": _r(attrs.get("tread_spacing_mm")),
+                      "axis": rec.get("axis")},
+            uids=_uids_for(ir, handles), handles=handles,
+            score=RULE_SCORE.get(str(rec.get("evidence_state") or "strong"), 0.7),
+            evidence={"rule": "stairs", "treads": attrs.get("tread_count")}))
+    for rec in steps or ():
+        if not isinstance(rec, dict):
+            continue
+        attrs = rec.get("attributes") or {}
+        handles = [str(h) for h in (rec.get("handles") or ())]
+        out.append(hypothesis(
+            category="step", subtype=str(rec.get("shape") or "nested_u"),
+            source="rule", engine="rule.steps", region=None,
+            bbox=_bbox_of_record(rec),
+            geometry={"count": attrs.get("steps"), "label": attrs.get("label")},
+            uids=_uids_for(ir, handles), handles=handles,
+            score=RULE_SCORE.get(str(rec.get("evidence_state") or "strong"), 0.7),
+            evidence={"rule": "steps"}))
+    for rec in aprons or ():
+        if not isinstance(rec, dict):
+            continue
+        attrs = rec.get("attributes") or {}
+        handles = [str(h) for h in (rec.get("handles") or ())]
+        out.append(hypothesis(
+            category="apron", subtype="band", source="rule", engine="rule.apron",
+            region=None, bbox=_bbox_of_record(rec),
+            geometry={"width_mm": _r(attrs.get("width_mm")),
+                      "outline": rec.get("outline")},
+            uids=_uids_for(ir, handles), handles=handles,
+            score=RULE_SCORE.get(str(rec.get("evidence_state") or "strong"), 0.7),
+            evidence={"rule": "apron"}))
+
+    # ---- 图框：一张图通常只有一个"有内容"的图框，按面积给分
+    for rec in frames or ():
+        if not isinstance(rec, dict):
+            continue
+        handles = [str(h) for h in (rec.get("handles") or ())]
+        box = _bbox_of_record(rec)
+        out.append(hypothesis(
+            category="frame", subtype="closed_polyline", source="rule",
+            engine="rule.frame", region=None, bbox=box,
+            geometry={"outer": rec.get("outer"), "inner": rec.get("inner"),
+                      "width_mm": _r(rec.get("width")), "height_mm": _r(rec.get("height"))},
+            uids=_uids_for(ir, handles), handles=handles, score=0.9,
+            evidence={"rule": "frame"}))
+
+    # ---- 轴网：轴线与交点都算 grid_axis 的两个 subtype
+    for rec in ((grid or {}).get("axes") or ()):
+        if not isinstance(rec, dict):
+            continue
+        handles = [str(h) for h in (rec.get("handles") or ())]
+        out.append(hypothesis(
+            category="grid_axis", subtype="line_with_numbering", source="rule",
+            engine="rule.grid", region=None, bbox=_bbox_of_record(rec),
+            geometry={"axis": rec.get("axis"), "label": rec.get("label"),
+                      "orient": rec.get("orient")},
+            uids=_uids_for(ir, handles), handles=handles, score=0.85,
+            evidence={"rule": "grid.axes"}))
+    for rec in ((grid or {}).get("intersections") or ()):
+        if not isinstance(rec, dict):
+            continue
+        box = _bbox_of_record(rec)
+        out.append(hypothesis(
+            category="grid_axis", subtype="intersection", source="rule",
+            engine="rule.grid", region=None, bbox=box,
+            geometry={"point": rec.get("point"), "labels": rec.get("labels")},
+            uids=_uids_for(ir, [str(rec.get("handle") or "")]), handles=[],
+            score=0.8, evidence={"rule": "grid.intersections"}))
+
+    # ---- 房间：由 space_solver 从**选中的墙网**重算，不从墙反推
+    for hyp in rooms or ():
+        if isinstance(hyp, dict) and hyp.get("schema") == HYP_SCHEMA:
+            out.append(hyp)
+
     if limit:
         out = out[:int(limit)]
+    by_cat: dict[str, int] = {}
+    for hyp in out:
+        by_cat[hyp["category"]] = by_cat.get(hyp["category"], 0) + 1
     return {"source": "rule", "status": "ok", "candidates": out,
-            "stats": {"candidates": len(out)}}
+            "stats": {"candidates": len(out), "by_category": by_cat}}
 
 
 # --------------------------------------------------------------------- 模式引擎
@@ -296,7 +389,8 @@ def dedupe(hypotheses, *, ratio: float | None = None) -> tuple[list[dict], int]:
 
 
 def generate(ir: dict, graph=None, *, plan=None, walls=(), columns=(), doors=(),
-             windows=(), pattern_cases=(), ai_grammars=(), faces=(),
+             windows=(), stairs=(), steps=(), aprons=(), frames=(), grid=None,
+             rooms=(), pattern_cases=(), ai_grammars=(), faces=(),
              regions=(), budget=None) -> dict:
     """三个引擎一起出候选，合成一个池子。
 
@@ -307,7 +401,9 @@ def generate(ir: dict, graph=None, *, plan=None, walls=(), columns=(), doors=(),
     engines: dict[str, dict] = {}
 
     rule = rule_candidates(ir, walls=walls, columns=columns, doors=doors,
-                           windows=windows, limit=budget["rule_candidates"])
+                           windows=windows, stairs=stairs, steps=steps,
+                           aprons=aprons, frames=frames, grid=grid, rooms=rooms,
+                           limit=budget["rule_candidates"])
     engines["rule"] = {"stats": rule["stats"], "status": rule["status"]}
 
     pattern = pattern_candidates(ir, graph, pattern_cases=pattern_cases,

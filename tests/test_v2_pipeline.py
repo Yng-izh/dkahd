@@ -256,3 +256,54 @@ def test_experiment_store_key_depends_on_config_and_grammar():
     b = STORE.key_for(ir_digest="x", grammar_hashes=["g2"], config_digest="c1")
     c = STORE.key_for(ir_digest="x", grammar_hashes=["g1"], config_digest="c2")
     assert len({a, b, c}) == 3
+
+
+# --------------------------------------------------------------------------- 11 类
+def test_rule_engine_covers_all_eleven_categories(ir):
+    """楼梯/台阶/散水/图框/轴网/房间 都必须能进池子（哪怕这张图上是空的）。"""
+    pool = ENGINES.generate(
+        ir, GG.build(ir),
+        walls=[{"id": "w1", "start": [0, 0], "end": [9000, 0], "thickness": 200}],
+        columns=[{"id": "c1", "bbox": [1500, 5000, 2000, 5500], "w": 500, "h": 500}],
+        doors=[{"id": "d1", "bbox": [1000, 0, 1900, 200]}],
+        windows=[{"id": "n1", "bbox": [3000, 0, 4200, 200]}],
+        stairs=[{"id": "s1", "bbox": [5000, 3000, 6200, 4200],
+                 "attributes": {"tread_count": 9, "tread_spacing_mm": 280}}],
+        steps=[{"id": "p1", "bbox": [0, -1200, 2000, 0],
+                "attributes": {"steps": 3}}],
+        aprons=[{"id": "a1", "bbox": [0, -2000, 9000, -1200],
+                 "attributes": {"width_mm": 600}}],
+        frames=[{"id": "f1", "outer": [[0, 0], [9000, 0], [9000, 7000], [0, 7000]],
+                 "width": 9000, "height": 7000}],
+        grid={"axes": [{"id": "g1", "axis": [[0, 0], [0, 7000]], "label": "A"}],
+              "intersections": [{"id": "g2", "point": [0, 0]}]},
+        rooms=[ENGINES.hypothesis(category="room", subtype="closed_face",
+                                  source="rule", engine="space_solver.rooms",
+                                  region=None, bbox=[0, 0, 4000, 3000],
+                                  geometry={"area_m2": 12.0}, score=0.8)])
+    cats = set(pool["stats"]["by_category"])
+    assert {"wall", "column", "door", "window", "stair", "step", "apron",
+            "frame", "grid_axis", "room"} <= cats
+
+
+def test_derived_categories_do_not_conflict_with_structure():
+    room = _hyp("room", [0, 0, 4000, 3000], score=0.8)
+    wall = _hyp("wall", [0, 0, 4000, 200], score=0.9)
+    res = RESOLVER.solve({"hypotheses": [room, wall]}, thickness=200.0)
+    cats = {h["category"] for h in res["selected"]}
+    assert {"room", "wall"} <= cats
+
+
+def test_staged_uses_space_builder_when_given():
+    pool = {"hypotheses": [_hyp("wall", [0, 0, 4000, 200], score=0.9,
+                                geometry={"axis": [[0, 0], [4000, 0]],
+                                          "thickness_mm": 200})]}
+
+    def builder(selected):
+        return {"schema": "space-solve/1.0", "status": "ok",
+                "hypotheses": [_hyp("room", [0, 0, 2000, 2000], score=0.8)],
+                "stats": {"faces": 3, "orphans": 1}}
+
+    res = RESOLVER.staged(pool, thickness=200.0, space_builder=builder)
+    assert res["stages"]["spaces"]["status"] == "ok"
+    assert res["final"]["counts"].get("room") == 1

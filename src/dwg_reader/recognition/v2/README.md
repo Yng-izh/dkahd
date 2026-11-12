@@ -35,7 +35,25 @@ CAD 统一几何表示（cad_ir）· 块族 · 关系图 · 文字 · 多尺度�
 | `proposal_engines.py` | 规则/模式/AI 三引擎并行出候选，统一 schema + 去重 | `walls.py`、`elements.py`、`pattern_discovery.py` |
 | `global_resolver.py` | 冲突图 + 贪心/局部改进联合选择，分阶段（墙→洞口→空间），保留多状态 | `local_solver.py` |
 | `agent_controller.py` | 选观察区域、向模型要语法、多尺度视图、失败反馈循环 | `ai_planner.py`、`model_gateway.py`、`vision.py` |
+| `space_solver.py` | 房间：选中墙网 → 面域（分块栅格）→ 房名挂靠 | `spaces.py`、`rooms.py`、`labels.py` |
 | `experiment_store.py` | 实验记录/比较/规则复用（接三层记忆库） | `experiment_runner.py`、`rule_memory.py` |
+
+## 覆盖的构件类别（11 类）
+
+| 类别 | 来源 | 说明 |
+|---|---|---|
+| 墙 / 柱 / 门 / 窗 | 规则引擎 | v1 的墙 run / 柱 / 统一洞口结果 |
+| 楼梯 | 规则引擎 | 踏步串（`stair.tread_series` 语法也能拟合） |
+| 台阶 | 规则引擎 | 含入口台阶（两个 v1 节点合并成一类，来源记在 `evidence.rule`） |
+| 散水 | 规则引擎 | 外圈闭合轮廓 |
+| 图框 | 规则引擎 | 闭合多段线，一张图一个"有内容"的框 |
+| 轴网 | 规则引擎 | 轴线 + 交点两个 subtype |
+| 指北针 | 规则引擎 | 圆 + 箭头符号 |
+| 房间 | `space_solver` | **必须**由选中的墙网重算面域再挂房名（单向链，绝不反推墙） |
+
+房间口径要说清楚：v2 目前是"面域 + 房名挂靠"这一步（`rooms.rooms_from_faces`），
+**不含** v1 房间节点里的多标签剖分与空间路由，所以同一张图上房间数会比 v1 少
+（住院楼实测 14 vs 44）。这是已知缺口，不是"合并简化"的胜利。
 
 ## 四条硬边界
 

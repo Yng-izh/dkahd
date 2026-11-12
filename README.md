@@ -330,6 +330,10 @@ dwg-reader v2 图纸.dxf --ai-mode enhance --ai-config ai_recognition.json \
   --store .dkahd/experiments --memory .dkahd/rule-memory
 ```
 
+v2 覆盖 **11 类**：墙 / 柱 / 门 / 窗 / 楼梯 / 台阶 / 散水 / 图框 / 轴网 / 指北针 / 房间。
+其中房间由 `space_solver` 从**选中的墙网**重算面域再挂房名（单向链，绝不反推墙）；
+房间多标签剖分与空间路由仍是 v1 的活，v2 这一步的房间数会比 v1 少（已知缺口）。
+
 **边界**：模型只能提**语法**（原语/关系都是闭集），坐标一律由拟合器算；权重未经
 独立标注校准前不宣称准确率；v2 结论目前是影子层，不写回旧导出结构，谁的默认仍
 由真值集决定。

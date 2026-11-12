@@ -58,7 +58,13 @@ EXCLUSIVE = {
 
 #: 相容关系：宿主与被支撑（洞口的宿主是墙）
 SUPPORTS = {("wall", "window"), ("wall", "door"), ("wall", "column"),
-            ("stair", "step"), ("apron", "wall")}
+            ("stair", "step"), ("apron", "wall"),
+            # 房间与洞口/墙是**互相支撑**的关系：房间在墙网里，洞口开在墙上
+            ("room", "door"), ("room", "window"), ("room", "wall"),
+            ("step", "door"), ("step", "apron")}
+
+#: 空间类构件（房间）不与结构构件争夺同一块地：它们由墙网派生，允许共存
+DERIVED_CATEGORIES = frozenset({"room", "grid_axis", "frame"})
 
 
 def _r(v, nd: int = 3) -> float:
@@ -140,6 +146,9 @@ def relation(a: dict, b: dict, *, thickness: float) -> tuple[float, str]:
 
     pair = frozenset((cat_a, cat_b))
     band = max(1.0, float(thickness))
+    # 派生类（房间/轴网/图框）不与结构构件互相排斥：它们本来就叠在一起
+    if cat_a in DERIVED_CATEGORIES or cat_b in DERIVED_CATEGORIES:
+        return 0.0, ""
     if pair in EXCLUSIVE:
         if iou >= float(BUDGET["exclusive_iou"]):
             return -1.0, "MUTUALLY_EXCLUSIVE"
@@ -302,7 +311,8 @@ STAGE_CATEGORIES = {
 }
 
 
-def staged(pool, *, thickness: float = 200.0, faces=(), budget=None) -> dict:
+def staged(pool, *, thickness: float = 200.0, faces=(), budget=None,
+           space_builder=None) -> dict:
     """分阶段联合求解：墙/柱 → 洞口 → 空间，每阶段保留多个状态。
 
     为什么分阶段：房间依赖墙网，洞口依赖宿主墙。如果一步到位把墙、洞口、房间
@@ -316,13 +326,38 @@ def staged(pool, *, thickness: float = 200.0, faces=(), budget=None) -> dict:
     for stage in STAGES:
         cats = STAGE_CATEGORIES[stage]
         if stage == "spaces":
-            # 空间由墙网几何重算，不在这里凭空生成：明确写出来，别假装算过
-            out["stages"][stage] = {"status": "needs_geometry",
-                                    "categories": list(cats),
-                                    "note": "房间面域必须由墙网重算（spaces/rooms 模块）"}
-            out["needs"].append({"stage": stage, "action": "rebuild_faces",
-                                 "walls": [h["id"] for h in carry
-                                           if h.get("category") == "wall"]})
+            # 房间不是"候选竞赛"的产物：必须由**选中的墙网**重算面域再挂房名。
+            # 给了 space_builder 就当场算（单向链：墙 -> 面域 -> 房名）；
+            # 没给就明确写 needs_geometry，绝不假装算过。
+            selection = list(carry)
+            if space_builder is None:
+                out["stages"][stage] = {"status": "needs_geometry",
+                                        "categories": list(cats),
+                                        "note": "房间面域必须由墙网重算（space_solver）"}
+                out["needs"].append({"stage": stage, "action": "rebuild_faces",
+                                     "walls": [h["id"] for h in selection
+                                               if h.get("category") == "wall"]})
+                continue
+            try:
+                built = space_builder(selection) or {}
+            except Exception as exc:                     # 参数给错也不该拖垮求解
+                out["stages"][stage] = {"status": "failed",
+                                        "error": type(exc).__name__}
+                continue
+            rooms = [h for h in (built.get("hypotheses") or ())
+                     if isinstance(h, dict)]
+            carry = carry + rooms
+            out["stages"][stage] = {"status": "ok", "categories": list(cats),
+                                    "counts": {"room": len(rooms)},
+                                    "faces": int((built.get("stats") or {}).get("faces")
+                                                 or 0),
+                                    "rooms": len(rooms),
+                                    "orphans": int((built.get("stats") or {})
+                                                   .get("orphans") or 0),
+                                    "selected": [h.get("id") for h in rooms]}
+            out["space_build"] = {"schema": built.get("schema"),
+                                  "status": built.get("status"),
+                                  "stats": built.get("stats")}
             continue
         subset = {"hypotheses": carry + [h for h in rows
                                          if h.get("category") in cats]}

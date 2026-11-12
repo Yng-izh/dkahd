@@ -20,6 +20,7 @@ from . import component_grammar as G
 from . import geometry_graph as GG
 from . import global_resolver as RESOLVER
 from . import proposal_engines as ENGINES
+from . import space_solver as SPACE
 
 SCHEMA = "agent-run/1.0"
 PROMPT_VERSION = "agent-controller/1.0"
@@ -228,8 +229,9 @@ def propose_grammars(facts: dict, *, gateway, views=None, budget=None,
 
 # --------------------------------------------------------------------- 主循环
 def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None,
-        walls=(), columns=(), doors=(), windows=(), faces=(), pattern_cases=(),
-        budget=None) -> dict:
+        walls=(), columns=(), doors=(), windows=(), stairs=(), steps=(),
+        aprons=(), frames=(), grid=None, north=None, faces=(), pattern_cases=(),
+        budget=None, rooms: bool = True, space_walls=(), labels=None) -> dict:
     """一轮或多轮：观察 -> 要语法 -> 拟合 -> 联合求解 -> 反馈。
 
     ``ai`` 是 :mod:`ai_config` 的配置（``mode=off`` 时不会调用模型，但**仍然**
@@ -301,10 +303,16 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
                 break
 
         pool_now = ENGINES.generate(ir, graph_obj, walls=walls, columns=columns,
-                                    doors=doors, windows=windows,
-                                    pattern_cases=pattern_cases,
+                                    doors=doors, windows=windows, stairs=stairs,
+                                    steps=steps, aprons=aprons, frames=frames,
+                                    grid=grid, pattern_cases=pattern_cases,
                                     ai_grammars=ai_items, faces=faces)
-        resolution = RESOLVER.staged(pool_now, thickness=thickness, faces=faces)
+        resolution = RESOLVER.staged(
+            pool_now, thickness=thickness, faces=faces,
+            space_builder=(lambda selected: SPACE.solve(
+                selected=list(space_walls) or selected,
+                texts=ir.get("texts") or (), labels=labels,
+                bbox=ir.get("bbox"), thick=thickness)) if rooms else None)
         failures = _failure_digest(pool_now, resolution)
         rounds.append({"round": round_no, "regions": round_rows,
                        "pool": ENGINES.summary(pool_now),
@@ -316,10 +324,17 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
             break
 
     pool_now = ENGINES.generate(ir, graph_obj, walls=walls, columns=columns,
-                                doors=doors, windows=windows,
-                                pattern_cases=pattern_cases, ai_grammars=ai_items,
+                                doors=doors, windows=windows, stairs=stairs,
+                                steps=steps, aprons=aprons, frames=frames,
+                                grid=grid, pattern_cases=pattern_cases,
+                                ai_grammars=ai_items,
                                 faces=faces) if rounds else (pool or {"hypotheses": []})
-    resolution = RESOLVER.staged(pool_now, thickness=thickness, faces=faces)
+    resolution = RESOLVER.staged(
+        pool_now, thickness=thickness, faces=faces,
+        space_builder=(lambda selected: SPACE.solve(
+            selected=list(space_walls) or selected,
+            texts=ir.get("texts") or (), labels=labels,
+            bbox=ir.get("bbox"), thick=thickness)) if rooms else None)
 
     vision_ok = any(v.get("ok") for v in vision_rows)
     return {"schema": SCHEMA,
