@@ -1,0 +1,21 @@
+{
+  "schema": "acceptance/1.0",
+  "drawing": "办公楼.dxf",
+  "truth": {
+    "wall": 31,
+    "column": 38,
+    "door": 30,
+    "window": 31,
+    "room": 21
+  },
+  "tolerance": {
+    "window": 1
+  },
+  "criterion": {
+    "column": "COLUMN 层 _FZH 块参照计数（38）",
+    "door": "门族块实例：$DorLib2D$00000002 12 + $TCHSYS$DOOR2D 11 + $TCHSYS$APDOOR2D 6 + $DorLib2D$00000001 1",
+    "window": "$TCHSYS$WIN2D 块参照计数（31）",
+    "room": "SPACE 层房名 21 条（PUB_TEXT 的走道/休息厅已并入同名相邻面域；楼梯 2 条归 stair 类别）",
+    "wall": "WALL 图层双线配对后的连续墙实例（31 run）"
+  }
+}

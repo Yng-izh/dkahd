@@ -1,0 +1,2054 @@
+{
+ "file": "会所-图层混乱.dxf",
+ "source": "/Users/yngizh/Library/Mobile Documents/com~apple~CloudDocs/插件/会所-图层混乱.dxf",
+ "counts": {
+  "column": 59,
+  "door": 58,
+  "frame": 2,
+  "grid_axis": 16,
+  "room": 13,
+  "stair": 3,
+  "wall": 82,
+  "window": 58
+ },
+ "total": 291,
+ "components": [
+  {
+   "category": "column",
+   "x": 68556,
+   "y": -24845,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 68556,
+   "y": -24463,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 68556,
+   "y": -24013,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 68556,
+   "y": -23563,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 68556,
+   "y": -21373,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 68556,
+   "y": -20463,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 68556,
+   "y": -19713,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 68556,
+   "y": -18963,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 68807,
+   "y": -25077,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69123,
+   "y": -25396,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69156,
+   "y": -21373,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69166,
+   "y": -20463,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69166,
+   "y": -19713,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69166,
+   "y": -18963,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69406,
+   "y": -24463,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69406,
+   "y": -24013,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69406,
+   "y": -23563,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69406,
+   "y": -23113,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69406,
+   "y": -21373,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69406,
+   "y": -20463,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69406,
+   "y": -19713,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69447,
+   "y": -25709,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69728,
+   "y": -25980,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69730,
+   "y": -24776,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69906,
+   "y": -20463,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69906,
+   "y": -19713,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 69906,
+   "y": -18963,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 70053,
+   "y": -25089,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 70334,
+   "y": -25359,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 70656,
+   "y": -19713,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 70656,
+   "y": -18963,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 70787,
+   "y": -19118,
+   "w": 45,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 70790,
+   "y": -18365,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 71456,
+   "y": -19713,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 71456,
+   "y": -18963,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 71610,
+   "y": -18365,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 71612,
+   "y": -19118,
+   "w": 45,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 72206,
+   "y": -20473,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 72206,
+   "y": -19713,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 72206,
+   "y": -18963,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 72956,
+   "y": -20463,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 72956,
+   "y": -19713,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 72956,
+   "y": -18963,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 73279,
+   "y": -20765,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 73420,
+   "y": -20615,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 73470,
+   "y": -18365,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 73560,
+   "y": -20000,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 73658,
+   "y": -21121,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 73690,
+   "y": -19115,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 73799,
+   "y": -20971,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 73940,
+   "y": -20354,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 74037,
+   "y": -21479,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 74070,
+   "y": -19464,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 74328,
+   "y": -20715,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 74453,
+   "y": -19821,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 74771,
+   "y": -19167,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 74840,
+   "y": -20184,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 75217,
+   "y": -19167,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 75245,
+   "y": -19763,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "door",
+   "x": 68700,
+   "y": -18942,
+   "w": 117,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 68722,
+   "y": -18895,
+   "w": 88,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 68728,
+   "y": -23984,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 68737,
+   "y": -24242,
+   "w": 43,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 68787,
+   "y": -18655,
+   "w": 78,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 68825,
+   "y": -23984,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 68826,
+   "y": -24242,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 68880,
+   "y": -18565,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 68880,
+   "y": -18476,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 68880,
+   "y": -18387,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 68947,
+   "y": -19263,
+   "w": 78,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 68990,
+   "y": -23873,
+   "w": 78,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 69137,
+   "y": -24257,
+   "w": 78,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 69180,
+   "y": -18565,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 69180,
+   "y": -18476,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 69180,
+   "y": -18387,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 69276,
+   "y": -18655,
+   "w": 78,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 69277,
+   "y": -18895,
+   "w": 88,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 69300,
+   "y": -23343,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 69300,
+   "y": -22893,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 69300,
+   "y": -20368,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 69300,
+   "y": -19973,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 69300,
+   "y": -19501,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 69300,
+   "y": -19139,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 69355,
+   "y": -19645,
+   "w": 140,
+   "block": "$DorLib2D$00000011"
+  },
+  {
+   "category": "door",
+   "x": 69517,
+   "y": -23887,
+   "w": 146,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 69763,
+   "y": -24059,
+   "w": 140,
+   "block": "$DorLib2D$00000011"
+  },
+  {
+   "category": "door",
+   "x": 69985,
+   "y": -24275,
+   "w": 140,
+   "block": "$DorLib2D$00000011"
+  },
+  {
+   "category": "door",
+   "x": 70025,
+   "y": -19105,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 70026,
+   "y": -18895,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 70074,
+   "y": -19105,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 70074,
+   "y": -18895,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 70217,
+   "y": -25017,
+   "w": 140,
+   "block": "$DorLib2D$00000011"
+  },
+  {
+   "category": "door",
+   "x": 70287,
+   "y": -24567,
+   "w": 140,
+   "block": "$DorLib2D$00000011"
+  },
+  {
+   "category": "door",
+   "x": 70762,
+   "y": -19105,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 70777,
+   "y": -18895,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 71185,
+   "y": -19635,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 71185,
+   "y": -18504,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 71215,
+   "y": -19635,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 71215,
+   "y": -18504,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 71979,
+   "y": -19105,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 72022,
+   "y": -19105,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 72325,
+   "y": -18895,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 72371,
+   "y": -18895,
+   "w": 117,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 72375,
+   "y": -19104,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 72427,
+   "y": -18362,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 73067,
+   "y": -19105,
+   "w": 98,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 73100,
+   "y": -19059,
+   "w": 117,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 73368,
+   "y": -19834,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 73390,
+   "y": -19855,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 73666,
+   "y": -18895,
+   "w": 88,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 74077,
+   "y": -20494,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 74099,
+   "y": -20514,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 74512,
+   "y": -20509,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 74698,
+   "y": -20312,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 75009,
+   "y": -20000,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 75118,
+   "y": -19889,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "door",
+   "x": 75474,
+   "y": -19128,
+   "w": 120,
+   "block": "$DorLib2D$00000013"
+  },
+  {
+   "category": "frame",
+   "x": 0,
+   "y": 0,
+   "w": 12615,
+   "block": ""
+  },
+  {
+   "category": "frame",
+   "x": 78246,
+   "y": -21644,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 68700,
+   "y": -17486,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 69300,
+   "y": -17486,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 69550,
+   "y": -18955,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 69700,
+   "y": -17486,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 70050,
+   "y": -17486,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 70292,
+   "y": -25779,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 70800,
+   "y": -17486,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 70895,
+   "y": -25155,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 71600,
+   "y": -17488,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 72350,
+   "y": -17486,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 72992,
+   "y": -20040,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 73096,
+   "y": -17486,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 74788,
+   "y": -21436,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 74930,
+   "y": -21283,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 75448,
+   "y": -20741,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 76041,
+   "y": -19105,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 68864,
+   "y": -18775,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 69000,
+   "y": -19185,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 69005,
+   "y": -20194,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 69005,
+   "y": -19787,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 69135,
+   "y": -19293,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 69374,
+   "y": -18625,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 70421,
+   "y": -19375,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 70458,
+   "y": -18622,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 71199,
+   "y": -19075,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 72688,
+   "y": -18616,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 72725,
+   "y": -19270,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 73331,
+   "y": -18616,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 73626,
+   "y": -18623,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "stair",
+   "x": 69190,
+   "y": -23768,
+   "w": 120,
+   "block": ""
+  },
+  {
+   "category": "stair",
+   "x": 69411,
+   "y": -18810,
+   "w": 171,
+   "block": ""
+  },
+  {
+   "category": "stair",
+   "x": 71876,
+   "y": -18705,
+   "w": 147,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 30,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 30,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 37,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 40,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 44,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 45,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 49,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 50,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 50,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 60,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 66,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 72,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 88,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 101,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 110,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 110,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 120,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 120,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 120,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 120,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 120,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 120,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 124,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 135,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 146,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 150,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 152,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 178,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 181,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 240,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 240,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 256,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 293,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 355,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 380,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 399,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 430,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 430,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 430,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 453,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 488,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 496,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 496,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 510,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 510,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 510,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 520,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 520,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 520,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 520,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 520,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 520,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 520,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 570,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 570,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 570,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 575,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 580,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 580,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 580,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 580,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 590,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 644,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 675,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 710,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 736,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 872,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 970,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1012,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1128,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1240,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1260,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1270,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1270,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1271,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1519,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1568,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1740,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1816,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1945,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 2070,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 2080,
+   "block": ""
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -23925,
+   "w": 80,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -23268,
+   "w": 155,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -23093,
+   "w": 155,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -22788,
+   "w": 155,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -22613,
+   "w": 155,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -20623,
+   "w": 155,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -20448,
+   "w": 155,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -20173,
+   "w": 155,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -19998,
+   "w": 155,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -19755,
+   "w": 155,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -19580,
+   "w": 155,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68700,
+   "y": -19291,
+   "w": 197,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68840,
+   "y": -18355,
+   "w": 80,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 68975,
+   "y": -20765,
+   "w": 210,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69225,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69300,
+   "y": -23130,
+   "w": 230,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69300,
+   "y": -22680,
+   "w": 230,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69300,
+   "y": -20555,
+   "w": 180,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69300,
+   "y": -20165,
+   "w": 190,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69300,
+   "y": -19729,
+   "w": 145,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69626,
+   "y": -23928,
+   "w": 90,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69798,
+   "y": -24095,
+   "w": 90,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69800,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69850,
+   "y": -19645,
+   "w": 280,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69949,
+   "y": -24240,
+   "w": 90,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69950,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 69986,
+   "y": -25254,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70090,
+   "y": -25147,
+   "w": 75,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70121,
+   "y": -24407,
+   "w": 90,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70175,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70237,
+   "y": -19645,
+   "w": 255,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70245,
+   "y": -24987,
+   "w": 75,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70262,
+   "y": -24543,
+   "w": 60,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70325,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70347,
+   "y": -24882,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70525,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70612,
+   "y": -19645,
+   "w": 255,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70675,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 70900,
+   "y": -19645,
+   "w": 180,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 71500,
+   "y": -19645,
+   "w": 180,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 71725,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 71800,
+   "y": -19645,
+   "w": 280,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 71875,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 72098,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 72175,
+   "y": -19645,
+   "w": 230,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 72250,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 72537,
+   "y": -19645,
+   "w": 255,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 72610,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 72810,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 72912,
+   "y": -19645,
+   "w": 255,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 72960,
+   "y": -18355,
+   "w": 130,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 73767,
+   "y": -18237,
+   "w": 70,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 73869,
+   "y": -19075,
+   "w": 70,
+   "block": "_wblk"
+  },
+  {
+   "category": "window",
+   "x": 73964,
+   "y": -18995,
+   "w": 50,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 74767,
+   "y": -20253,
+   "w": 90,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 75654,
+   "y": -19116,
+   "w": 210,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 75823,
+   "y": -19063,
+   "w": 90,
+   "block": "$WinLib2D$00000001"
+  },
+  {
+   "category": "window",
+   "x": 75889,
+   "y": -18819,
+   "w": 210,
+   "block": "$WinLib2D$00000001"
+  }
+ ]
+}

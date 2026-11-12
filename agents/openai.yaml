@@ -1,0 +1,8 @@
+interface:
+  display_name: "DWG Drawing Reader"
+  short_description: "Extract structure and multilingual text from DWG/DXF drawings"
+  default_prompt: "Use $dwg-drawing-reader to inspect this CAD drawing and summarize its contents."
+
+policy:
+  allow_implicit_invocation: true
+

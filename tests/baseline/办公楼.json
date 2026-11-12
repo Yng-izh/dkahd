@@ -1,0 +1,1329 @@
+{
+ "file": "办公楼.dxf",
+ "source": "/Users/yngizh/Library/Mobile Documents/com~apple~CloudDocs/插件/办公楼.dxf",
+ "counts": {
+  "apron": 1,
+  "column": 38,
+  "door": 30,
+  "frame": 2,
+  "grid_axis": 26,
+  "north_arrow": 1,
+  "room": 21,
+  "stair": 2,
+  "step": 3,
+  "wall": 31,
+  "window": 32
+ },
+ "total": 187,
+ "components": [
+  {
+   "category": "apron",
+   "x": 3398,
+   "y": 2238,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 901,
+   "y": 1581,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 901,
+   "y": 2186,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 901,
+   "y": 2441,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 901,
+   "y": 3046,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 1598,
+   "y": 1581,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 1598,
+   "y": 2186,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 1598,
+   "y": 2441,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 1598,
+   "y": 3046,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 1958,
+   "y": 2431,
+   "w": 45,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 1958,
+   "y": 3056,
+   "w": 45,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 2318,
+   "y": 1581,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 2318,
+   "y": 2186,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 2318,
+   "y": 2441,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 2318,
+   "y": 3046,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 3016,
+   "y": 1581,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 3016,
+   "y": 2186,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 3016,
+   "y": 2441,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 3016,
+   "y": 3046,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 3781,
+   "y": 1581,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 3781,
+   "y": 2186,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 3781,
+   "y": 2441,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 3781,
+   "y": 3046,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 4118,
+   "y": 2431,
+   "w": 45,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 4118,
+   "y": 3056,
+   "w": 45,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 4478,
+   "y": 1581,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 4478,
+   "y": 2186,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 4478,
+   "y": 2441,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 4478,
+   "y": 3046,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 4838,
+   "y": 1581,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 4838,
+   "y": 2186,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 4838,
+   "y": 2441,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 4838,
+   "y": 3046,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 5378,
+   "y": 1581,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 5378,
+   "y": 3046,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 5896,
+   "y": 1581,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 5896,
+   "y": 2186,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 5896,
+   "y": 2441,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "column",
+   "x": 5896,
+   "y": 3046,
+   "w": 65,
+   "block": ""
+  },
+  {
+   "category": "door",
+   "x": 901,
+   "y": 2658,
+   "w": 100,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1107,
+   "y": 2692,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1107,
+   "y": 2802,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1107,
+   "y": 2892,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1107,
+   "y": 2982,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1156,
+   "y": 2418,
+   "w": 110,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1216,
+   "y": 2208,
+   "w": 98,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1370,
+   "y": 2892,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1370,
+   "y": 2982,
+   "w": 60,
+   "block": "$TCHSYS$APDOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1553,
+   "y": 2208,
+   "w": 98,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1576,
+   "y": 2658,
+   "w": 100,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1643,
+   "y": 2208,
+   "w": 98,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 1696,
+   "y": 3073,
+   "w": 166,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 2273,
+   "y": 2208,
+   "w": 98,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 2273,
+   "y": 2418,
+   "w": 98,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 2363,
+   "y": 2208,
+   "w": 98,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 2971,
+   "y": 2208,
+   "w": 98,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 2972,
+   "y": 2418,
+   "w": 117,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 3221,
+   "y": 1553,
+   "w": 176,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 3221,
+   "y": 1808,
+   "w": 176,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 3401,
+   "y": 1553,
+   "w": 176,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 3401,
+   "y": 1808,
+   "w": 176,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 3620,
+   "y": 2418,
+   "w": 117,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 3826,
+   "y": 2208,
+   "w": 117,
+   "block": "$DorLib2D$00000001"
+  },
+  {
+   "category": "door",
+   "x": 3826,
+   "y": 2418,
+   "w": 98,
+   "block": "$TCHSYS$DOOR2D"
+  },
+  {
+   "category": "door",
+   "x": 4317,
+   "y": 2208,
+   "w": 117,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 4381,
+   "y": 3073,
+   "w": 166,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 4629,
+   "y": 2498,
+   "w": 117,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 4838,
+   "y": 1620,
+   "w": 117,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "door",
+   "x": 4838,
+   "y": 2240,
+   "w": 146,
+   "block": "$DorLib2D$00000002"
+  },
+  {
+   "category": "frame",
+   "x": 0,
+   "y": 0,
+   "w": 7430,
+   "block": ""
+  },
+  {
+   "category": "frame",
+   "x": 6982,
+   "y": 2101,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 338,
+   "y": 1558,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 338,
+   "y": 2208,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 338,
+   "y": 2418,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 338,
+   "y": 3068,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 878,
+   "y": 638,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 878,
+   "y": 3688,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 1598,
+   "y": 638,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 1598,
+   "y": 3688,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 2318,
+   "y": 638,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 2318,
+   "y": 3688,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 3038,
+   "y": 638,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 3038,
+   "y": 3688,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 3758,
+   "y": 638,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 3758,
+   "y": 3688,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 4478,
+   "y": 638,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 4478,
+   "y": 3688,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 4838,
+   "y": 638,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 4838,
+   "y": 3688,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 5378,
+   "y": 638,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 5378,
+   "y": 3688,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 5918,
+   "y": 638,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 5918,
+   "y": 3688,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 6458,
+   "y": 1558,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 6458,
+   "y": 2208,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 6458,
+   "y": 2418,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "grid_axis",
+   "x": 6458,
+   "y": 3068,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "north_arrow",
+   "x": 3034,
+   "y": 345,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 1056,
+   "y": 2430,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 1059,
+   "y": 2865,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 1179,
+   "y": 2541,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 1419,
+   "y": 1877,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 1419,
+   "y": 2865,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 1471,
+   "y": 2538,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 1779,
+   "y": 1877,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 2139,
+   "y": 2748,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 2499,
+   "y": 1877,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 2678,
+   "y": 2310,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 2679,
+   "y": 2748,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 2862,
+   "y": 1877,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 3395,
+   "y": 2008,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 3399,
+   "y": 1680,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 3399,
+   "y": 2748,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 3939,
+   "y": 1880,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 3939,
+   "y": 2748,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 4299,
+   "y": 1877,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 4655,
+   "y": 2022,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 4659,
+   "y": 2788,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "room",
+   "x": 5381,
+   "y": 2312,
+   "w": 0,
+   "block": ""
+  },
+  {
+   "category": "stair",
+   "x": 1876,
+   "y": 2520,
+   "w": 144,
+   "block": ""
+  },
+  {
+   "category": "stair",
+   "x": 4200,
+   "y": 2547,
+   "w": 144,
+   "block": ""
+  },
+  {
+   "category": "step",
+   "x": 1778,
+   "y": 3173,
+   "w": 310,
+   "block": ""
+  },
+  {
+   "category": "step",
+   "x": 3398,
+   "y": 1348,
+   "w": 840,
+   "block": ""
+  },
+  {
+   "category": "step",
+   "x": 4298,
+   "y": 3173,
+   "w": 310,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 198,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 220,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 220,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 372,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 392,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 480,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 540,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 540,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 540,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 540,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 540,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 540,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 540,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 540,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 540,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 540,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 580,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 580,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 630,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 630,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 630,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 630,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1275,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1400,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1400,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 1940,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 2115,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 2135,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 2135,
+   "block": ""
+  },
+  {
+   "category": "wall",
+   "x": 0,
+   "y": 0,
+   "w": 4930,
+   "block": ""
+  },
+  {
+   "category": "window",
+   "x": 873,
+   "y": 2313,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 1058,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 1076,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 1418,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 1418,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 1506,
+   "y": 2418,
+   "w": 120,
+   "block": ""
+  },
+  {
+   "category": "window",
+   "x": 1778,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 2138,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 2138,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 2498,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 2498,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 2858,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 2858,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 3038,
+   "y": 1968,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 3143,
+   "y": 1553,
+   "w": 150,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 3143,
+   "y": 1808,
+   "w": 150,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 3218,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 3578,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 3653,
+   "y": 1553,
+   "w": 150,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 3653,
+   "y": 1808,
+   "w": 150,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 3938,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 3938,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 4298,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 4658,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 4668,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 4973,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 5108,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 5213,
+   "y": 1553,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 5738,
+   "y": 3073,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 5923,
+   "y": 1883,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 5923,
+   "y": 2313,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  },
+  {
+   "category": "window",
+   "x": 5923,
+   "y": 2743,
+   "w": 180,
+   "block": "$TCHSYS$WIN2D"
+  }
+ ]
+}

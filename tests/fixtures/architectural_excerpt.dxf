@@ -1,0 +1,146 @@
+  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1009
+  0
+ENDSEC
+  0
+SECTION
+  2
+TABLES
+  0
+TABLE
+  2
+LAYER
+ 70
+1
+  0
+LAYER
+  2
+NOTES
+ 70
+0
+ 62
+7
+  6
+CONTINUOUS
+  0
+ENDTAB
+  0
+ENDSEC
+  0
+SECTION
+  2
+BLOCKS
+  0
+BLOCK
+  8
+0
+  2
+ROOM_TAG
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+ROOM_TAG
+  1
+
+  0
+TEXT
+  8
+NOTES
+ 10
+1.0
+ 20
+2.0
+ 30
+0.0
+ 40
+2.5
+  1
+ROOM
+  7
+STANDARD
+  0
+ENDBLK
+  8
+0
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+TEXT
+  8
+NOTES
+ 10
+0.0
+ 20
+20.0
+ 30
+0.0
+ 40
+2.5
+  1
+Top %%C20
+  7
+STANDARD
+  0
+INSERT
+  8
+NOTES
+  2
+ROOM_TAG
+ 10
+100.0
+ 20
+200.0
+ 30
+0.0
+ 41
+1.0
+ 42
+1.0
+ 43
+1.0
+ 50
+0.0
+ 66
+1
+  0
+ATTRIB
+  8
+NOTES
+ 10
+102.0
+ 20
+205.0
+ 30
+0.0
+ 40
+2.5
+  1
+A-101
+  2
+ROOM_NO
+  7
+STANDARD
+ 70
+0
+  0
+SEQEND
+  0
+ENDSEC
+  0
+EOF

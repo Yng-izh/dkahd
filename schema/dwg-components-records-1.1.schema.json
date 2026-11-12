@@ -1,0 +1,471 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "dwg-components-records/1.1",
+ "title": "DWG component recognition result",
+ "description": "单张图纸的构件识别统一输出文档。",
+ "type": "object",
+ "required": [
+  "schema",
+  "meta",
+  "components"
+ ],
+ "properties": {
+  "schema": {
+   "type": "string",
+   "const": "dwg-components-records/1.1"
+  },
+  "meta": {
+   "type": "object",
+   "required": [
+    "source_file",
+    "dxf_version",
+    "tool",
+    "method",
+    "units",
+    "total_records",
+    "by_type"
+   ],
+   "properties": {
+    "source_file": {
+     "type": "string"
+    },
+    "parsed_file": {
+     "type": "string"
+    },
+    "dxf_version": {
+     "type": "string"
+    },
+    "created_at": {
+     "type": "string"
+    },
+    "tool": {
+     "type": "string"
+    },
+    "method": {
+     "type": "string"
+    },
+    "units": {
+     "type": "string"
+    },
+    "extents": {
+     "type": "array",
+     "items": {
+      "type": "number"
+     },
+     "minItems": 4,
+     "maxItems": 4
+    },
+    "counting_rule": {
+     "type": "string"
+    },
+    "total_records": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "by_type": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "integer"
+     }
+    },
+    "counts": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "integer"
+     }
+    },
+    "grid": {
+     "type": "object"
+    },
+    "wall_diagnostics": {
+     "type": "object"
+    },
+    "unrecognized_count": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "crosscheck": {
+     "type": "object"
+    }
+   },
+   "additionalProperties": true
+  },
+  "basemap": {
+   "type": "object",
+   "required": [
+    "width",
+    "height",
+    "transform"
+   ],
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "version": {
+     "type": "string"
+    },
+    "file": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "width": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "height": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "sha256": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "style": {
+     "type": "string"
+    },
+    "generated_from": {
+     "type": "string"
+    },
+    "transform": {
+     "type": "object",
+     "required": [
+      "basemap_width",
+      "basemap_height",
+      "world",
+      "scale_px_per_unit",
+      "padding_ratio"
+     ],
+     "properties": {
+      "basemap_width": {
+       "type": "integer"
+      },
+      "basemap_height": {
+       "type": "integer"
+      },
+      "world": {
+       "type": "object",
+       "required": [
+        "xmin",
+        "ymin",
+        "xmax",
+        "ymax"
+       ],
+       "properties": {
+        "xmin": {
+         "type": "number"
+        },
+        "ymin": {
+         "type": "number"
+        },
+        "xmax": {
+         "type": "number"
+        },
+        "ymax": {
+         "type": "number"
+        }
+       }
+      },
+      "scale_px_per_unit": {
+       "type": "number",
+       "minimum": 0
+      },
+      "padding_ratio": {
+       "type": "number",
+       "minimum": 0
+      },
+      "formula": {
+       "type": "string"
+      },
+      "note": {
+       "type": "string"
+      }
+     },
+     "additionalProperties": true
+    }
+   },
+   "additionalProperties": true
+  },
+  "components": {
+   "type": "array",
+   "items": {
+    "title": "ComponentRecord",
+    "description": "一个构件实例。块类构件 anchor=insert，几何推导构件 anchor=geometry。",
+    "type": "object",
+    "required": [
+     "id",
+     "category",
+     "anchor",
+     "bbox_model",
+     "bbox_px",
+     "bbox_center_px"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "description": "类别内唯一编号，如 WALL-0001"
+     },
+     "category": {
+      "type": "string",
+      "enum": [
+       "图框",
+       "轴线",
+       "轴网交点",
+       "指北针",
+       "柱",
+       "墙",
+       "门",
+       "窗",
+       "房间",
+       "楼梯",
+       "台阶",
+       "散水"
+      ]
+     },
+     "name": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "block": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "块名；几何推导构件为 null"
+     },
+     "layer": {
+      "type": "string"
+     },
+     "anchor": {
+      "type": "string",
+      "enum": [
+       "insert",
+       "geometry"
+      ]
+     },
+     "depth": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "块嵌套深度，非块为 0"
+     },
+     "insert_pt": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+     },
+     "rotation_deg": {
+      "type": "number",
+      "description": "DXF 原始值，未归一化"
+     },
+     "scale": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+     },
+     "bbox_model": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+     },
+     "bbox_px": {
+      "type": "array",
+      "items": {
+       "type": "integer"
+      },
+      "minItems": 4,
+      "maxItems": 4
+     },
+     "bbox_center_px": {
+      "type": "array",
+      "items": {
+       "type": "integer"
+      },
+      "minItems": 2,
+      "maxItems": 2
+     },
+     "dxf_handle": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "source_handles": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "source_entities": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "handle"
+       ],
+       "properties": {
+        "handle": {
+         "type": "string"
+        },
+        "type": {
+         "type": "string"
+        },
+        "layer": {
+         "type": "string"
+        },
+        "role": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "geometry": {
+      "type": "object",
+      "description": "几何明细：中心线/轮廓/包围盒/面积等，随类别而异"
+     },
+     "attributes": {
+      "type": "object",
+      "description": "类别相关的属性键值"
+     },
+     "evidence": {
+      "type": "object",
+      "properties": {
+       "rule": {
+        "type": "string"
+       },
+       "detail": {
+        "type": "string"
+       }
+      }
+     },
+     "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "confirmed",
+       "uncertain"
+      ]
+     },
+     "opening": {
+      "type": "array",
+      "items": {
+       "type": "array",
+       "items": {
+        "type": "number"
+       },
+       "minItems": 2,
+       "maxItems": 2
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "墙上的洞口段（门/窗），两点"
+     },
+     "axis": {
+      "type": "array",
+      "items": {
+       "type": "array",
+       "items": {
+        "type": "number"
+       },
+       "minItems": 2,
+       "maxItems": 2
+      },
+      "minItems": 2,
+      "maxItems": 2
+     }
+    },
+    "additionalProperties": true
+   }
+  },
+  "unrecognized": {
+   "type": "array",
+   "items": {
+    "title": "UnrecognizedEntity",
+    "description": "未归入任何构件的原始图元，附原因。",
+    "type": "object",
+    "required": [
+     "handle",
+     "type",
+     "reason"
+    ],
+    "properties": {
+     "handle": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     },
+     "layer": {
+      "type": "string"
+     },
+     "bbox": {
+      "type": [
+       "array",
+       "null"
+      ],
+      "items": {
+       "type": "number"
+      }
+     },
+     "reason": {
+      "type": "string"
+     }
+    },
+    "additionalProperties": true
+   }
+  },
+  "unmatched_blocks": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "block",
+     "count"
+    ],
+    "properties": {
+     "block": {
+      "type": "string"
+     },
+     "count": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "note": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "unmatched_total": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "scope": {
+   "type": "object"
+  },
+  "notes": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  }
+ },
+ "additionalProperties": true
+}

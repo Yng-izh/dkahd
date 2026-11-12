@@ -1,0 +1,135 @@
+{
+  "_说明": "构件识别规则：每条规则含 name(构件名)、block_re(块名/INSERT 正则)、layer_re(图层名正则)。匹配时不区分大小写。可用 --rules 指向自定义 JSON 覆盖。",
+  "rules": [
+    {
+      "name": "门",
+      "block_re": "^(M_?DOOR|DOOR|门|MC|MH|TM|DOOR_)|\\$TCHSYS\\$DOOR2D|\\$DorLib2D\\$|APDOOR2D",
+      "layer_re": "(DOOR|门|MCDOOR)"
+    },
+    {
+      "name": "窗",
+      "block_re": "^(W_?WIN|WIN|WC|WINDOW|窗|CHUANG)|\\$TCHSYS\\$WIN2D",
+      "layer_re": "(WINDOW|窗|WCWIN)"
+    },
+    {
+      "name": "梁",
+      "block_re": "(BEAM|梁|LIANG|KL|WKL|XL)",
+      "layer_re": "(BEAM|梁|S_BEAM|STRB)"
+    },
+    {
+      "name": "柱",
+      "block_re": "(COLUMN|COL|柱|ZHU|KZ)|^_FZH$",
+      "layer_re": "(COLUMN|柱|S_COL|STRC)"
+    },
+    {
+      "name": "钢筋",
+      "block_re": "(REBAR|BAR|钢筋|REINFORCE|STEEL)",
+      "layer_re": "(REBAR|钢筋|STEEL|REIN)"
+    },
+    {
+      "name": "楼梯",
+      "block_re": "(STAIR|楼梯|LT|LOUTI)",
+      "layer_re": "(STAIR|楼梯)"
+    },
+    {
+      "name": "电梯",
+      "block_re": "(LIFT|ELEVATOR|电梯|DT)",
+      "layer_re": "(LIFT|ELEVATOR|电梯)"
+    },
+    {
+      "name": "墙",
+      "block_re": "(WALL|墙|QIANG)",
+      "layer_re": "(WALL|墙|S_WALL)"
+    },
+    {
+      "name": "板",
+      "block_re": "(SLAB|板|BAN|B$)",
+      "layer_re": "(SLAB|板|S_SLAB)"
+    },
+    {
+      "name": "基础",
+      "block_re": "(FOUND|基础|JC|JICHU)",
+      "layer_re": "(FOUND|基础|S_FD)"
+    },
+    {
+      "name": "管道",
+      "block_re": "(PIPE|管|GUAN|GD)",
+      "layer_re": "(PIPE|管|冷凝|排水|给水|水管)"
+    },
+    {
+      "name": "设备",
+      "block_re": "(EQUIP|设备|FAN|AHU|KT|SB)|^\\$TwtSys\\$|^\\$TWTSYS\\$|^\\$风口\\$|^\\$轴流风机\\$",
+      "layer_re": "(EQUIP|设备|暖通|HVAC|电气)"
+    },
+    {
+      "name": "家具",
+      "block_re": "(FURNITURE|FURN|家具|SOFA|BED|TABLE|DESK|CHAIR|JIAJU)",
+      "layer_re": "(FURNITURE|家具|FF)"
+    },
+    {
+      "name": "轴线/轴号",
+      "block_re": "^(AXIS|CIRCLE_AXIS|轴|_AXISO)",
+      "layer_re": "(AXIS|轴|C-AXIS|ZH)"
+    },
+    {
+      "name": "标高",
+      "block_re": "^(ELEV|LEVEL|标高|BG)",
+      "layer_re": "(ELEV|标高|LEVEL|高程|断面高程)"
+    },
+    {
+      "name": "索引/详图",
+      "block_re": "^(DETAIL|INDEX|SECTION|索引|详图)",
+      "layer_re": "(DETAIL|索引|详图|SECTION)"
+    },
+    {
+      "name": "标注",
+      "block_re": "^(DIM|DIMENSION|标注)",
+      "layer_re": "(DIM|标注|注释)"
+    },
+    {
+      "name": "图签/图框",
+      "block_re": "(TITLE|FIGURE|图签|图框|TK)",
+      "layer_re": "(图签|图框|TITLE|TK)"
+    },
+    {
+      "name": "指北针",
+      "block_re": "(NORTH|指北针|COMPASS)",
+      "layer_re": "(NORTH|指北针|COMPASS)"
+    },
+    {
+      "name": "道路",
+      "block_re": "(ROAD|路|LU)",
+      "layer_re": "(ROAD|路|一级路|二级路|公路)"
+    },
+    {
+      "name": "渠道",
+      "block_re": "(CANAL|渠道|QUDAO)",
+      "layer_re": "(CANAL|渠道|渠)"
+    },
+    {
+      "name": "排水沟",
+      "block_re": "(DITCH|排水|排沟|PAIGOU)",
+      "layer_re": "(DITCH|排沟|排水沟|排水)"
+    },
+    {
+      "name": "建筑物",
+      "block_re": "(BUILDING|建筑|FANGWU)",
+      "layer_re": "(BUILDING|建筑|居民点|房屋)"
+    },
+    {
+      "name": "等高线",
+      "block_re": "(CONTOUR|DGX|等高线)",
+      "layer_re": "(CONTOUR|等高线|DGX)"
+    },
+    {
+      "name": "桩号",
+      "block_re": "(ZHUANGHAO|桩号|KZD)",
+      "layer_re": "(KZD|桩号|里程)"
+    },
+    {
+      "name": "断面",
+      "block_re": "(SECTION|断面|DMX|DXPM)",
+      "layer_re": "(断面|DMX|DXPM|断面注释)"
+    }
+  ]
+}

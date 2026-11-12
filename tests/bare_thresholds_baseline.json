@@ -1,0 +1,150 @@
+{
+ "base.py": [
+  "SPACED_MAX_GAP",
+  "SPACED_MAX_LEN",
+  "SPACED_MIN_GAP"
+ ],
+ "blockmodel.py": [
+  "SWING_RANGE"
+ ],
+ "case_builder.py": [
+  "DIR_TOL_DEG"
+ ],
+ "dag.py": [
+  "ERROR_LIMIT"
+ ],
+ "defects.py": [
+  "COLLINEAR_TOL",
+  "LABEL_NEAR"
+ ],
+ "elements.py": [
+  "ARC_SWEEP",
+  "COL_DEDUPE_MM",
+  "COL_MAX_MM",
+  "COL_MIN_MM",
+  "COL_TOUCH_MM"
+ ],
+ "evaluation.py": [
+  "COL_CENTER_TOL",
+  "OPENING_CENTER_TOL",
+  "OPENING_WIDTH_TOL",
+  "WALL_ANGLE_TOL",
+  "WALL_OFFSET_TOL",
+  "WALL_OVERLAP"
+ ],
+ "executors.py": [
+  "MAX_LOCAL_LINES"
+ ],
+ "export.py": [
+  "BASEMAP_W",
+  "PADDING"
+ ],
+ "finalstate.py": [
+  "MAX_FACE_AREA"
+ ],
+ "geometry.py": [
+  "AXIS_TOL",
+  "PLAN_SPAN_MM",
+  "TEXT_HEIGHT_MM",
+  "TYPICAL_SPAN_MM"
+ ],
+ "labels.py": [
+  "HEIGHT_RANGE"
+ ],
+ "layer_roles_infer.py": [
+  "CELL",
+  "CONTRADICTION",
+  "MARGIN"
+ ],
+ "layout.py": [
+  "MIN_FRAME"
+ ],
+ "llm_verify.py": [
+  "CROP_HALF_MM",
+  "CROP_PX"
+ ],
+ "local_solver.py": [
+  "MAX_FACE_AREA",
+  "MAX_FACE_VERTICES",
+  "REGION_PAD"
+ ],
+ "opening_cases.py": [
+  "BELT_MAX_FACES",
+  "TYPICAL_WIDTH"
+ ],
+ "openzone.py": [
+  "CLUSTER_RADIUS",
+  "DEFECT_EXCLUDE"
+ ],
+ "operators.py": [
+  "CONTOUR_SHORT"
+ ],
+ "plan_compiler.py": [
+  "MAX_HYPOTHESIS_LEN"
+ ],
+ "quality_gate.py": [
+  "LEAK_TOL",
+  "OFFSET_TOL"
+ ],
+ "recompute.py": [
+  "MAX_FACES",
+  "MAX_MS",
+  "PAD"
+ ],
+ "regions.py": [
+  "MAX_LINE_MM",
+  "MAX_PLAN_SPAN",
+  "MIN_LINE_MM",
+  "MIN_PLAN_SPAN",
+  "UNIT_SCALES"
+ ],
+ "room_merge.py": [
+  "ADJACENT"
+ ],
+ "rooms.py": [
+  "FACE_MIN_AREA",
+  "LABEL_INSIDE_TOL",
+  "LABEL_NEAR_TOL",
+  "PAD",
+  "RES",
+  "SAME_NAME_ADJ",
+  "SPLIT_RES"
+ ],
+ "snapshot.py": [
+  "MAX_EXPAND_DEPTH"
+ ],
+ "spaces.py": [
+  "MAX_FACES",
+  "MAX_FACE_AREA",
+  "MIN_FACE_AREA",
+  "OBSERVED_SEAL_MAX",
+  "RES"
+ ],
+ "unified.py": [
+  "ARC_RADIUS_RATIO",
+  "ARC_SWEEP",
+  "BLOCK_OVERLAP",
+  "MERGE_OVERLAP"
+ ],
+ "wallmodel.py": [
+  "GAP_FACTOR",
+  "NODE_TOL",
+  "NOMINAL_GAP"
+ ],
+ "walls.py": [
+  "BRIDGE_GAP_MAX",
+  "DUP_GAP",
+  "END_CONNECT_TOL",
+  "ENVELOPE_MARGIN",
+  "LONG_WALL",
+  "MAX_SINGLE",
+  "MIDLINE_MIN_SUB",
+  "MIN_CLUSTER_LEN",
+  "MIN_OVERLAP",
+  "SHORT_MERGE_GAP",
+  "SHORT_SEG_MAX",
+  "SINGLE_DUP_TOL",
+  "SINGLE_MIN_LEN",
+  "TOL"
+ ]
+}
