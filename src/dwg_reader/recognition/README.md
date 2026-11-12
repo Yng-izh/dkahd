@@ -50,7 +50,8 @@
 | `model_gateway.py` **新** | 260 | 唯一网络出口：端点/预算/脱敏/图像授权/结构化解析/审计 |
 | `experiment_runner.py` **新** | 350 | 同一 baseline 上试多组参数、去重、记账、失败原因闭集、预算刹车 |
 | `rule_memory.py` **新** | 230 | 三层规则记忆（candidate -> project -> cross_project），召回只产生提议 |
-| `vision.py` **新** | 280 | 局部矢量渲染：把 ROI 画成小图喂多模态模型（内存里出图，配色带语义） |
+| `vision.py` | 480 | 视觉链路：ROI 局部渲染 + **多尺度视图**（全局/局部/细节）+ 能力自检 `health()` |
+| `v2/` **新架构** | 3.4k | 独立编排层：`cad_ir` / `geometry_graph` / `component_grammar` / `geometry_fitter` / `proposal_engines` / `global_resolver` / `agent_controller` / `experiment_store`（详见 `v2/README.md`） |
 
 > 全部约 **31k 行**（含 `scripts/`）。运行时只依赖 `ezdxf`；模型调用是可选的。
 
@@ -75,6 +76,12 @@ evidence_graph -> quality_gate -> ai_hypotheses [新 PURE, 不缓存, 含模型�
 配色即语义（灰=背景/橙=目标/绿=墙/蓝=文字），`provider.vision=false` 时连渲染都不做。
 
 ---
+
+### v2 编排层与旧 DAG 的关系
+
+`v2/` 不改这张 DAG：它读 DAG 的快照与墙/柱/门窗结果当"几何底座"，在上面做
+多路径候选生成与全局联合求解（`v2.run_drawing()`）。旧路径 `recognize()` /
+`run_recognition()` 的签名与输出完全不变。
 
 ## 2. 执行器（`dag.py`）
 

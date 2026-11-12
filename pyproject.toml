@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dwg-reader-skill"
-version = "0.7.1"
+version = "0.8.0"
 description = "Extract structured content and multilingual SHX text from DWG/DXF drawings"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -14,6 +14,10 @@ dependencies = []
 
 [project.optional-dependencies]
 dxf = ["ezdxf>=1.4,<2"]
+# 多尺度视觉链路（v2 的局部/细节视图）：缺 Pillow 时识别照常跑，
+# 但 vision.health() 会明确报 NO_PILLOW，而不是静默"没有图"。
+vision = ["Pillow>=10"]
+all = ["ezdxf>=1.4,<2", "Pillow>=10", "openpyxl>=3.1", "mcp>=1.27,<2"]
 dev = ["pytest>=8", "ruff>=0.6"]
 mcp = ["mcp>=1.27,<2"]
 xlsx = ["openpyxl>=3.1"]

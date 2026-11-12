@@ -306,3 +306,114 @@ def summary(cases) -> dict:
     total = sum(len(str(c.get("image_b64") or "")) for c in rows)
     return {"mode": "local_vector_render", "rendered": len(rows),
             "encoded_bytes": total, "budget": dict(RENDER)}
+
+
+# --------------------------------------------------------------------- 多尺度视图
+#: 三种观察层次：全局（布局/重复规律）、局部（构件与墙柱关系）、细节（线/弧/填充）
+VIEW_SCALES = ("global", "local", "detail")
+
+#: 每个尺度的取景与分辨率（比率，不是图纸阈值）
+VIEW_SPEC = {
+    "global": {"pad_thickness": 0.0, "width": 640, "shrink": 1.0},
+    "local": {"pad_thickness": 6.0, "width": 720, "shrink": 1.0},
+    "detail": {"pad_thickness": 1.0, "width": 900, "shrink": 1.0},
+}
+
+#: 统一构件编号的配色（画在图元右上角；放进字典，避免被当成几何阈值扫描）
+LABEL_STYLE = {"color": (180, 0, 180)}
+
+
+def health() -> dict:
+    """渲染能力自检：**能不能出图**要是一个可查事实，不能静默返回 None。"""
+    try:
+        from PIL import Image  # noqa: F401
+        pillow = True
+        reason = None
+    except Exception as exc:                       # pragma: no cover - 环境差异
+        pillow = False
+        reason = f"NO_PILLOW:{type(exc).__name__}"
+    return {"ok": bool(pillow), "pillow": pillow, "reason": reason,
+            "font": bool(_font(12)), "budget": dict(RENDER),
+            "scales": list(VIEW_SCALES)}
+
+
+def _draw_numbers(draw, entities, *, pt, focus_handles, font) -> int:
+    """在目标图元右上角写统一编号（``handle`` 前 6 位），便于人和模型对齐。"""
+    if font is None:
+        return 0
+    drawn = 0
+    for rec in entities or ():
+        handle = str(rec.get("handle") or "")
+        if handle not in focus_handles:
+            continue
+        box = _bbox_of(rec)
+        if not box:
+            continue
+        try:
+            draw.text(pt((box[2], box[3])), handle[:6], fill=LABEL_STYLE["color"],
+                      font=font)
+            drawn += 1
+        except Exception:
+            continue
+        if drawn >= 24:
+            break
+    return drawn
+
+
+def render_views(snapshot: dict, focus: dict, *, scales=("local", "detail"),
+                 walls=(), thickness: float = 0.0, focus_handles=(),
+                 numbering: bool = True) -> dict:
+    """多尺度视图：同一个焦点，按层次各画一张（共享编号与配色）。
+
+    ``focus`` 至少要有 ``bbox``；``scales`` 从 :data:`VIEW_SCALES` 里取。
+    返回的每一张都带 ``status``（``rendered`` / ``no_pillow`` / ``empty`` /
+    ``too_big``），**AI 到底看没看到图，看这里就能回答**。
+    """
+    ok = health()
+    views: list[dict] = []
+    if not ok["ok"]:
+        return {"schema": "vision-views/1.0", "ok": False, "reason": ok["reason"],
+                "views": [], "rendered": 0}
+    box = focus.get("bbox") or focus.get("region")
+    if not box:
+        return {"schema": "vision-views/1.0", "ok": False, "reason": "NO_FOCUS",
+                "views": [], "rendered": 0}
+    all_handles = {str(h) for h in (focus_handles or ())}
+    for scale in scales:
+        spec = VIEW_SPEC.get(str(scale))
+        if spec is None:
+            views.append({"scale": str(scale), "status": "unknown_scale"})
+            continue
+        pad = float(spec["pad_thickness"]) * float(thickness or 0.0)
+        window = [float(box[0]) - pad, float(box[1]) - pad,
+                  float(box[2]) + pad, float(box[3]) + pad]
+        if scale == "global" and thickness:
+            window = list(snapshot.get("bbox") or window)
+        shot = render_case(snapshot, {"bbox": window, "region": window,
+                                      "image_bbox": window,
+                                      "source_handles": list(all_handles)},
+                           walls=walls, thickness=thickness,
+                           width=int(spec["width"]))
+        if not shot:
+            views.append({"scale": scale, "status": "empty"})
+            continue
+        views.append({"scale": scale, "status": "rendered",
+                      "b64": shot["b64"], "width": shot["width"],
+                      "height": shot["height"], "bytes": shot["bytes"],
+                      "focus": shot["focus"], "walls": shot["walls"],
+                      "numbering": bool(numbering)})
+    rendered = [v for v in views if v.get("status") == "rendered"]
+    return {"schema": "vision-views/1.0", "ok": bool(rendered),
+            "rendered": len(rendered), "views": views,
+            "bytes": sum(int(v.get("bytes") or 0) for v in rendered),
+            "reason": None if rendered else "NO_VIEW"}
+
+
+def views_summary(result: dict) -> dict:
+    result = result or {}
+    return {"schema": "vision-views/1.0", "ok": bool(result.get("ok")),
+            "reason": result.get("reason"), "rendered": int(result.get("rendered") or 0),
+            "bytes": int(result.get("bytes") or 0),
+            "scales": [{"scale": v.get("scale"), "status": v.get("status"),
+                        "w": v.get("width"), "h": v.get("height")}
+                       for v in (result.get("views") or ())]}

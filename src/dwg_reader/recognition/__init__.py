@@ -66,3 +66,11 @@ __all__ = [
     "DagNodeError",
     "DagExecutionError",
 ]
+
+# ------------------------------------------------------------------ v2 编排层
+# v2 是新架构（多路径候选 + 全局联合求解），复用同一套底层算法。
+# 用可选导入：缺 Pillow 之类可选依赖时，老路径必须照常可用。
+try:                                        # pragma: no cover - 可选依赖路径
+    from . import v2  # noqa: F401
+except Exception:                           # noqa: BLE001
+    v2 = None  # type: ignore

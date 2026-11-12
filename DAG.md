@@ -49,6 +49,35 @@ quality_gate -> ai_hypotheses[新] -> plan_compile -> adaptive_controller
 3. **参数必须真被读**：可调参数只能来自 `param_registry`，运行时以不可变
    `RecognitionConfig` 显式传给算子；没被 `take()` 过的参数会进 `params_unused`。
 
+## v2 编排层（新架构，与上图并存）
+
+旧 DAG 是"基础规则 → 找残余 → AI 补救"，AI 的范围被第一轮识别决定。v2 把
+三条路并列：规则引擎 / 图形模式引擎 / 多模态 AI，各自往同一个**假设池**投候选，
+再由几何拟合与全局联合求解裁决：
+
+```text
+cad_ir（统一 uid/几何/多尺度区域）+ geometry_graph（平行/共线/相接/包含/同族）
+   -> proposal_engines（rule / pattern / ai 三引擎）
+   -> geometry_fitter（component_grammar 的封闭语法在原始图元上兑现）
+   -> global_resolver（冲突图 + 分阶段联合选择，保留多状态）
+   -> agent_controller（选区域/要语法/失败反馈）+ experiment_store（实验与规则复用）
+```
+
+| 文件 | 职责 |
+|---|---|
+| `v2/cad_ir.py` | 统一几何表示：稳定 uid、封闭 kind、块族、多尺度区域 |
+| `v2/geometry_graph.py` | 关系图 + 网格空间索引 |
+| `v2/component_grammar.py` | 构件几何语法：封闭原语/关系/锚点 + 内置模板 |
+| `v2/geometry_fitter.py` | 按语法在原始图元上拟合精确几何（模型不碰坐标） |
+| `v2/proposal_engines.py` | 三引擎并行出候选、统一 schema、去重 |
+| `v2/global_resolver.py` | 冲突图 + 联合选择（墙→洞口→空间，多状态） |
+| `v2/agent_controller.py` | 观察/提问/反馈循环 |
+| `v2/experiment_store.py` | 实验记录、比较、规则复用 |
+
+```bash
+dwg-reader v2 图纸.dxf -o v2.json --store .dkahd/experiments
+```
+
 ## 运行
 
 ```bash

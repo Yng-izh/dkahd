@@ -101,6 +101,20 @@ def build_parser() -> argparse.ArgumentParser:
     comps.add_argument("--no-ai-vision", dest="ai_vision", action="store_false",
                        default=None, help="强制关闭视觉链路（只用结构特征）")
 
+    v2 = commands.add_parser("v2", help="v2 编排：多路径候选 + 全局联合求解")
+    v2.add_argument("input", type=Path, help="DWG or DXF file")
+    v2.add_argument("-o", "--output", type=Path, help="结果 JSON（默认 stdout）")
+    v2.add_argument("--no-convert", action="store_true", help="输入已是 DXF")
+    v2.add_argument("--ai-mode", choices=("off", "propose", "enhance"), default="off",
+                    help="off=不调模型（仍走候选生成+联合求解）| propose/enhance 允许问模型要语法")
+    v2.add_argument("--ai-config", type=Path, help="AI 增强配置（JSON）")
+    v2.add_argument("--no-ai-vision", dest="ai_vision", action="store_false",
+                    default=None, help="不渲染多尺度视图")
+    v2.add_argument("--store", type=Path, help="实验存储目录（experiments.jsonl）")
+    v2.add_argument("--memory", type=Path, help="规则记忆库目录")
+    v2.add_argument("--cache", type=Path, help="DAG 内容寻址缓存目录")
+    v2.add_argument("--jobs", type=int, default=4, help="底座 DAG 的并行度")
+
     eval_ = commands.add_parser("ai-eval",
                                 help="独立真值集对照：基础模式 vs 增强模式")
     eval_.add_argument("--manifest", type=Path, required=True,
@@ -195,6 +209,8 @@ def main(argv: list[str] | None = None) -> int:
             return _components(args)
         if args.command == "ai-eval":
             return _ai_eval(args)
+        if args.command == "v2":
+            return _v2(args)
         if args.command == "quantity":
             return _quantity(args)
         if args.command == "text":
@@ -326,6 +342,36 @@ def _components(args: argparse.Namespace) -> int:
     else:
         text = render_markdown(result)
 
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(text, encoding="utf-8")
+        print(f"已写入: {args.output}", file=sys.stderr)
+    else:
+        print(text)
+    return 0
+
+
+def _v2(args: argparse.Namespace) -> int:
+    """v2 编排：旧 DAG 出几何底座，v2 做多假设 + 联合求解。"""
+    import json as _json
+
+    from .pipeline import resolve_dxf
+    from .recognition import ai_config as AIC
+    from .recognition import v2 as V2
+
+    dxf = resolve_dxf(args.input, convert=not args.no_convert)
+    overrides = {}
+    if getattr(args, "ai_vision", None) is not None:
+        overrides["provider"] = {"vision": bool(args.ai_vision),
+                                 "allow_remote_images": bool(args.ai_vision)}
+    cfg = AIC.load(str(args.ai_config) if args.ai_config else None,
+                   mode=args.ai_mode or "off", overrides=overrides or None)
+    result = V2.run_drawing(str(dxf), ai_mode=cfg.get("mode") or "off", ai_config=cfg,
+                            jobs=int(args.jobs or 4),
+                            cache_dir=str(args.cache) if args.cache else None,
+                            store_dir=str(args.store) if args.store else None,
+                            memory_dir=str(args.memory) if args.memory else None)
+    text = _json.dumps(result, ensure_ascii=False, indent=1)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(text, encoding="utf-8")
