@@ -1,0 +1,25 @@
+name: v2 multimodal recognition
+on:
+  pull_request:
+    paths:
+      - "src/dwg_reader/recognition/**"
+      - "tests/test_v2_*"
+      - "pyproject.toml"
+      - ".github/workflows/v2-multimodal.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CAD and vision test dependencies
+        run: python -m pip install -e '.[dxf,vision,dev]'
+      - name: Compile recognition sources
+        run: python -m compileall -q src/dwg_reader/recognition
+      - name: Run architectural and multimodal tests
+        run: python -m pytest -q tests/test_v2_pipeline.py tests/test_v2_multimodal_bootstrap.py tests/test_ai_dag_mode.py
