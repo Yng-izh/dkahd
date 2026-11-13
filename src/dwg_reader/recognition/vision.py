@@ -387,7 +387,10 @@ def render_views(snapshot: dict, focus: dict, *, scales=("local", "detail"),
         pad = float(spec["pad_thickness"]) * float(thickness or 0.0)
         window = [float(box[0]) - pad, float(box[1]) - pad,
                   float(box[2]) + pad, float(box[3]) + pad]
-        if scale == "global" and thickness:
+        if scale == "global" and thickness and not focus.get("respect_focus_global"):
+            # Normally the global view covers the complete drawing. The v2
+            # bootstrap explicitly supplies a robust building footprint so
+            # far-away labels and outlier geometry do not shrink the plan.
             window = list(snapshot.get("bbox") or window)
         shot = render_case(snapshot, {"bbox": window, "region": window,
                                       "image_bbox": window,
