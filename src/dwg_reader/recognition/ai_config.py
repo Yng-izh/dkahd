@@ -44,9 +44,9 @@ DEFAULT_CONFIG: dict = {
         "model_env": "DWG_AI_MODEL",
         "vision_model_env": "DWG_AI_VISION_MODEL",
         # 视觉链路：本地矢量渲染 -> 只把**这一块 ROI 的小图**发给多模态模型。
-        # 默认打开（配了 model/vision_model 才真发），要纯本地方案就把它设为 False。
+        # 远端图片必须显式授权；视觉渲染可默认开启，但默认不上传任何图片。
         "vision": True,
-        "allow_remote_images": True,
+        "allow_remote_images": False,
         "timeout_seconds": 60.0,
         "retries": 1,
     },
