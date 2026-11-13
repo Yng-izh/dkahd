@@ -124,7 +124,8 @@ def test_propose_mode_does_not_apply_model_candidates():
         ai={"mode": "propose", "provider": {"vision": True}},
         rooms=False, budget={"max_rounds": 1, "max_regions": 0,
                              "max_model_calls": 6})
-    assert run["bootstrap"]["items"], "Propose must still inspect the drawing"
+    assert any(r["grammars"] for r in run["bootstrap"]["regions"]), (
+        "Propose must inspect the drawing, even though no AI proposal is committed")
     assert run["pool"]["engines"]["ai"]["stats"]["candidates"] == 0
 
 
