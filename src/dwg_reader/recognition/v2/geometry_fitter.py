@@ -376,6 +376,24 @@ def check_relation(name: str, left: dict, right: dict, *, tol: float,
                   and lb[2] <= rb[2] + tol and lb[3] <= rb[3] + tol)
         return ok, {"gap": _r(_box_gap(lb, rb))}
     if name == "connect":
+        # A parallel-line pair exposes its center axis, whereas an end cap
+        # touches the *two face lines*. Testing the cap against the centerline
+        # endpoints wrongly rejects an otherwise exact rectangular window.
+        frame = (left if left.get("prim") == "parallel_line_pair" else
+                 right if right.get("prim") == "parallel_line_pair" else None)
+        cap = right if frame is left else left
+        frame_box = (frame or {}).get("bbox")
+        cap_seg = cap.get("segment")
+        if frame_box and cap_seg and len(cap_seg) == 2:
+            def on_frame_edge(pt):
+                x, y = float(pt[0]), float(pt[1])
+                x0, y0, x1, y1 = frame_box
+                return (x0 - tol <= x <= x1 + tol and
+                        y0 - tol <= y <= y1 + tol and
+                        min(abs(x - x0), abs(x - x1),
+                            abs(y - y0), abs(y - y1)) <= 3.0 * tol)
+            if all(on_frame_edge(pt) for pt in cap_seg):
+                return True, {"frame_cap": True}
         ls, rs = left.get("segment") or left.get("axis"), \
             right.get("segment") or right.get("axis")
         if not ls or not rs:
