@@ -87,6 +87,8 @@ def build_parser() -> argparse.ArgumentParser:
     comps.add_argument("--basemap", help="basemap PNG path recorded in the schema output")
     comps.add_argument("--no-convert", action="store_true", help="input is already DXF")
     # ---- AI 增强（默认关闭：不给这个参数就与老行为逐条一致）
+    comps.add_argument("--engine", choices=("legacy", "v2"), default="legacy",
+                       help="legacy=兼容旧输出（默认）| v2=多模态首轮识别与完整构件几何")
     comps.add_argument("--ai-mode", choices=("off", "propose", "enhance"), default="off",
                        help="off=纯几何（默认）| propose=只出提议 | enhance=试验通过才合并")
     comps.add_argument("--ai-config", type=Path,
@@ -284,12 +286,38 @@ def _components(args: argparse.Namespace) -> int:
     from .recognition import build_document, recognize, render_markdown, schema_json, write_outputs
 
     if args.emit_schema:
+        if getattr(args, "engine", "legacy") == "v2":
+            raise ValueError("v2 使用 recognition-v2/1.0 原生 JSON；旧 --emit-schema 不适用")
         print(schema_json())
         return 0
     if args.input is None:
         raise ValueError("必须提供图纸文件（或使用 --emit-schema 只打印 schema）")
 
     dxf = resolve_dxf(args.input, convert=not args.no_convert)
+
+    if getattr(args, "engine", "legacy") == "v2":
+        if args.format != "json":
+            raise ValueError("v2 原生输出目前只支持 --format json")
+        from .recognition import ai_config as AIC
+        from .recognition import v2 as V2
+        overrides = {}
+        if getattr(args, "ai_vision", None) is not None:
+            overrides["provider"] = {"vision": bool(args.ai_vision),
+                                     "allow_remote_images": bool(args.ai_vision)}
+        cfg = AIC.load(str(args.ai_config) if args.ai_config else None,
+                       mode=getattr(args, "ai_mode", "off"),
+                       overrides=overrides or None)
+        result = V2.run_drawing(
+            str(dxf), ai_mode=cfg["mode"], ai_config=cfg,
+            memory_dir=(str(args.ai_memory_dir) if args.ai_memory_dir else None))
+        text = _json.dumps(result, ensure_ascii=False, indent=1)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(text, encoding="utf-8")
+            print(f"已写入: {args.output}", file=sys.stderr)
+        else:
+            print(text)
+        return 0
 
     ai_mode = getattr(args, "ai_mode", "off") or "off"
     if ai_mode == "off":
