@@ -147,7 +147,7 @@ def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
             "_ir": ir, "_graph": graph, "_pool": pool, "_resolution": resolution}
 
 
-def run_drawing(dxf_path: str, *, ai_mode: str = "off", ai_config=None, jobs: int = 4,
+def run_drawing(dxf_path: str, *, ai_mode: str | None = None, ai_config=None, jobs: int = 4,
                 cache_dir=None, store_dir: str | None = None,
                 memory_dir: str | None = None, budget=None) -> dict:
     """从一张 DXF 跑 v2：底座仍用旧 DAG（几何更成熟的那些），v2 负责多假设。
@@ -159,8 +159,8 @@ def run_drawing(dxf_path: str, *, ai_mode: str = "off", ai_config=None, jobs: in
     from ..pipeline import run_recognition
 
     cfg = ai_config if isinstance(ai_config, dict) else AIC.load(
-        str(ai_config) if ai_config else None, mode=ai_mode or "off")
-    if ai_mode:
+        str(ai_config) if ai_config else None, mode=ai_mode)
+    if ai_mode is not None:
         cfg = dict(cfg, mode=ai_mode)
 
     gateway = GATEWAY.gateway_from_config(cfg) if AIC.enabled(cfg) else None
