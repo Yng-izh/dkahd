@@ -202,14 +202,21 @@ def validate(grammar: dict) -> dict:
     """校验一份语法；非法直接抛 :class:`GrammarError`（错误码闭集）。"""
     if not isinstance(grammar, dict):
         raise GrammarError("NOT_AN_OBJECT")
-    extra = sorted(set(grammar) - GRAMMAR_KEYS - {"template", "source", "hash"})
-    if extra:
-        raise GrammarError("UNKNOWN_FIELD", fields=extra)
-    # 坐标/代码永远不许出现在语法里
+    # Reject model-provided coordinates with a stable, auditable error code.
+    # Validate this *before* checking generic unknown keys.
     for forbidden in ("bbox", "geometry", "points", "polygon", "outline",
                       "coordinates", "coords", "x", "y", "thickness", "width"):
         if forbidden in grammar:
             raise GrammarError("MODEL_GEOMETRY", field=forbidden)
+    # Canonical grammars already validated by the bootstrap/agent have a
+    # schema field. They must remain valid when the candidate engine checks
+    # them a second time; otherwise every AI candidate is silently rejected.
+    if "schema" in grammar and grammar["schema"] != SCHEMA:
+        raise GrammarError("UNKNOWN_FIELD", fields=["schema"])
+    extra = sorted(set(grammar) - GRAMMAR_KEYS -
+                   {"template", "source", "hash", "schema"})
+    if extra:
+        raise GrammarError("UNKNOWN_FIELD", fields=extra)
     category = str(grammar.get("category") or "")
     if category not in CATEGORIES:
         raise GrammarError("UNKNOWN_CATEGORY", category=category)
