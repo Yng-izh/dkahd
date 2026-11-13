@@ -6,8 +6,8 @@ geometry and acceptance remain the responsibility of the deterministic fitter/re
 """
 from __future__ import annotations
 
+import json
 import math
-from collections import Counter
 
 from . import component_grammar as GRAMMAR
 
@@ -229,7 +229,9 @@ def run(*, ir, graph, snapshot, gateway, ai=None, budget=None, walls=()):
         # Only the regional geometry may be used for fitting; nothing is inferred
         # from the absolute position of a model-generated bounding box.
         if model_vision:
-            views = VISION.render_views(snapshot, {"bbox": reg["bbox"]},
+            views = VISION.render_views(snapshot,
+                                        {"bbox": reg["bbox"],
+                                         "respect_focus_global": True},
                                         scales=("global",) if overview else ("local", "detail"),
                                         walls=walls,
                                         thickness=(ir.get("basis") or {}).get("thickness") or 0)
@@ -238,10 +240,10 @@ def run(*, ir, graph, snapshot, gateway, ai=None, budget=None, walls=()):
         images = [v["b64"] for v in views.get("views") or ()
                   if v.get("status") == "rendered" and v.get("b64")][:2]
         prompt = PROMPT.format(
-            facts=__import__("json").dumps(facts, ensure_ascii=False, default=str)[:4000],
-            scene=__import__("json").dumps(result["scene"], ensure_ascii=False)[:1000],
-            knowledge=__import__("json").dumps(DOMAIN_KNOWLEDGE, ensure_ascii=False),
-            catalog=__import__("json").dumps(GRAMMAR.catalog(), ensure_ascii=False)[:5000],
+            facts=json.dumps(facts, ensure_ascii=False, default=str)[:4000],
+            scene=json.dumps(result["scene"], ensure_ascii=False)[:1000],
+            knowledge=json.dumps(DOMAIN_KNOWLEDGE, ensure_ascii=False),
+            catalog=json.dumps(GRAMMAR.catalog(), ensure_ascii=False)[:5000],
             limit=0 if overview else int(cfg["max_grammars_per_region"]))
         raw = gateway.ask(system=SYSTEM, prompt=prompt, images=images,
                           vision=bool(images))
