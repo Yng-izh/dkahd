@@ -2681,6 +2681,9 @@ def node_adaptive_controller(ctx):
         if ai_result.get("status") == "applied":
             result["state"] = ai_result.get("state")
             result["patch"] = ADAPT._diff(state, ai_result.get("state") or base)
+            # finalize_patch only commits controllers with status=applied.
+            # Keep the net patch and status consistent when legacy did nothing.
+            result["status"] = "applied"
             result["applied"] = list(result.get("applied") or ()) + list(
                 ai_result.get("applied") or ())
             result["rejected"] = list(result.get("rejected") or ()) + list(
