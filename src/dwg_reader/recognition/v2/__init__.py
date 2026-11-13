@@ -79,6 +79,7 @@ def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
         rounds = agent["rounds"]
         vision = agent["vision"]
         failures = agent["failures"]
+        bootstrap = agent.get("bootstrap") or {}
     else:
         space_builder = (lambda selected: SPACE.solve(
             selected=selected, texts=ir.get("texts") or (),
@@ -93,6 +94,7 @@ def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
             pool, thickness=float((ir.get("basis") or {}).get("thickness") or 200.0),
             faces=faces, space_builder=space_builder if rooms else None)
         rounds, vision, failures = [], {"ok": False, "reason": "AGENT_OFF"}, []
+        bootstrap = {"status": "off", "calls": 0, "images_seen": 0}
 
     # 房间：agent 路径下 staged 还没算过空间阶段，这里在**最终选中**的墙网上补算
     space = None
@@ -126,11 +128,20 @@ def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
                                     ("id", "category", "subtype", "source",
                                      "score", "bbox", "uids")}
                                    for h in chosen],
+                      # Native v2 result: complete fitted geometry and evidence,
+                      # not just a shadow count or an AI suggestion.
+                      "instances": [{k: h.get(k) for k in
+                                     ("id", "category", "subtype", "source",
+                                      "engine", "score", "status", "bbox",
+                                      "geometry", "uids", "source_handles",
+                                      "evidence", "grammar", "case_id")}
+                                    for h in chosen],
                       "states": len((resolution.get("final") or {}).get("selected")
                                     or ())},
             "space": SPACE.summary(space) if space else (
                 ((resolution.get("stages") or {}).get("spaces") or {})),
-            "rounds": rounds, "vision": vision, "failures": failures,
+            "rounds": rounds, "vision": vision, "bootstrap": bootstrap,
+            "failures": failures,
             "ai": {"mode": ai.get("mode") or "off"},
             "ms": round((time.perf_counter() - started) * 1000.0, 1),
             "_ir": ir, "_graph": graph, "_pool": pool, "_resolution": resolution}
@@ -177,6 +188,25 @@ def run_drawing(dxf_path: str, *, ai_mode: str = "off", ai_config=None, jobs: in
     faces = (out.get("spaces_seed") or {}).get("faces") or ()
 
     gateway = GATEWAY.gateway_from_config(cfg) if AIC.enabled(cfg) else None
+    # Enhance is explicitly a *multimodal* mode in v2. Do not silently turn
+    # it into text-only guessing if the endpoint, image permission or renderer
+    # is missing. Propose/off remain available without a vision endpoint.
+    if cfg.get("mode") == "enhance":
+        from .. import vision as VISION
+        if gateway is None or not gateway.available:
+            raise RuntimeError(
+                "v2 enhance requires a configured multimodal model: "
+                "set DWG_AI_BASE_URL, DWG_AI_API_KEY and DWG_AI_MODEL")
+        if not bool((cfg.get("provider") or {}).get("vision")):
+            raise RuntimeError("v2 enhance requires provider.vision=true")
+        if not gateway.allow_remote_images:
+            raise RuntimeError(
+                "v2 enhance uploads local CAD crops; explicitly set "
+                "provider.allow_remote_images=true after approving this upload")
+        if not VISION.health()["ok"]:
+            raise RuntimeError(
+                "v2 enhance requires Pillow to render CAD images; "
+                "install with pip install -e '.[dxf,vision]'")
     result = analyze(snapshot=snapshot, scale=scale, plan=plan, walls=walls,
                      columns=columns, doors=sel.get("doors") or (),
                      windows=sel.get("windows") or (), stairs=stairs,
@@ -190,6 +220,10 @@ def run_drawing(dxf_path: str, *, ai_mode: str = "off", ai_config=None, jobs: in
                                                                     or 0) / 1000.0)
                                   * 1000.0, 1)}
     result["gateway"] = gateway.describe() if gateway is not None else {"available": False}
+    if cfg.get("mode") == "enhance" and not result["gateway"].get("images_sent"):
+        raise RuntimeError(
+            "v2 enhance did not deliver any rendered image to the model; "
+            "check drawing geometry, provider configuration and model errors")
     result["inputs"] = {"dxf": str(dxf_path), "ai_mode": cfg.get("mode") or "off",
                         "wall_source": ("wall_runs" if merged_runs else "walls_seg"),
                         "walls": len(walls), "columns": len(columns),
@@ -237,6 +271,8 @@ def summary(result) -> dict:
             "pool": result.get("pool"), "resolution": result.get("resolution"),
             "final_counts": (result.get("final") or {}).get("counts") or {},
             "rounds": len(result.get("rounds") or ()),
+            "bootstrap": {k: v for k, v in (result.get("bootstrap") or {}).items()
+                          if k != "regions"},
             "ai": result.get("ai") or {},
             "vision": {"ok": (result.get("vision") or {}).get("ok"),
                        "model_on": (result.get("vision") or {}).get("model_on"),
