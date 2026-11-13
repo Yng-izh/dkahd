@@ -160,3 +160,37 @@ def test_enhance_fails_before_base_recognition_when_model_not_configured(monkeyp
                        ai_config={"mode": "enhance",
                                   "provider": {"vision": True,
                                                "allow_remote_images": True}})
+
+
+def test_components_cli_v2_uses_native_fitted_output(tmp_path, monkeypatch):
+    import argparse
+    import json
+    from pathlib import Path
+    from dwg_reader import cli as CLI
+    from dwg_reader import pipeline as PIPE
+    from dwg_reader.recognition import v2 as V2
+
+    monkeypatch.setattr(PIPE, "resolve_dxf", lambda *args, **kwargs: Path("demo.dxf"))
+    called = []
+
+    def fake_v2(dxf, **kwargs):
+        called.append((dxf, kwargs))
+        return {"schema": V2.SCHEMA, "final": {"instances": [
+            {"category": "window", "geometry": {"axis": [[0, 0], [1, 0]]}}]}}
+
+    monkeypatch.setattr(V2, "run_drawing", fake_v2)
+    output = tmp_path / "recognition.json"
+    args = argparse.Namespace(
+        engine="v2", emit_schema=False, input=Path("demo.dxf"),
+        no_convert=True, format="json", ai_mode="off",
+        ai_config=None, ai_vision=None, ai_memory_dir=None, output=output)
+    assert CLI._components(args) == 0
+    assert called and called[0][1]["ai_mode"] == "off"
+    written = json.loads(output.read_text(encoding="utf-8"))
+    assert written["schema"] == V2.SCHEMA
+    assert written["final"]["instances"][0]["geometry"]["axis"]
+
+
+def test_remote_cad_image_upload_requires_opt_in():
+    from dwg_reader.recognition import ai_config as AIC
+    assert AIC.DEFAULT_CONFIG["provider"]["allow_remote_images"] is False
