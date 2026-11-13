@@ -304,6 +304,46 @@ def _regions(entities, *, basis: dict, interesting=()) -> list[dict]:
                             "kind": "detail", "bbox": _expand(box, radius * 0.5),
                             "parent": f"r:loc:{k:03d}",
                             "uids": inside[:int(BUDGET["entities"])]})
+    # A drawing with no residual cases still needs local regions for first
+    # pass interpretation. Split spatially in O(n), instead of constructing
+    # an O(n²) all-pairs residual cluster over the whole drawing.
+    if len(regions) == 1 and len(entities) >= int(BUDGET["min_local_entities"]):
+        xm = (global_box[0] + global_box[2]) / 2.0
+        ym = (global_box[1] + global_box[3]) / 2.0
+        groups = {i: [] for i in range(4)}
+        for e in entities:
+            box = e.get("bbox")
+            if not box or e.get("kind") == "text":
+                continue
+            cx = (box[0] + box[2]) / 2.0
+            cy = (box[1] + box[3]) / 2.0
+            idx = int(cx >= xm) + 2 * int(cy >= ym)
+            groups[idx].append(e)
+        ranked = sorted(groups.items(), key=lambda item: (-len(item[1]), item[0]))
+        n_local = 0
+        for idx, group in ranked:
+            if len(group) < int(BUDGET["min_local_entities"]):
+                continue
+            box = _union([e["bbox"] for e in group])
+            if not box:
+                continue
+            local = _expand(box, radius)
+            region_uids = [e["uid"] for e in entities
+                           if e.get("bbox") and _gap(e["bbox"], local) <= 0]
+            n_local += 1
+            rid = f"r:loc:tile:{idx}"
+            regions.append({"id": rid, "level": REGION_LEVELS["local"],
+                            "kind": "local", "bbox": local,
+                            "seed_uids": [e["uid"] for e in group[:24]],
+                            "uids": region_uids[:int(BUDGET["entities"])]})
+            if n_local <= int(BUDGET["detail_regions"]):
+                regions.append({"id": f"r:detail:tile:{idx}",
+                                "level": REGION_LEVELS["detail"],
+                                "kind": "detail", "parent": rid,
+                                "bbox": _expand(box, radius * 0.5),
+                                "uids": region_uids[:int(BUDGET["entities"])]})
+            if n_local >= int(BUDGET["local_regions"]):
+                break
     return regions
 
 
