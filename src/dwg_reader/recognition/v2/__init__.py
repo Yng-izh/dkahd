@@ -163,6 +163,27 @@ def run_drawing(dxf_path: str, *, ai_mode: str = "off", ai_config=None, jobs: in
     if ai_mode:
         cfg = dict(cfg, mode=ai_mode)
 
+    gateway = GATEWAY.gateway_from_config(cfg) if AIC.enabled(cfg) else None
+    # Enhance is explicitly a *multimodal* mode in v2. Do not silently turn
+    # it into text-only guessing if the endpoint, image permission or renderer
+    # is missing. Propose/off remain available without a vision endpoint.
+    if cfg.get("mode") == "enhance":
+        from .. import vision as VISION
+        if gateway is None or not gateway.available:
+            raise RuntimeError(
+                "v2 enhance requires a configured multimodal model: "
+                "set DWG_AI_BASE_URL, DWG_AI_API_KEY and DWG_AI_MODEL")
+        if not bool((cfg.get("provider") or {}).get("vision")):
+            raise RuntimeError("v2 enhance requires provider.vision=true")
+        if not gateway.allow_remote_images:
+            raise RuntimeError(
+                "v2 enhance uploads local CAD crops; explicitly set "
+                "provider.allow_remote_images=true after approving this upload")
+        if not VISION.health()["ok"]:
+            raise RuntimeError(
+                "v2 enhance requires Pillow to render CAD images; "
+                "install with pip install -e '.[dxf,vision]'")
+
     t0 = time.perf_counter()
     base = run_recognition(str(dxf_path), jobs=jobs, targets=("assemble",),
                            cache_dir=cache_dir, ai_mode="off")
@@ -187,26 +208,6 @@ def run_drawing(dxf_path: str, *, ai_mode: str = "off", ai_config=None, jobs: in
     pattern_cases = (out.get("pattern_discovery") or {}).get("cases") or ()
     faces = (out.get("spaces_seed") or {}).get("faces") or ()
 
-    gateway = GATEWAY.gateway_from_config(cfg) if AIC.enabled(cfg) else None
-    # Enhance is explicitly a *multimodal* mode in v2. Do not silently turn
-    # it into text-only guessing if the endpoint, image permission or renderer
-    # is missing. Propose/off remain available without a vision endpoint.
-    if cfg.get("mode") == "enhance":
-        from .. import vision as VISION
-        if gateway is None or not gateway.available:
-            raise RuntimeError(
-                "v2 enhance requires a configured multimodal model: "
-                "set DWG_AI_BASE_URL, DWG_AI_API_KEY and DWG_AI_MODEL")
-        if not bool((cfg.get("provider") or {}).get("vision")):
-            raise RuntimeError("v2 enhance requires provider.vision=true")
-        if not gateway.allow_remote_images:
-            raise RuntimeError(
-                "v2 enhance uploads local CAD crops; explicitly set "
-                "provider.allow_remote_images=true after approving this upload")
-        if not VISION.health()["ok"]:
-            raise RuntimeError(
-                "v2 enhance requires Pillow to render CAD images; "
-                "install with pip install -e '.[dxf,vision]'")
     result = analyze(snapshot=snapshot, scale=scale, plan=plan, walls=walls,
                      columns=columns, doors=sel.get("doors") or (),
                      windows=sel.get("windows") or (), stairs=stairs,
