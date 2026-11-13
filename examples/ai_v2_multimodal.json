@@ -1,0 +1,39 @@
+{
+  "schema": "ai-recognition-config/1.0",
+  "mode": "enhance",
+  "provider": {
+    "type": "openai-compatible",
+    "base_url_env": "DWG_AI_BASE_URL",
+    "api_key_env": "DWG_AI_API_KEY",
+    "model_env": "DWG_AI_MODEL",
+    "vision_model_env": "DWG_AI_VISION_MODEL",
+    "vision": true,
+    "allow_remote_images": true,
+    "timeout_seconds": 60,
+    "retries": 1
+  },
+  "budget": {
+    "max_regions": 8,
+    "max_model_calls": 12,
+    "max_model_rounds_per_case": 2,
+    "max_hypotheses_per_case": 3,
+    "max_trials_per_case": 12,
+    "max_total_trials": 72,
+    "max_walltime_seconds": 180,
+    "max_entities_per_region": 400,
+    "max_views_per_region": 3,
+    "max_diagnostic_images": 6,
+    "max_images_per_case": 2
+  },
+  "safety": {
+    "protect_confirmed": true,
+    "require_independent_support_for_confirmed": true,
+    "global_consistency_check": true,
+    "allow_arbitrary_code": false
+  },
+  "memory": {
+    "enabled": false,
+    "scope": "project",
+    "directory": ".dkahd/rule-memory"
+  }
+}
