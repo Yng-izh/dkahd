@@ -59,6 +59,13 @@ def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
     """
     started = time.perf_counter()
     ai = dict(ai or {})
+    if budget is None:
+        # The gateway and agent must honor the same user-configured call/time
+        # budget; previously the agent used a second, smaller hardcoded limit.
+        upstream = ai.get("budget") or {}
+        budget = {k: upstream[k] for k in
+                  ("max_model_calls", "max_regions", "max_walltime_seconds")
+                  if k in upstream}
 
     interesting = []
     for case in pattern_cases or ():
@@ -249,7 +256,7 @@ def run_drawing(dxf_path: str, *, ai_mode: str | None = None, ai_config=None, jo
                  "counts": (result.get("final") or {}).get("counts") or {},
                  "winner": "prototype",
                  "resolver_version": VERSION,
-                 "units": "mm"}
+                 "units": (scale or {}).get("unit") or "unspecified"}
         result["experiment"] = STORE.record(entry, directory=store_dir)
         result["experiment_best"] = STORE.best(directory=store_dir)
         if memory_dir:
