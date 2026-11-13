@@ -243,7 +243,9 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
     started = time.perf_counter()
     budget = dict(BUDGET, **(budget or {}))
     ai_cfg = dict(ai or {})
-    model_on = bool(gateway is not None and getattr(gateway, "available", False))
+    mode = str(ai_cfg.get("mode") or "off")
+    model_on = bool(mode in ("propose", "enhance") and gateway is not None
+                    and getattr(gateway, "available", False))
     graph_obj = graph if isinstance(graph, GG.Graph) else GG.Graph(graph or {}, ir)
     thickness = float((ir.get("basis") or {}).get("thickness") or 200.0)
 
@@ -253,6 +255,20 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
     visited: list[str] = []
     ai_items: list[dict] = []
     calls = 0
+    bootstrap = {"status": "off", "calls": 0, "images_seen": 0,
+                 "regions": [], "items": [], "scene": {}}
+    # First-pass vision has its own scene/region selection and sees objects
+    # even if the legacy recognizer has already explained every entity.
+    if model_on and snapshot:
+        from . import multimodal_bootstrap as BOOT
+        bootstrap = BOOT.run(
+            ir=ir, graph=graph_obj, snapshot=snapshot, gateway=gateway,
+            ai=ai_cfg, walls=walls,
+            budget={"max_model_calls": int(budget["max_model_calls"]),
+                    "max_calls": min(5, int(budget["max_model_calls"]))})
+        calls += int(bootstrap["calls"])
+        if mode == "enhance":
+            ai_items.extend(bootstrap["items"])
 
     for round_no in range(1, int(budget["max_rounds"]) + 1):
         ranking = region_priority(ir, graph_obj, cases=pattern_cases)
@@ -288,7 +304,7 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
                     tpl = G.for_kind(str(case.get("kind") or ""))
                     if tpl:
                         grammars.append(tpl)
-            if grammars:
+            if grammars and mode == "enhance":
                 ai_items.append({"region": region, "seed_uids": facts.get("seed_uids"),
                                  "grammars": [g for g in grammars
                                               if g.get("category")],
@@ -340,16 +356,18 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
     return {"schema": SCHEMA,
             "status": "ok" if (pool_now.get("hypotheses") or []) else "no_candidate",
             "pool": pool_now, "resolution": resolution, "rounds": rounds,
-            "vision": {"ok": vision_ok, "regions": vision_rows,
+            "vision": {"ok": vision_ok or bootstrap["images_seen"] > 0,
+                       "regions": vision_rows,
                        "model_on": model_on,
-                       "images_seen": int(sum(int(r.get("images") or 0)
-                                              for rd in rounds
-                                              for r in rd.get("regions") or ())),
+                       "images_seen": int(bootstrap["images_seen"]) + int(
+                           sum(int(r.get("images") or 0)
+                               for rd in rounds for r in rd.get("regions") or ())),
                        "renderer": VISION.health()},
             "ai": {"mode": ai_cfg.get("mode") or "off", "model_on": model_on,
                    "calls": calls, "walltime_s": round(
                        time.perf_counter() - started, 1),
                    "prompt_version": PROMPT_VERSION},
+            "bootstrap": {k: v for k, v in bootstrap.items() if k != "items"},
             "failures": failures[:12],
             "budget": budget}
 
