@@ -266,7 +266,12 @@ def run(*, ir, graph, snapshot, gateway, ai=None, budget=None, walls=()):
                         except (GRAMMAR.GrammarError, TypeError, ValueError):
                             continue
                 if valid:
-                    result["items"].append({"region": reg, "seed_uids": reg["seed_uids"],
+                    # Spatial tiles must fit against *all* geometry in their
+                    # ROI. Their first 24 uids are only visual/query samples.
+                    # Family regions, in contrast, may safely focus on the
+                    # originating insert and its expanded children.
+                    fit_seeds = (reg["seed_uids"] if reg["kind"] == "family" else [])
+                    result["items"].append({"region": reg, "seed_uids": fit_seeds,
                                             "grammars": valid, "case_id": reg["id"]})
                 row["grammars"] = len(valid)
         result["regions"].append(row)
