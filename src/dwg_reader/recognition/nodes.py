@@ -2254,6 +2254,8 @@ def node_ai_hypotheses(ctx):
     if mode == "off":
         return {"schema": PLANNER.SCHEMA, "status": "off", "mode": "off",
                 "proposals": {}, "plans": {}, "cases": len(cases),
+                "gateway": {"available": False, "calls": 0,
+                            "images_sent": 0, "images_dropped": 0},
                 "config": AIC.summary(cfg)}
     gateway = GATEWAY.gateway_from_config(cfg)
     budget = dict(cfg.get("budget") or {})
