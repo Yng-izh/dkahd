@@ -82,6 +82,11 @@ export DWG_AI_VISION_MODEL='YOUR_MULTIMODAL_MODEL'
 
 dwg-reader v2 '图纸.dxf' --no-convert --ai-mode enhance \
   --ai-config examples/ai_v2_multimodal.json -o v2-result.json
+
+# 原有 components 命令也可以显式切换到 v2（JSON 格式）：
+dwg-reader components '图纸.dxf' --no-convert --engine v2 \
+  --ai-mode enhance --ai-config examples/ai_v2_multimodal.json \
+  -o v2-result.json
 ```
 
 `enhance` 在 v2 中严格要求 **图片渲染正常、API 密钥有效、允许上传图片**：
