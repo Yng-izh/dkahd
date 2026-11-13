@@ -38,7 +38,8 @@ DEFAULT_CONFIG: dict = {
     "provider": {
         "type": "openai-compatible",
         # 端点/模型/密钥全部由显式配置提供：默认**不上传**任何图纸内容，
-        # 允许远端渲染图必须显式打开（allow_remote_images）
+        # 截图上传默认**直接授权**：本地渲染的 ROI 小图会随请求发给配置好的模型端点。
+        # 想关就设 allow_remote_images=false（或在 CLI 用 --no-ai-vision）。
         "base_url_env": "DWG_AI_BASE_URL",
         "api_key_env": "DWG_AI_API_KEY",
         "model_env": "DWG_AI_MODEL",
@@ -46,7 +47,7 @@ DEFAULT_CONFIG: dict = {
         # 视觉链路：本地矢量渲染 -> 只把**这一块 ROI 的小图**发给多模态模型。
         # 远端图片必须显式授权；视觉渲染可默认开启，但默认不上传任何图片。
         "vision": True,
-        "allow_remote_images": False,
+        "allow_remote_images": True,
         "timeout_seconds": 60.0,
         "retries": 1,
     },

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dwg-reader-skill"
-version = "0.8.1"
+version = "0.8.2"
 description = "Extract structured content and multilingual SHX text from DWG/DXF drawings"
 readme = "README.md"
 requires-python = ">=3.10"

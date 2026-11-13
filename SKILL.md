@@ -636,6 +636,7 @@ DIMENSION 实体的测量值，对应图纸的尺寸标注。
 
 | 版本 | 日期 | 变更 |
 | --- | --- | --- |
+| 0.8.2 | 2026-11-13 | 截图上传改为**默认授权**（`allow_remote_images` 默认 true，网关构造同为 true）：本地渲染的 ROI 小图会随请求发给配置好的模型端点；不用就 `--no-ai-vision` 或配置 `allow_remote_images: false`。实测（住院楼-图层混乱，propose，1 次调用 / 1 张图）：链路通、模型确实看到图，但语法未匹配到任何图元（NO_PART/NO_RELATION），构件数不变。 |
 | 0.8.1 | 2026-11-12 | v2 补齐 **11 类构件**：楼梯/台阶/散水/图框/轴网/指北针 接入规则引擎；新增 `v2/space_solver.py` —— 房间由**选中的墙网**重算面域（分块栅格，避免整图一次栅格化 OOM）再挂房名，单向链不反推墙；`global_resolver` 支持注入 `space_builder` 与"派生类不互斥"（房间/轴网/图框与结构构件共存）。已知缺口：房间只做"面域+挂靠"，不含多标签剖分与空间路由，数量低于 v1（住院楼 14 vs 44）。 |
 | 0.8.0 | 2026-11-12 | **v2 编排层（新架构，旧 DAG 不动）**：`cad_ir`（统一几何表示/稳定 uid/多尺度区域）、`geometry_graph`（平行/共线/相接/相交/包含/同族/贴空间）、`component_grammar`（构件几何语法的封闭原语与关系）、`geometry_fitter`（语法在原始图元上兑现）、`proposal_engines`（规则/模式/AI 三引擎并行出候选）、`global_resolver`（冲突图+分阶段联合求解+多状态）、`agent_controller`（选区域/要语法/失败反馈）、`experiment_store`（实验比较与规则复用）。新增 `dwg-reader v2` 与 `v2.run_drawing()`；多尺度视觉视图（全局/局部/细节）+ `vision.health()` 可诊断；Pillow 声明为 `vision` extra。旧 `recognize()`/`run_recognition()` 输出不变。 |
 | 0.7.1 | 2026-11-12 | **AI 自适应增强（默认关闭）**：新增 `ai_mode=off｜propose｜enhance`、运行时参数表 `param_registry`（绝对授权区间 + 真实消费者校验）、残余图元发现 `pattern_discovery`（48 节点）、受约束提议 `ai_planner`、模型网关 `model_gateway`、多试验执行 `experiment_runner`、全局一致性验收、三层规则记忆 `rule_memory`、`dwg-reader ai-eval`。`ai_mode=off` 输出与 0.7.0 逐条一致；模型不写坐标/阈值/不执行代码；未授权不上传图纸。另修：`import dwg_reader` 不再强制要求 ezdxf（改为 PEP 562 懒加载），版本号统一 0.7.1。 |

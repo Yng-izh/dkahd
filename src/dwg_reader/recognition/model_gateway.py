@@ -101,7 +101,7 @@ class ModelGateway:
 
     def __init__(self, *, api_key: str | None = None, base_url: str | None = None,
                  model: str | None = None, vision_model: str | None = None,
-                 allow_remote_images: bool = False, timeout: float = 60.0,
+                 allow_remote_images: bool = True, timeout: float = 60.0,
                  retries: int = 1, budget: dict | None = None,
                  prompt_version: str = ""):
         self.api_key = CRED.api_key(api_key)
