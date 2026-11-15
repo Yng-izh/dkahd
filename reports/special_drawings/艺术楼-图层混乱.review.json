@@ -1,0 +1,2454 @@
+[
+  {
+    "id": "DOOR-01",
+    "category": "door",
+    "name": "geometric:door_block_arc",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "insert": [
+        86087.9,
+        56978.9
+      ],
+      "width": 1200.0,
+      "opening": [
+        [
+          84887.9,
+          56978.9
+        ],
+        [
+          86087.9,
+          56978.9
+        ]
+      ],
+      "hinges": [
+        [
+          86087.9,
+          56978.9
+        ]
+      ],
+      "rotation": 0.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1D8B",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1D8B",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为门）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1200.0mm；两侧面域 None；附近弧线 True；模型理由：门弧+墙缺口"
+    }
+  },
+  {
+    "id": "DOOR-02",
+    "category": "door",
+    "name": "geometric:door_block_arc",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "insert": [
+        32713.0,
+        49358.8
+      ],
+      "width": 1199.9,
+      "opening": [
+        [
+          33524.5,
+          48474.9
+        ],
+        [
+          32713.0,
+          49358.8
+        ]
+      ],
+      "hinges": [
+        [
+          32713.0,
+          49358.8
+        ]
+      ],
+      "rotation": 312.5553384329999
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1DF6",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1DF6",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为门）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1199.9mm；两侧面域 None；附近弧线 True；模型理由：门弧+墙缺口"
+    }
+  },
+  {
+    "id": "DOOR-04",
+    "category": "door",
+    "name": "geometric:door_block_arc M6",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "insert": [
+        72797.3,
+        36456.4
+      ],
+      "width": 1500.0,
+      "opening": [
+        [
+          72797.3,
+          36478.9
+        ],
+        [
+          74297.3,
+          36478.9
+        ]
+      ],
+      "hinges": [
+        [
+          72797.3,
+          36456.4
+        ]
+      ],
+      "rotation": 180.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "24C7",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "24C7",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为门）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1500.0mm；两侧面域 None；附近弧线 True；模型理由：门弧+墙缺口"
+    }
+  },
+  {
+    "id": "DOOR-05",
+    "category": "door",
+    "name": "geometric:door_block_arc",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "insert": [
+        42038.1,
+        32722.1
+      ],
+      "width": 1500.0,
+      "opening": [
+        [
+          42038.1,
+          32722.1
+        ],
+        [
+          42038.1,
+          34222.1
+        ]
+      ],
+      "hinges": [
+        [
+          42038.1,
+          32722.1
+        ]
+      ],
+      "rotation": 90.000000001
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "2394",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "2394",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为门）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1500.0mm；两侧面域 None；附近弧线 True；模型理由：门弧+墙缺口"
+    }
+  },
+  {
+    "id": "DOOR-09",
+    "category": "door",
+    "name": "geometric:door_block_arc",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "insert": [
+        42038.1,
+        29832.1
+      ],
+      "width": 1200.0,
+      "opening": [
+        [
+          42038.1,
+          28632.1
+        ],
+        [
+          42038.1,
+          29832.1
+        ]
+      ],
+      "hinges": [
+        [
+          42038.1,
+          29832.1
+        ]
+      ],
+      "rotation": 270.000000001
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "2400",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "2400",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为门）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1200.0mm；两侧面域 None；附近弧线 True；模型理由：门弧+墙缺口"
+    }
+  },
+  {
+    "id": "DOOR-10",
+    "category": "door",
+    "name": "geometric:door_block_arc M7",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "insert": [
+        83282.9,
+        27516.9
+      ],
+      "width": 1500.0,
+      "opening": [
+        [
+          83297.9,
+          27516.9
+        ],
+        [
+          83297.9,
+          29016.9
+        ]
+      ],
+      "hinges": [
+        [
+          83282.9,
+          27516.9
+        ]
+      ],
+      "rotation": 90.000000001
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1E6B",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1E6B",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为门）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1500.0mm；两侧面域 None；附近弧线 True；模型理由：门弧+墙缺口"
+    }
+  },
+  {
+    "id": "DOOR-11",
+    "category": "door",
+    "name": "geometric:door_block_arc M7",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "insert": [
+        70282.9,
+        27516.9
+      ],
+      "width": 1500.0,
+      "opening": [
+        [
+          70297.9,
+          27516.9
+        ],
+        [
+          70297.9,
+          29016.9
+        ]
+      ],
+      "hinges": [
+        [
+          70282.9,
+          27516.9
+        ]
+      ],
+      "rotation": 90.000000001
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "24C3",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "24C3",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为门）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1500.0mm；两侧面域 None；附近弧线 True；模型理由：门弧+墙缺口"
+    }
+  },
+  {
+    "id": "DOOR-12",
+    "category": "door",
+    "name": "geometric:door_block_arc",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "insert": [
+        53324.6,
+        58521.8
+      ],
+      "width": 1000.0,
+      "opening": [
+        [
+          53287.8,
+          58488.0
+        ],
+        [
+          54024.4,
+          59164.3
+        ]
+      ],
+      "hinges": [
+        [
+          53324.6,
+          58521.8
+        ]
+      ],
+      "rotation": 42.6
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "21A9",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "21A9",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为门）+ 墙线缺口几何复算",
+      "detail": "gap 候选，宽 1000.0mm；两侧面域 False；附近弧线 True；模型理由：门弧+墙缺口"
+    }
+  },
+  {
+    "id": "DOOR-15",
+    "category": "door",
+    "name": "geometric:door_block_arc M3",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "insert": [
+        51198.7,
+        50501.8
+      ],
+      "width": 1199.9,
+      "opening": [
+        [
+          51219.0,
+          50479.7
+        ],
+        [
+          52102.9,
+          51291.2
+        ]
+      ],
+      "hinges": [
+        [
+          51198.7,
+          50501.8
+        ]
+      ],
+      "rotation": 42.55533843299992
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1DE9",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1DE9",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为门）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1199.9mm；两侧面域 None；附近弧线 True；模型理由：门弧+墙缺口"
+    }
+  },
+  {
+    "id": "WIN-01",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        71697.9,
+        73078.9
+      ],
+      "axis": [
+        [
+          71297.9,
+          73078.9
+        ],
+        [
+          72097.9,
+          73078.9
+        ]
+      ],
+      "width": 800.0,
+      "thickness": 180.0,
+      "rotation": 180.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1F61",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1F61",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "gap 候选，宽 800.0mm；两侧面域 False；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-02",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        72897.9,
+        73078.9
+      ],
+      "axis": [
+        [
+          72497.9,
+          73078.9
+        ],
+        [
+          73297.9,
+          73078.9
+        ]
+      ],
+      "width": 800.0,
+      "thickness": 180.0,
+      "rotation": 180.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1F5B",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1F5B",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "gap 候选，宽 800.0mm；两侧面域 False；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-03",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.6,
+    "needs_review": true,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        76297.9,
+        72978.9
+      ],
+      "axis": [
+        [
+          74947.9,
+          72978.9
+        ],
+        [
+          77647.9,
+          72978.9
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 0.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1D9B",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "窗块 $TCHSYS$WIN2D + 块属性 A + 与墙中心线共线",
+      "detail": "属性 None；xscale=2700 即窗宽；yscale=180 与墙厚一致",
+      "block_evidence": "geometric:window_block_parallel_strokes"
+    }
+  },
+  {
+    "id": "WIN-04",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        80297.9,
+        72968.9
+      ],
+      "axis": [
+        [
+          78947.9,
+          72968.9
+        ],
+        [
+          81647.9,
+          72968.9
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 0.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1D9E",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1D9E",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-05",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        84297.9,
+        72968.9
+      ],
+      "axis": [
+        [
+          82947.9,
+          72968.9
+        ],
+        [
+          85647.9,
+          72968.9
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 0.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1DA1",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1DA1",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-06",
+    "category": "window",
+    "name": "窗 C8",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        42816.1,
+        59055.4
+      ],
+      "axis": [
+        [
+          41821.6,
+          58142.4
+        ],
+        [
+          43810.5,
+          59968.4
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 42.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1EDD",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1EDD",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-07",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        76297.9,
+        56978.9
+      ],
+      "axis": [
+        [
+          74947.9,
+          56978.9
+        ],
+        [
+          77647.9,
+          56978.9
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 180.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1D91",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1D91",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-08",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        80297.9,
+        56978.9
+      ],
+      "axis": [
+        [
+          78947.9,
+          56978.9
+        ],
+        [
+          81647.9,
+          56978.9
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 180.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1D8E",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1D8E",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-09",
+    "category": "window",
+    "name": "窗 C8",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        39869.6,
+        56350.2
+      ],
+      "axis": [
+        [
+          38875.1,
+          55437.2
+        ],
+        [
+          40864.0,
+          57263.2
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 42.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1ED7",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1ED7",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-10",
+    "category": "window",
+    "name": "窗 C8",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        36923.1,
+        53645.0
+      ],
+      "axis": [
+        [
+          35928.6,
+          52732.0
+        ],
+        [
+          37917.5,
+          54558.0
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 42.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1ED4",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1ED4",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-11",
+    "category": "window",
+    "name": "窗 C8",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        33974.1,
+        50937.4
+      ],
+      "axis": [
+        [
+          32979.6,
+          50024.4
+        ],
+        [
+          34968.5,
+          51850.4
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 42.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1ED0",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1ED0",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-12",
+    "category": "window",
+    "name": "窗 C8",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        31027.5,
+        48232.2
+      ],
+      "axis": [
+        [
+          30033.1,
+          47319.2
+        ],
+        [
+          32022.0,
+          49145.2
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 42.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1ECC",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1ECC",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-13",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        48572.6,
+        48050.1
+      ],
+      "axis": [
+        [
+          47578.2,
+          47137.1
+        ],
+        [
+          49567.1,
+          48963.1
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 222.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1E0B",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1E0B",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-14",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        46583.8,
+        46224.1
+      ],
+      "axis": [
+        [
+          45589.3,
+          45311.0
+        ],
+        [
+          47578.2,
+          47137.1
+        ]
+      ],
+      "width": 2700.1,
+      "thickness": 180.0,
+      "rotation": 222.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1E08",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1E08",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.1mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-15",
+    "category": "window",
+    "name": "窗 C8",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        28083.5,
+        45529.4
+      ],
+      "axis": [
+        [
+          27089.1,
+          44616.4
+        ],
+        [
+          29078.0,
+          46442.4
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 42.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1E2C",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1E2C",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-16",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        36561.2,
+        45167.4
+      ],
+      "axis": [
+        [
+          37169.8,
+          44504.5
+        ],
+        [
+          35952.5,
+          45830.4
+        ]
+      ],
+      "width": 1800.0,
+      "thickness": 180.0,
+      "rotation": 132.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1E39",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1E39",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1800.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-17",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        44631.4,
+        44431.5
+      ],
+      "axis": [
+        [
+          43636.9,
+          43518.5
+        ],
+        [
+          45625.8,
+          45344.5
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 222.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1DFD",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1DFD",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-18",
+    "category": "window",
+    "name": "窗 C8",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        25137.0,
+        42824.1
+      ],
+      "axis": [
+        [
+          24142.6,
+          41911.1
+        ],
+        [
+          26131.5,
+          43737.2
+        ]
+      ],
+      "width": 2700.1,
+      "thickness": 180.0,
+      "rotation": 42.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1EC6",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1EC6",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.1mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-19",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        39266.3,
+        42220.9
+      ],
+      "axis": [
+        [
+          39875.0,
+          41558.0
+        ],
+        [
+          38657.7,
+          42883.9
+        ]
+      ],
+      "width": 1800.0,
+      "thickness": 180.0,
+      "rotation": 132.555338433
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1EE4",
+        "type": "INSERT",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1EE4",
+        "type": "LINE",
+        "layer": "WINDOW",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1800.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-20",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        45939.6,
+        36478.9
+      ],
+      "axis": [
+        [
+          45539.6,
+          36478.9
+        ],
+        [
+          46339.6,
+          36478.9
+        ]
+      ],
+      "width": 800.0,
+      "thickness": 180.0,
+      "rotation": 180.000000001
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1FEB",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1FEB",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 800.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-21",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        47139.6,
+        36478.9
+      ],
+      "axis": [
+        [
+          46739.6,
+          36478.9
+        ],
+        [
+          47539.6,
+          36478.9
+        ]
+      ],
+      "width": 800.0,
+      "thickness": 180.0,
+      "rotation": 180.000000001
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1FEE",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1FEE",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 800.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-22",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        50039.6,
+        36478.9
+      ],
+      "axis": [
+        [
+          49139.6,
+          36478.9
+        ],
+        [
+          50939.6,
+          36478.9
+        ]
+      ],
+      "width": 1800.0,
+      "thickness": 180.0,
+      "rotation": 0.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "2063",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "2063",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1800.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-23",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        52039.6,
+        33628.6
+      ],
+      "axis": [
+        [
+          52039.6,
+          32278.6
+        ],
+        [
+          52039.6,
+          34978.6
+        ]
+      ],
+      "width": 2700.0,
+      "thickness": 180.0,
+      "rotation": 270.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "2510",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "2510",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2700.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-24",
+    "category": "window",
+    "name": "窗 C2",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        31779.5,
+        31530.5
+      ],
+      "axis": [
+        [
+          31779.5,
+          31230.5
+        ],
+        [
+          31779.5,
+          31830.5
+        ]
+      ],
+      "width": 600.0,
+      "thickness": 180.0,
+      "rotation": 90.000000001
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "2409",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "2409",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 600.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-25",
+    "category": "window",
+    "name": "窗 C2",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        31779.5,
+        29722.3
+      ],
+      "axis": [
+        [
+          31779.5,
+          29422.3
+        ],
+        [
+          31779.5,
+          30022.3
+        ]
+      ],
+      "width": 600.0,
+      "thickness": 180.0,
+      "rotation": 90.000000001
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1E26",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1E26",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 600.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-26",
+    "category": "window",
+    "name": "窗 C1",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        35279.5,
+        27788.5
+      ],
+      "axis": [
+        [
+          35279.5,
+          27038.5
+        ],
+        [
+          35279.5,
+          28538.5
+        ]
+      ],
+      "width": 1500.0,
+      "thickness": 180.0,
+      "rotation": 270.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1E35",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "1E35",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 1500.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "WIN-27",
+    "category": "window",
+    "name": "窗",
+    "status": "uncertain",
+    "confidence": 0.8,
+    "needs_review": false,
+    "geometry": {
+      "type": "opening",
+      "center": [
+        38659.5,
+        25292.2
+      ],
+      "axis": [
+        [
+          37249.5,
+          25292.2
+        ],
+        [
+          40069.5,
+          25292.2
+        ]
+      ],
+      "width": 2820.0,
+      "thickness": 180.0,
+      "rotation": 180.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "2253",
+        "type": "INSERT",
+        "layer": "WALL",
+        "role": "洞口候选"
+      },
+      {
+        "handle": "2253",
+        "type": "LINE",
+        "layer": "WALL",
+        "role": "洞口候选"
+      }
+    ],
+    "evidence": {
+      "rule": "洞口语义裁决（模型判定为窗）+ 墙线缺口几何复算",
+      "detail": "pending 候选，宽 2820.0mm；两侧面域 None；模型理由：窗线束与墙同厚"
+    }
+  },
+  {
+    "id": "ROOM-02",
+    "category": "room",
+    "name": "配  电  所",
+    "status": "uncertain",
+    "confidence": 0.6,
+    "needs_review": false,
+    "geometry": {
+      "type": "polygon",
+      "outline": [
+        [
+          70397.3,
+          26566.2
+        ],
+        [
+          78197.3,
+          26566.2
+        ],
+        [
+          78197.3,
+          29986.2
+        ],
+        [
+          78257.3,
+          29986.2
+        ],
+        [
+          78257.3,
+          30166.2
+        ],
+        [
+          78197.3,
+          30166.2
+        ],
+        [
+          78197.3,
+          33186.2
+        ],
+        [
+          78257.3,
+          33186.2
+        ],
+        [
+          78257.3,
+          33366.2
+        ],
+        [
+          78197.3,
+          33366.2
+        ],
+        [
+          78197.3,
+          36386.2
+        ],
+        [
+          74297.3,
+          36386.2
+        ],
+        [
+          74297.3,
+          36446.2
+        ],
+        [
+          72817.3,
+          36446.2
+        ],
+        [
+          72817.3,
+          36386.2
+        ],
+        [
+          70397.3,
+          36386.2
+        ],
+        [
+          70397.3,
+          29026.2
+        ],
+        [
+          70337.3,
+          29026.2
+        ],
+        [
+          70337.3,
+          27526.2
+        ],
+        [
+          70397.3,
+          27526.2
+        ]
+      ],
+      "bbox": [
+        70337.3,
+        26566.2,
+        78257.3,
+        36446.2
+      ],
+      "area_m2": 76.8
+    },
+    "boundary_state": "hypothesis",
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1E15",
+        "type": "TEXT",
+        "layer": "PUB_TEXT",
+        "role": "房间名"
+      }
+    ],
+    "evidence": {
+      "rule": "房间名文字作种子 + 墙/柱/洞口围合做障碍的连通域 + 边界追踪",
+      "detail": "栅格 10mm；面积标注 None m²，几何 76.80 m²"
+    }
+  },
+  {
+    "id": "STAIR-01",
+    "category": "stair",
+    "name": "楼梯 1",
+    "status": "uncertain",
+    "confidence": 0.7,
+    "needs_review": false,
+    "geometry": {
+      "type": "polygon",
+      "bbox": [
+        42128.1,
+        25799.1,
+        62497.9,
+        73068.9
+      ],
+      "outline": [
+        [
+          42128.1,
+          25799.1
+        ],
+        [
+          62497.9,
+          25799.1
+        ],
+        [
+          62497.9,
+          73068.9
+        ],
+        [
+          42128.1,
+          73068.9
+        ]
+      ],
+      "width": 20369.8,
+      "depth": 47269.9
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1D74",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D75",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1DA4",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1E62",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1E63",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F11",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F12",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F7F",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F82",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FC0",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FC9",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FCB",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FCC",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FCD",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FCE",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FCF",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FD6",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FD7",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FF1",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FF4",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "2051",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "223A",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "223B",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "223C",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "23DA",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "23E1",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "23E2",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "24CE",
+        "type": "LINE",
+        "layer": "STAIR"
+      }
+    ],
+    "evidence": {
+      "rule": "STAIR 图层踏步线聚类 + 梯段编号文字",
+      "detail": "踏步线 16 道，间距 267mm"
+    }
+  },
+  {
+    "id": "STAIR-02",
+    "category": "stair",
+    "name": "楼梯 2",
+    "status": "uncertain",
+    "confidence": 0.7,
+    "needs_review": false,
+    "geometry": {
+      "type": "polygon",
+      "bbox": [
+        66075.9,
+        24431.9,
+        77497.6,
+        73068.9
+      ],
+      "outline": [
+        [
+          66075.9,
+          24431.9
+        ],
+        [
+          77497.6,
+          24431.9
+        ],
+        [
+          77497.6,
+          73068.9
+        ],
+        [
+          66075.9,
+          73068.9
+        ]
+      ],
+      "width": 11421.7,
+      "depth": 48637.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1D76",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D77",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D7A",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D7C",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D7F",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D80",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D84",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D85",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1E7D",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1EE0",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F1B",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F1F",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F76",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F7D",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F81",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F87",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FC6",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FD2",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FD8",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FDA",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FDB",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FDC",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FDD",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FDE",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FDF",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FE0",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FE1",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FE2",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FE3",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FE4",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FE5",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FF5",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "239C",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "239D",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "239E",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "239F",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "23A3",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "240C",
+        "type": "LINE",
+        "layer": "STAIR"
+      }
+    ],
+    "evidence": {
+      "rule": "STAIR 图层踏步线聚类 + 梯段编号文字",
+      "detail": "踏步线 13 道，间距 180mm"
+    }
+  },
+  {
+    "id": "STAIR-03",
+    "category": "stair",
+    "name": "楼梯 3",
+    "status": "uncertain",
+    "confidence": 0.7,
+    "needs_review": false,
+    "geometry": {
+      "type": "polygon",
+      "bbox": [
+        81207.9,
+        24731.9,
+        86897.9,
+        54568.9
+      ],
+      "outline": [
+        [
+          81207.9,
+          24731.9
+        ],
+        [
+          86897.9,
+          24731.9
+        ],
+        [
+          86897.9,
+          54568.9
+        ],
+        [
+          81207.9,
+          54568.9
+        ]
+      ],
+      "width": 5690.0,
+      "depth": 29837.0
+    },
+    "boundary_state": null,
+    "area_warning": null,
+    "source_entities": [
+      {
+        "handle": "1D79",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D7B",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D7D",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D7E",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D81",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D82",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D87",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D98",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D99",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1D9A",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1EDA",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1EDB",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1EDC",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1EE7",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1EE8",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1F1D",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FD5",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "1FD9",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "2115",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "227B",
+        "type": "LINE",
+        "layer": "STAIR"
+      },
+      {
+        "handle": "2365",
+        "type": "LINE",
+        "layer": "STAIR"
+      }
+    ],
+    "evidence": {
+      "rule": "STAIR 图层踏步线聚类 + 梯段编号文字",
+      "detail": "踏步线 9 道，间距 180mm"
+    }
+  }
+]

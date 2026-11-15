@@ -1,0 +1,43 @@
+{
+  "original": "办公楼.dxf",
+  "rotated": "office_rotated30.dxf",
+  "runtime_sec": 21.3,
+  "note": "Geometric consistency relative to baseline predictions, not accuracy against GT. Rotated inverse by 30 degrees about origin.",
+  "comparison": {
+    "wall": {
+      "original_count": 31,
+      "rotated_count": 42,
+      "geometry_overlap_precision": 0.9316,
+      "geometry_overlap_recall": 0.9851,
+      "iou": 0.9187
+    },
+    "column": {
+      "original_count": 38,
+      "rotated_count": 38,
+      "geometry_overlap_precision": 0.9999,
+      "geometry_overlap_recall": 0.9999,
+      "iou": 0.9999
+    },
+    "door": {
+      "original_count": 30,
+      "rotated_count": 30,
+      "geometry_overlap_precision": 0.8575,
+      "geometry_overlap_recall": 0.8274,
+      "iou": 0.7274
+    },
+    "window": {
+      "original_count": 32,
+      "rotated_count": 30,
+      "geometry_overlap_precision": 0.9999,
+      "geometry_overlap_recall": 0.9356,
+      "iou": 0.9356
+    },
+    "room": {
+      "original_count": 21,
+      "rotated_count": 20,
+      "geometry_overlap_precision": 0.8911,
+      "geometry_overlap_recall": 0.9109,
+      "iou": 0.8197
+    }
+  }
+}

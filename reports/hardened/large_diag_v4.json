@@ -1,0 +1,637 @@
+{
+  "elapsed": 30.92,
+  "plan_room_layers": [
+    "PUB_TEXT",
+    "FF-Text【平面文字】",
+    "J-文字",
+    "FF-TEXT",
+    "J-级别"
+  ],
+  "seed_count": 940,
+  "seed_layer": {
+    "PUB_TEXT": 55,
+    "FF-Text【平面文字】": 12,
+    "J-文字": 38,
+    "FF-TEXT": 104,
+    "J-级别": 2,
+    "TK": 718,
+    "WALL": 3,
+    "0": 7,
+    "设计-图框": 1
+  },
+  "filter_status": "unavailable",
+  "filter_stats": {
+    "candidates": 938,
+    "to_llm": 938,
+    "geometry": {
+      "promoted": 50,
+      "layers": [
+        "FF-TEXT",
+        "J-文字"
+      ]
+    },
+    "llm": {}
+  },
+  "roles": {
+    "pending": 888,
+    "room": 50
+  },
+  "selected_labels": [
+    {
+      "text": "报告室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21263253.84850177,
+      "y": -1304559.100646784
+    },
+    {
+      "text": "办公室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21266498.51869461,
+      "y": -1304563.967932072
+    },
+    {
+      "text": "消防控制室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21234891.03364609,
+      "y": -1306546.67140781
+    },
+    {
+      "text": "进风井",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21210850.78258937,
+      "y": -1307860.709965007
+    },
+    {
+      "text": "住院大堂",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21248778.45493746,
+      "y": -1308207.760866849
+    },
+    {
+      "text": "脱外包",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21203299.2622293,
+      "y": -1310359.890506517
+    },
+    {
+      "text": "财务室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21263243.02285903,
+      "y": -1310600.890506517
+    },
+    {
+      "text": "核医学科",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21207352.80748555,
+      "y": -1311318.593582315
+    },
+    {
+      "text": "侯梯厅",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21207088.75246505,
+      "y": -1312067.576295433
+    },
+    {
+      "text": "女值班室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21273815.75249612,
+      "y": -1312188.533806934
+    },
+    {
+      "text": "开敞大办公室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21269205.03116597,
+      "y": -1312694.438998838
+    },
+    {
+      "text": "钼靶",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21290034.9716964,
+      "y": -1313505.564834367
+    },
+    {
+      "text": "阅片室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21268642.69958715,
+      "y": -1313521.659459581
+    },
+    {
+      "text": "X光机",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21282378.60481086,
+      "y": -1313561.814834367
+    },
+    {
+      "text": "数字胃肠",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21278728.20508482,
+      "y": -1313561.814834367
+    },
+    {
+      "text": "强电井",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21263208.66047386,
+      "y": -1313688.605531846
+    },
+    {
+      "text": "洁净空调机房",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21199271.83951057,
+      "y": -1315197.595511883
+    },
+    {
+      "text": "男值班室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21273848.61326316,
+      "y": -1315276.588628067
+    },
+    {
+      "text": "医梯",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21210908.41225328,
+      "y": -1315350.807900741
+    },
+    {
+      "text": "弱电井",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21262436.19753252,
+      "y": -1315756.064847142
+    },
+    {
+      "text": "医生",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21253171.75562961,
+      "y": -1316190.536102887
+    },
+    {
+      "text": "住院",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21243423.14774324,
+      "y": -1318310.207437529
+    },
+    {
+      "text": "住院",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21253702.87506603,
+      "y": -1318337.930255383
+    },
+    {
+      "text": "内走廊",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21285726.91228384,
+      "y": -1318664.891587703
+    },
+    {
+      "text": "氧气汇排流间",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21199804.0705302,
+      "y": -1320289.736279557
+    },
+    {
+      "text": "二级库",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21206572.60468738,
+      "y": -1320767.133877371
+    },
+    {
+      "text": "控制室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21271575.07935024,
+      "y": -1321892.827580297
+    },
+    {
+      "text": "合用",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21289589.89455449,
+      "y": -1322894.468365651
+    },
+    {
+      "text": "污梯",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21285479.5684313,
+      "y": -1323558.825154798
+    },
+    {
+      "text": "前室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21289589.89455449,
+      "y": -1323879.468365651
+    },
+    {
+      "text": "兼消防电梯",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21285862.18853003,
+      "y": -1324386.862421041
+    },
+    {
+      "text": "注射室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21273677.38126546,
+      "y": -1324415.188729342
+    },
+    {
+      "text": "住院客服中心",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21259345.93583596,
+      "y": -1325594.962103487
+    },
+    {
+      "text": "更衣室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21271520.40693732,
+      "y": -1326422.154585315
+    },
+    {
+      "text": "清洁间",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21234537.06835751,
+      "y": -1326955.613767506
+    },
+    {
+      "text": "发放",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21241088.36363112,
+      "y": -1326969.689126947
+    },
+    {
+      "text": "设备室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21285165.54875952,
+      "y": -1326974.15658659
+    },
+    {
+      "text": "无障碍",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21258575.17602445,
+      "y": -1328628.346099967
+    },
+    {
+      "text": "卫生间",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21258575.17602444,
+      "y": -1329444.934013607
+    },
+    {
+      "text": "值班室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21227641.61567345,
+      "y": -1329465.343078075
+    },
+    {
+      "text": "男厕",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21261961.53582337,
+      "y": -1329705.424309499
+    },
+    {
+      "text": "女厕",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21255178.48348956,
+      "y": -1329852.773524322
+    },
+    {
+      "text": "设备室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21267376.16438202,
+      "y": -1330003.871818289
+    },
+    {
+      "text": "监控机房",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21207029.12430744,
+      "y": -1330246.545997717
+    },
+    {
+      "text": "UPS配电间",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21227882.4486764,
+      "y": -1330993.918645534
+    },
+    {
+      "text": "前室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21258738.63101764,
+      "y": -1331370.252875769
+    },
+    {
+      "text": "全院中心机房",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21218181.87084209,
+      "y": -1332619.556383387
+    },
+    {
+      "text": "空调机房",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21231640.63492404,
+      "y": -1334165.653876772
+    },
+    {
+      "text": "气瓶室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21227618.37855395,
+      "y": -1335225.715290605
+    },
+    {
+      "text": "值班室",
+      "layer": "FF-TEXT",
+      "role": "room",
+      "x": -21236722.22627561,
+      "y": -1336246.588866222
+    }
+  ],
+  "rooms": [
+    {
+      "name": "办公室",
+      "boundary": "nearest_face",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "全院中心机房",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "合用",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "二级库",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "开敞大办公室",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": "circulation"
+    },
+    {
+      "name": "内走廊",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": "circulation"
+    },
+    {
+      "name": "消防控制室",
+      "boundary": "nearest_face",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "核医学科",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "住院",
+      "boundary": "split_room",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "发放",
+      "boundary": "split_room",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "氧气汇排流间",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "洁净空调机房",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "空调机房",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "X光机",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "数字胃肠",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "注射室",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "清洁间",
+      "boundary": "split_room",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "钼靶",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "气瓶室",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "脱外包",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "监控机房",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "男厕",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "女厕",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "设备室",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "报告室",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "女值班室",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "UPS配电间",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "男值班室",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "控制室",
+      "boundary": "split_room",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "更衣室",
+      "boundary": "split_room",
+      "state": "hypothesis",
+      "kind": null
+    },
+    {
+      "name": "医梯",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "前室",
+      "boundary": "faces",
+      "state": "hypothesis",
+      "kind": "circulation"
+    },
+    {
+      "name": "值班室",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "值班室",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "无障碍",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    },
+    {
+      "name": "财务室",
+      "boundary": "faces",
+      "state": "observed",
+      "kind": null
+    }
+  ],
+  "room_stats": null,
+  "orphans": null,
+  "spaces": {
+    "faces": 73,
+    "observed": 39,
+    "stats": {
+      "faces": 73,
+      "observed_faces": 39,
+      "hypothesis_faces": 19,
+      "sealed": 518,
+      "candidates": 73,
+      "thickness": 200.0,
+      "total_area_m2": 1900.84,
+      "virtual_edge_count": 518,
+      "partition_rects": [],
+      "inferred_edges_used": 0,
+      "regions": 1
+    }
+  },
+  "count": {
+    "frame": 2,
+    "column": 67,
+    "wall": 309,
+    "door": 65,
+    "window": 2,
+    "room": 36,
+    "stair": 9
+  }
+}

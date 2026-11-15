@@ -1,0 +1,28 @@
+{
+  "drawing": "测试-二维DWG.dxf",
+  "target": "assemble",
+  "status": "ok",
+  "seconds": 86.988,
+  "counts": {
+    "frame": 2,
+    "column": 67,
+    "wall": 298,
+    "door": 65,
+    "window": 2,
+    "room": 26,
+    "stair": 9
+  },
+  "wall_segments": 580,
+  "column_candidates": 84,
+  "door_candidates": 219,
+  "window_candidates": 6,
+  "region_count": 15,
+  "soft_layers": {
+    "wall": [],
+    "column": [],
+    "door": [],
+    "window": []
+  },
+  "room_boundary_states": {},
+  "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+}

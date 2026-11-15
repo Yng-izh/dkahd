@@ -1,0 +1,65 @@
+{
+  "drawing": "艺术楼-图层混乱.dxf",
+  "target": "assemble",
+  "status": "ok",
+  "seconds": 2.779,
+  "counts": {
+    "grid_axis": 67,
+    "column": 7,
+    "wall": 58,
+    "door": 15,
+    "window": 27,
+    "room": 4,
+    "stair": 3
+  },
+  "status_by_category": {
+    "column": {
+      "confirmed": 7
+    },
+    "door": {
+      "uncertain": 9,
+      "confirmed": 6
+    },
+    "grid_axis": {
+      "confirmed": 67
+    },
+    "room": {
+      "confirmed": 3,
+      "uncertain": 1
+    },
+    "stair": {
+      "uncertain": 3
+    },
+    "wall": {
+      "confirmed": 58
+    },
+    "window": {
+      "uncertain": 27
+    }
+  },
+  "needs_review_by_category": {
+    "window": 1
+  },
+  "room_area_warning_count": 0,
+  "unlayered": null,
+  "wall_segments": 141,
+  "column_candidates": 7,
+  "door_candidates": 15,
+  "window_candidates": 27,
+  "region_count": 2,
+  "soft_layers": {
+    "wall": [
+      "PUB_WALL"
+    ],
+    "column": [],
+    "door": [],
+    "window": [
+      "2"
+    ]
+  },
+  "room_boundary_states": {
+    "observed": 3,
+    "hypothesis": 1
+  },
+  "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+}

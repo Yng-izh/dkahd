@@ -191,6 +191,12 @@ def test_components_cli_v2_uses_native_fitted_output(tmp_path, monkeypatch):
     assert written["final"]["instances"][0]["geometry"]["axis"]
 
 
-def test_remote_cad_image_upload_requires_opt_in():
+def test_remote_cad_image_upload_defaults_on_but_stays_switchable():
+    """截图上传默认授权（用户 0.8.2 要求"直接自动授权"），但必须能一句话关掉。
+
+    敏感图纸走本地视觉模型或 ``allow_remote_images=false``；默认值不等于"没有出口"。
+    """
     from dwg_reader.recognition import ai_config as AIC
-    assert AIC.DEFAULT_CONFIG["provider"]["allow_remote_images"] is False
+    assert AIC.DEFAULT_CONFIG["provider"]["allow_remote_images"] is True
+    off = AIC.load(overrides={"provider": {"allow_remote_images": False}})
+    assert off["provider"]["allow_remote_images"] is False

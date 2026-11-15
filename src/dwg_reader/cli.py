@@ -89,6 +89,9 @@ def build_parser() -> argparse.ArgumentParser:
     # ---- AI 增强（默认关闭：不给这个参数就与老行为逐条一致）
     comps.add_argument("--engine", choices=("legacy", "v2"), default="legacy",
                        help="legacy=兼容旧输出（默认）| v2=多模态首轮识别与完整构件几何")
+    comps.add_argument("--profile", default=None,
+                       help="v2 档位（openings_columns / openings_columns_lean / full）；"
+                            "只对 --engine v2 生效")
     comps.add_argument("--ai-mode", choices=("off", "propose", "enhance"), default="off",
                        help="off=纯几何（默认）| propose=只出提议 | enhance=试验通过才合并")
     comps.add_argument("--ai-config", type=Path,
@@ -116,6 +119,14 @@ def build_parser() -> argparse.ArgumentParser:
     v2.add_argument("--memory", type=Path, help="规则记忆库目录")
     v2.add_argument("--cache", type=Path, help="DAG 内容寻址缓存目录")
     v2.add_argument("--jobs", type=int, default=4, help="底座 DAG 的并行度")
+    v2.add_argument("--profile", choices=("openings_columns", "openings_columns_lean",
+                                         "full"), default="openings_columns",
+                    help="识别档位：openings_columns=门窗柱专用（默认，房间退出主流程）| "
+                         "full=旧行为（11 类 + 房间）")
+    v2.add_argument("--rooms", dest="rooms", action="store_true", default=None,
+                    help="强制计算房间（默认随档位）")
+    v2.add_argument("--no-rooms", dest="rooms", action="store_false",
+                    help="强制不算房间")
 
     eval_ = commands.add_parser("ai-eval",
                                 help="独立真值集对照：基础模式 vs 增强模式")
@@ -309,7 +320,8 @@ def _components(args: argparse.Namespace) -> int:
                        overrides=overrides or None)
         result = V2.run_drawing(
             str(dxf), ai_mode=cfg["mode"], ai_config=cfg,
-            memory_dir=(str(args.ai_memory_dir) if args.ai_memory_dir else None))
+            memory_dir=(str(args.ai_memory_dir) if args.ai_memory_dir else None),
+            profile=getattr(args, "profile", None))
         text = _json.dumps(result, ensure_ascii=False, indent=1)
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -398,7 +410,9 @@ def _v2(args: argparse.Namespace) -> int:
                             jobs=int(args.jobs or 4),
                             cache_dir=str(args.cache) if args.cache else None,
                             store_dir=str(args.store) if args.store else None,
-                            memory_dir=str(args.memory) if args.memory else None)
+                            memory_dir=str(args.memory) if args.memory else None,
+                            profile=getattr(args, "profile", None) or "openings_columns",
+                            rooms=getattr(args, "rooms", None))
     text = _json.dumps(result, ensure_ascii=False, indent=1)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

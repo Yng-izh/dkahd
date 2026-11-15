@@ -1,0 +1,42 @@
+{
+  "file": "测试-二维DWG.dxf",
+  "targets": [
+    "columns",
+    "walls_seg"
+  ],
+  "duration_seconds": 28.407,
+  "counts": {},
+  "partial_counts": {
+    "wall_segments": 576,
+    "column_candidates": 84
+  },
+  "total": 0,
+  "room_boundary": {},
+  "room_status": {},
+  "repair": {
+    "runs": null,
+    "applied": 0,
+    "rolled_back": 0,
+    "rejected": 0,
+    "budget": null,
+    "rollback_verdicts": {}
+  },
+  "finalstate": {
+    "provenance": null,
+    "unresolved": 0
+  },
+  "node_times": {
+    "load": {
+      "status": "ok",
+      "ms": 27411.2
+    },
+    "columns": {
+      "status": "ok",
+      "ms": 152.61
+    },
+    "walls_seg": {
+      "status": "ok",
+      "ms": 572.73
+    }
+  }
+}

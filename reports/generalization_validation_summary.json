@@ -1,0 +1,166 @@
+{
+  "schema": "generalization-validation/1.0",
+  "warning": "Count-based regression only; not instance-level accuracy",
+  "baseline_truth": {
+    "office": {
+      "wall": 31,
+      "column": 38,
+      "door": 30,
+      "window": 31,
+      "room": 21
+    },
+    "large": {
+      "wall": [
+        297,
+        303
+      ],
+      "column": [
+        65,
+        69
+      ],
+      "door": [
+        55,
+        76
+      ],
+      "room": [
+        45,
+        60
+      ]
+    }
+  },
+  "runs": {
+    "generalization_office.json": {
+      "drawing": "办公楼.dxf",
+      "target": "assemble",
+      "status": "ok",
+      "seconds": 14.494,
+      "counts": {
+        "frame": 2,
+        "grid_axis": 26,
+        "north_arrow": 1,
+        "column": 38,
+        "wall": 31,
+        "door": 30,
+        "window": 32,
+        "room": 21,
+        "stair": 2,
+        "step": 3,
+        "apron": 1
+      },
+      "wall_segments": 146,
+      "column_candidates": 38,
+      "door_candidates": 30,
+      "window_candidates": 36,
+      "region_count": 23,
+      "soft_layers": {
+        "wall": [],
+        "column": [],
+        "door": [],
+        "window": []
+      },
+      "room_boundary_states": {},
+      "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+    },
+    "generalization_office_renamed.json": {
+      "drawing": "office_renamed.dxf",
+      "target": "assemble",
+      "status": "ok",
+      "seconds": 12.053,
+      "counts": {
+        "grid_axis": 26,
+        "column": 38,
+        "wall": 31,
+        "door": 30,
+        "window": 33,
+        "room": 21,
+        "apron": 1
+      },
+      "wall_segments": 146,
+      "column_candidates": 38,
+      "door_candidates": 30,
+      "window_candidates": 37,
+      "region_count": 23,
+      "soft_layers": {
+        "wall": [
+          "XYZ_WALL"
+        ],
+        "column": [],
+        "door": [],
+        "window": [
+          "XYZ_WINDOW"
+        ]
+      },
+      "room_boundary_states": {},
+      "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+    },
+    "generalization_office_rotated30.json": {
+      "drawing": "office_rotated30.dxf",
+      "target": "assemble",
+      "status": "ok",
+      "seconds": 11.742,
+      "counts": {
+        "frame": 2,
+        "grid_axis": 26,
+        "north_arrow": 1,
+        "column": 42,
+        "wall": 50,
+        "door": 30,
+        "window": 15,
+        "room": 6,
+        "stair": 2,
+        "step": 2,
+        "apron": 1
+      },
+      "wall_segments": 85,
+      "column_candidates": 42,
+      "door_candidates": 30,
+      "window_candidates": 34,
+      "region_count": 40,
+      "soft_layers": {
+        "wall": [],
+        "column": [],
+        "door": [],
+        "window": []
+      },
+      "room_boundary_states": {},
+      "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+    },
+    "generalization_large_full.json": {
+      "drawing": "测试-二维DWG.dxf",
+      "target": "assemble",
+      "status": "ok",
+      "seconds": 86.988,
+      "counts": {
+        "frame": 2,
+        "column": 67,
+        "wall": 298,
+        "door": 65,
+        "window": 2,
+        "room": 26,
+        "stair": 9
+      },
+      "wall_segments": 580,
+      "column_candidates": 84,
+      "door_candidates": 219,
+      "window_candidates": 6,
+      "region_count": 15,
+      "soft_layers": {
+        "wall": [],
+        "column": [],
+        "door": [],
+        "window": []
+      },
+      "room_boundary_states": {},
+      "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+    }
+  },
+  "pytest": {
+    "passed": 258,
+    "skipped": 5
+  },
+  "outstanding": [
+    "large room recall",
+    "rotation invariance",
+    "renamed office window count difference"
+  ]
+}

@@ -45,6 +45,39 @@ def _sha(text: str) -> str:
     return hashlib.sha256(str(text).encode("utf-8")).hexdigest()
 
 
+def _dumps(obj) -> str:
+    import json as _json
+    return _json.dumps(obj, sort_keys=True, ensure_ascii=False, default=str)
+
+
+def hypothesis(*, category, subtype, source, engine, region, bbox, geometry,
+               uids=(), handles=(), score=0.0, evidence=None, grammar=None,
+               status="candidate", instances=None, family_id=None,
+               transform=None) -> dict:
+    """统一的候选结构（``hypothesis/1.0``）：所有引擎与专用拟合器都必须走这里。
+
+    ``family_id`` / ``transform`` 是 ``v2-component-focus`` 新增的：一个候选要能
+    回答"它属于哪个构件族、相对族内代表实例是否旋转/镜像/缩放过"。字段可空，
+    老调用方不受影响。
+    """
+    body = {"c": category, "b": [_r(v) for v in (bbox or ())],
+            "u": sorted(str(u) for u in (uids or ())), "s": source}
+    out = {"schema": HYP_SCHEMA, "id": "hyp:" + _sha(_dumps(body))[:12],
+           "category": category, "subtype": subtype, "source": source,
+           "engine": engine, "region": region, "bbox": bbox,
+           "geometry": dict(geometry or {}),
+           "uids": [str(u) for u in (uids or ())],
+           "source_handles": [str(h) for h in (handles or ())],
+           "evidence": dict(evidence or {}), "grammar": grammar,
+           "instances": list(instances or ()), "score": _r(score, 3),
+           "status": status}
+    if family_id:
+        out["family_id"] = str(family_id)
+    if transform:
+        out["transform"] = dict(transform)
+    return out
+
+
 def _len(a, b) -> float:
     return math.hypot(float(b[0]) - float(a[0]), float(b[1]) - float(a[1]))
 
@@ -613,34 +646,84 @@ def fit(grammar: dict, ir: dict, graph=None, *, region=None, seed_uids=(),
                       "primitives": {k: len(v) for k, v in matches.items()}}}
 
 
-def _find_similar(candidates, matches, grammar, ir, *, region=None) -> list:
-    """同族实例：把第一个候选的"局部形状签名"在其余匹配里重复找到。"""
+def _entities_of(ir: dict, uids) -> list:
+    by_uid = {e["uid"]: e for e in (ir.get("entities") or ())}
+    return [by_uid[u] for u in uids or () if u in by_uid]
+
+
+def _signature_of(ir: dict, uids, *, mirror: bool = False):
+    from .fitters import _common as SH
+    return SH.shape_signature(_entities_of(ir, uids), mirror=mirror)
+
+
+def _find_similar(candidates, matches, grammar, ir, *, region=None, walls=(),
+                 tol: float | None = None) -> list:
+    """全图相似实例检索：在**整张图**里找同画法的其它实例。
+
+    以前这里只在本区域已产出的候选里比一个很粗的签名（"部件数/关系数"），于是
+    "一个族推广到全图"根本发生不了。现在：
+
+    1. 用族里第一个候选的图元算**旋转/镜像/缩放不变**的形状签名；
+    2. 把该族的主原语匹配器放到**全图**跑一遍（不再受区域限制）；
+    3. 每个命中各自算签名，距离小于容差的才算同族实例；
+    4. 实例几何仍然由拟合器绑定的原语给出，模型不参与。
+
+    这样"模型看懂一扇特殊窗"之后，系统能自己把同画法的窗全找出来，不用逐扇
+    调用模型。
+    """
+    from .fitters import _common as SH
     if not candidates:
         return candidates
     head = candidates[0]
-    signature = _local_signature(head)
+    parts = dict(grammar.get("parts") or {})
+    basis_part = None
+    for name in parts:
+        if name in (head.get("parts") or {}):
+            basis_part = name
+            break
+    matcher = MATCHERS.get(parts.get(basis_part) or "")
+    if matcher is None:
+        return candidates
+    basis = ir.get("basis") or {}
+    thickness = float(basis.get("thickness") or 200.0)
+    noise = float(basis.get("noise") or 2.0)
+    ref = _signature_of(ir, head.get("uids") or ())
+    if not ref:
+        return candidates
+    rows = matcher(list(ir.get("entities") or ()), thickness=thickness,
+                   tol=float(tol if tol is not None else noise * 2.0))
+    head_uids = set(head.get("uids") or ())
     out = [head]
-    seen = {head["id"]}
-    for row in candidates[1:]:
-        if _local_signature(row) != signature:
+    seen = {head.get("id")}
+    for row in rows:
+        uids = sorted({str(u) for u in (row.get("uids") or ())})
+        if not uids or set(uids) <= head_uids:
             continue
-        if row["id"] in seen:
+        dist, mirrored = SH.best_signature_distance(
+            ref, lambda flip: _signature_of(ir, uids, mirror=flip))
+        if dist > float(SH.LIMITS["signature_distance"]):
             continue
-        seen.add(row["id"])
-        out.append(row)
+        bound = {basis_part: row}
+        geom = _geometry_for(grammar, bound, category=grammar["category"])
+        bbox = geom.get("bbox") or row.get("bbox")
+        clone = dict(head)
+        clone.update({"id": _candidate_id(grammar["category"], uids, bbox),
+                      "uids": uids, "bbox": bbox, "geometry": geom,
+                      "parts": {basis_part: {"prim": row.get("prim"),
+                                             "uids": uids}},
+                      "evidence": dict(head.get("evidence") or {},
+                                       similarity=_r(1.0 - dist, 3),
+                                       mirrored=bool(mirrored),
+                                       located="whole_drawing"),
+                      "score": _r(float(head.get("score") or 0.0) * (1.0 - 0.3 * dist), 3)})
+        clone.pop("alternatives", None)
+        if clone["id"] in seen:
+            continue
+        seen.add(clone["id"])
+        out.append(clone)
         if len(out) >= int(BUDGET["instances"]):
             break
     return out
-
-
-def _local_signature(hyp: dict) -> str:
-    """局部形状签名：只保留相对关系（部分数量/关系数量/类别），不含绝对坐标。"""
-    geom = hyp.get("geometry") or {}
-    body = {"cat": hyp.get("category"), "sub": hyp.get("subtype"),
-            "parts": len(hyp.get("parts") or {}),
-            "rels": len((hyp.get("grammar") or {}).get("relations") or ()),
-            "panes": geom.get("panes"), "solid": geom.get("solid")}
-    return _sha(json_dumps(body))[:12]
 
 
 def json_dumps(obj) -> str:

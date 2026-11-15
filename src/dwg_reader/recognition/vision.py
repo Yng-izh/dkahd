@@ -47,6 +47,9 @@ FONT_PATHS = ("/System/Library/Fonts/Hiragino Sans GB.ttc",
 
 #: 配色（放在字典里：这些是像素颜色，不是几何阈值）
 COLORS = {"base": (205, 205, 205), "focus": (255, 140, 0),
+          # 实心填充的面色：淡灰=周边，淡橙=目标。"实心方块"和"空方框"对判柱是
+          # 决定性差别，只画边界等于把这个信息抹掉。
+          "base_fill": (232, 232, 232), "focus_fill": (255, 214, 160),
           "wall": (30, 140, 70), "text": (40, 80, 200)}
 
 
@@ -87,6 +90,18 @@ def _bbox_of(rec: dict):
                 if isinstance(pt, (list, tuple)) and len(pt) >= 2:
                     xs.append(float(pt[0]))
                     ys.append(float(pt[1]))
+    # Conservative extents keep arcs/circles visible even when their center is
+    # outside the viewport or the stored bbox only contains the center.
+    center, radius = rec.get("center"), rec.get("radius")
+    if str(rec.get("type") or "").upper() in ("ARC", "CIRCLE") and center and radius is not None:
+        r = abs(float(radius))
+        xs.extend((float(center[0]) - r, float(center[0]) + r))
+        ys.extend((float(center[1]) - r, float(center[1]) + r))
+    # HATCH 的包围盒只能从边界环算：漏掉它，填充块既进不了取景也画不出来
+    for loop in _loops(rec):
+        for pt in loop:
+            xs.append(float(pt[0]))
+            ys.append(float(pt[1]))
     box = rec.get("bbox")
     if isinstance(box, (list, tuple)) and len(box) == 4:
         xs.extend([float(box[0]), float(box[2])])
@@ -96,8 +111,24 @@ def _bbox_of(rec: dict):
     return (min(xs), min(ys), max(xs), max(ys))
 
 
+def _loops(rec: dict):
+    """HATCH 的边界环（每条环是一串点）。填充有没有实心，是"柱"与"空白方框"的关键视觉差别。"""
+    loops = rec.get("loops")
+    if not isinstance(loops, (list, tuple)):
+        return []
+    out = []
+    for loop in loops:
+        if not isinstance(loop, (list, tuple)):
+            continue
+        pts = [(float(p[0]), float(p[1])) for p in loop
+               if isinstance(p, (list, tuple)) and len(p) >= 2]
+        if len(pts) >= 2:
+            out.append(pts)
+    return out
+
+
 def _segments(rec: dict):
-    """一个图元 -> 若干线段（LINE / 多段线 / 弧 / 圆）。"""
+    """一个图元 -> 若干线段（LINE / 多段线 / 弧 / 圆 / 填充边界）。"""
     kind = str(rec.get("type") or "").upper()
     out = []
     if kind == "LINE":
@@ -116,6 +147,15 @@ def _segments(rec: dict):
             out.append(((float(last[0]), float(last[1])),
                         (float(first[0]), float(first[1]))))
         return out
+    loops = _loops(rec)
+    if loops:
+        # 以前这里不认 HATCH：填充块在图上等于不存在，模型看不到"实心方块"，
+        # 目标本身也就画不出来（focus=0）。
+        for loop in loops:
+            for a, b in zip(loop, loop[1:]):
+                out.append((a, b))
+            out.append((loop[-1], loop[0]))
+        return out
     center, radius = rec.get("center"), rec.get("radius")
     if center and radius:
         cx, cy = float(center[0]), float(center[1])
@@ -123,8 +163,11 @@ def _segments(rec: dict):
         if kind == "CIRCLE":
             a0, a1 = 0.0, 360.0
         else:
-            a0 = float(rec.get("start_angle") or 0.0)
-            a1 = float(rec.get("end_angle") or 360.0)
+            start_angle, end_angle = rec.get("start_angle"), rec.get("end_angle")
+            a0 = float(0.0 if start_angle is None else start_angle)
+            a1 = float(360.0 if end_angle is None else end_angle)
+            if a1 < a0:
+                a1 = a0 + (a1 - a0) % 360.0
         steps = max(8, min(48, int(abs(a1 - a0) / 10.0) + 8))
         prev = None
         for i in range(steps + 1):
@@ -142,10 +185,12 @@ ASPECT = {"max": 3.0}
 
 def _window(case: dict, *, thickness: float, pad_ratio: float):
     # 同族多实例的案例只截**代表实例**（image_bbox），不截"整栋楼的外接框"
-    box = case.get("image_bbox") or case.get("region") or case.get("bbox")
+    viewport = case.get("image_bbox")
+    box = viewport or case.get("target_bbox") or case.get("bbox") or case.get("region")
     if not isinstance(box, (list, tuple)) or len(box) != 4:
         return None
-    pad = float(pad_ratio) * float(thickness or 0.0) + 1.0
+    # render_views already applies its scale's padding to image_bbox.
+    pad = 0.0 if viewport else float(pad_ratio) * float(thickness or 0.0) + 1.0
     x0, y0, x1, y1 = (float(box[0]) - pad, float(box[1]) - pad,
                       float(box[2]) + pad, float(box[3]) + pad)
     if x1 - x0 <= 0 or y1 - y0 <= 0:
@@ -164,14 +209,25 @@ def _window(case: dict, *, thickness: float, pad_ratio: float):
 
 
 def render_case(snapshot: dict, case: dict, *, walls=(), thickness: float = 0.0,
-                width: int | None = None) -> dict | None:
+                width: int | None = None, numbering: bool = False,
+                focus_indices=None) -> dict | None:
     """把一条 PatternCase 画成 PNG（内存里）。
 
     返回 ``{"b64": str, "width": int, "height": int, "bytes": int,
     "focus": int, "walls": int}``；画不出来返回 ``None``（调用方按"无图"处理）。
+
+    ``focus_indices`` selects zero-based positions in entities + derived; when
+    supplied (even empty), it replaces handle matching. INSERTs include children
+    whose ``via.insert`` identifies the selected raw INSERT.
+
+    ``numbering=True`` 时给每个目标图元写上 handle 前 6 位，模型和人都能指着说
+    "第几条"。``focus`` 回传真正被高亮成橙色的图元数——**它是 0 就说明这张图
+    没有指出目标**；那种图给模型看等于让它猜整块区域。目标 handle 对不上
+    （例如目标的 handle 落在块参照上、可见几何是展开后的子图元）时，退化成在
+    目标包围盒上画橙色虚线框，保证"看的是哪一处"永远有明确标记。
     """
     try:
-        from PIL import Image, ImageDraw
+        from PIL import Image, ImageChops, ImageDraw
     except Exception:                                   # 没有 Pillow：退化成无图
         return None
     win = _window(case, thickness=thickness, pad_ratio=RENDER["pad_thickness"])
@@ -192,6 +248,11 @@ def render_case(snapshot: dict, case: dict, *, walls=(), thickness: float = 0.0,
 
     focus_handles = {str(h) for h in (case.get("source_handles")
                                       or case.get("target_handles") or ())}
+    raw = list(snapshot.get("entities") or ()) + list(snapshot.get("derived") or ())
+    exact = None if focus_indices is None else set(focus_indices)
+    insert_handles = {str(raw[i].get("handle")) for i in (exact or ())
+                      if 0 <= i < len(raw) and raw[i].get("type") == "INSERT"
+                      and raw[i].get("handle")}
     wall_handles = {str(h) for h in (case.get("context_handles") or ())}
 
     img = Image.new("RGB", (out_w, out_h), "white")
@@ -204,20 +265,46 @@ def render_case(snapshot: dict, case: dict, *, walls=(), thickness: float = 0.0,
         return not (rec_box[2] < x0 or rec_box[0] > x1
                     or rec_box[3] < y0 or rec_box[1] > y1)
 
-    # 背景图元（含块展开几何）：灰色细线
-    for rec in list(snapshot.get("entities") or ()) + list(snapshot.get("derived") or ()):
+    target_box = case.get("target_bbox") or case.get("bbox") or case.get("region")
+    focused = []
+
+    def paint(rec, segments, *, is_focus):
+        color = COLORS["focus"] if is_focus else COLORS["base"]
+        line_w = int(RENDER["focus_width"] if is_focus else RENDER["base_width"])
+        if rec.get("solid"):
+            # XOR polygon masks implement even-odd filling regardless of loop
+            # orientation/order, preserving holes and nested islands underneath.
+            mask = Image.new("1", img.size)
+            for loop in _loops(rec):
+                if len(loop) >= 3:
+                    ring = Image.new("1", img.size)
+                    ImageDraw.Draw(ring).polygon([pt(p) for p in loop], fill=1)
+                    mask = ImageChops.logical_xor(mask, ring)
+            fill = COLORS["focus_fill"] if is_focus else COLORS["base_fill"]
+            img.paste(fill, (0, 0), mask)
+        for a, b in segments:
+            draw.line([pt(a), pt(b)], fill=color, width=line_w)
+
+    # Exact raw positions take precedence over the legacy handle/bbox match.
+    # INSERT placeholders select their exploded children through provenance.
+    for index, rec in enumerate(raw):
         box = _bbox_of(rec)
         if not _in(box):
             continue
+        segments = _segments(rec)
+        if not segments:
+            continue  # INSERT placeholders must not suppress the fallback box.
         handle = str(rec.get("handle") or "")
-        is_focus = handle in focus_handles
-        color = COLORS["focus"] if is_focus else COLORS["base"]
-        line_w = int(RENDER["focus_width"]) if is_focus else int(RENDER["base_width"])
-        for a, b in _segments(rec):
-            draw.line([pt(a), pt(b)], fill=color, width=line_w)
+        in_target = (target_box is not None and not (
+            box[2] < target_box[0] or box[0] > target_box[2]
+            or box[3] < target_box[1] or box[1] > target_box[3]))
+        is_focus = ((index in exact or
+                     str((rec.get("via") or {}).get("insert") or "") in insert_handles)
+                    if exact is not None else handle in focus_handles and in_target)
         if is_focus:
-            drawn_focus += 1
+            focused.append((rec, segments))
         else:
+            paint(rec, segments, is_focus=False)
             drawn_base += 1
 
     # 已确认的墙：绿色（上下文，只读）
@@ -261,6 +348,39 @@ def render_case(snapshot: dict, case: dict, *, walls=(), thickness: float = 0.0,
             except Exception:
                 pass
 
+    # Targets overlay all context, including solid fills, walls and text.
+    for rec, segments in focused:
+        paint(rec, segments, is_focus=True)
+        drawn_focus += 1
+
+    # 目标 handle 一个都没画出来：画橙色框标出"要判断的就是这里"，并记下来。
+    focus_box = False
+    if drawn_focus == 0:
+        box = case.get("target_bbox") or case.get("bbox") or case.get("region")
+        if isinstance(box, (list, tuple)) and len(box) == 4:
+            x0_, y0_, x1_, y1_ = (float(box[0]), float(box[1]),
+                                  float(box[2]), float(box[3]))
+            corners = [pt((x0_, y0_)), pt((x1_, y0_)), pt((x1_, y1_)),
+                       pt((x0_, y1_)), pt((x0_, y0_))]
+            draw.line(corners, fill=COLORS["focus"],
+                      width=int(RENDER["focus_width"]), joint="curve")
+            focus_box = True
+
+    drawn_numbers = 0
+    if numbering:
+        drawn_numbers = _draw_numbers(
+            draw, [rec for rec, _ in focused],
+            pt=pt, focus_handles=None, font=label_font)
+        if not drawn_numbers and focus_box:
+            box = case.get("target_bbox") or case.get("bbox") or case.get("region")
+            if label_font is not None and isinstance(box, (list, tuple)) and len(box) == 4:
+                try:
+                    draw.text(pt((float(box[2]), float(box[3]))), "TARGET",
+                              fill=LABEL_STYLE["color"], font=label_font)
+                    drawn_numbers = 1
+                except Exception:
+                    pass
+
     buffer = io.BytesIO()
     img.save(buffer, format="PNG", optimize=True)
     raw = buffer.getvalue()
@@ -268,11 +388,12 @@ def render_case(snapshot: dict, case: dict, *, walls=(), thickness: float = 0.0,
         # 太大就降一档分辨率重画（不改变内容，只改像素）
         smaller = max(120, int(out_w * 0.6))
         return render_case(snapshot, case, walls=walls, thickness=thickness,
-                           width=smaller)
+                           width=smaller, numbering=numbering, focus_indices=exact)
     import base64
     return {"b64": base64.b64encode(raw).decode("ascii"), "width": out_w,
             "height": out_h, "bytes": len(raw), "focus": drawn_focus,
-            "walls": drawn_walls, "base": drawn_base}
+            "walls": drawn_walls, "base": drawn_base, "focus_box": focus_box,
+            "numbers": drawn_numbers}
 
 
 def case_renderer(snapshot: dict, *, walls=(), thickness: float = 0.0,
@@ -309,14 +430,16 @@ def summary(cases) -> dict:
 
 
 # --------------------------------------------------------------------- 多尺度视图
-#: 三种观察层次：全局（布局/重复规律）、局部（构件与墙柱关系）、细节（线/弧/填充）
-VIEW_SCALES = ("global", "local", "detail")
+#: 观察层次：全局（布局/重复规律）、局部（构件与墙柱关系）、细节（线/弧/填充）、
+#: closeup（只框住目标本身的最近视图，用于模型说"看不清"时的补看）
+VIEW_SCALES = ("global", "local", "detail", "closeup")
 
 #: 每个尺度的取景与分辨率（比率，不是图纸阈值）
 VIEW_SPEC = {
     "global": {"pad_thickness": 0.0, "width": 640, "shrink": 1.0},
     "local": {"pad_thickness": 6.0, "width": 720, "shrink": 1.0},
     "detail": {"pad_thickness": 1.0, "width": 900, "shrink": 1.0},
+    "closeup": {"pad_thickness": 0.25, "width": 900, "shrink": 1.0},
 }
 
 #: 统一构件编号的配色（画在图元右上角；放进字典，避免被当成几何阈值扫描）
@@ -344,7 +467,7 @@ def _draw_numbers(draw, entities, *, pt, focus_handles, font) -> int:
     drawn = 0
     for rec in entities or ():
         handle = str(rec.get("handle") or "")
-        if handle not in focus_handles:
+        if focus_handles is not None and handle not in focus_handles:
             continue
         box = _bbox_of(rec)
         if not box:
@@ -362,7 +485,7 @@ def _draw_numbers(draw, entities, *, pt, focus_handles, font) -> int:
 
 def render_views(snapshot: dict, focus: dict, *, scales=("local", "detail"),
                  walls=(), thickness: float = 0.0, focus_handles=(),
-                 numbering: bool = True) -> dict:
+                 numbering: bool = True, focus_indices=None) -> dict:
     """多尺度视图：同一个焦点，按层次各画一张（共享编号与配色）。
 
     ``focus`` 至少要有 ``bbox``；``scales`` 从 :data:`VIEW_SCALES` 里取。
@@ -378,6 +501,7 @@ def render_views(snapshot: dict, focus: dict, *, scales=("local", "detail"),
     if not box:
         return {"schema": "vision-views/1.0", "ok": False, "reason": "NO_FOCUS",
                 "views": [], "rendered": 0}
+    focus_indices = None if focus_indices is None else set(focus_indices)
     all_handles = {str(h) for h in (focus_handles or ())}
     for scale in scales:
         spec = VIEW_SPEC.get(str(scale))
@@ -393,10 +517,11 @@ def render_views(snapshot: dict, focus: dict, *, scales=("local", "detail"),
             # far-away labels and outlier geometry do not shrink the plan.
             window = list(snapshot.get("bbox") or window)
         shot = render_case(snapshot, {"bbox": window, "region": window,
-                                      "image_bbox": window,
+                                      "image_bbox": window, "target_bbox": list(box),
                                       "source_handles": list(all_handles)},
                            walls=walls, thickness=thickness,
-                           width=int(spec["width"]))
+                           width=int(spec["width"]), numbering=bool(numbering),
+                           focus_indices=focus_indices)
         if not shot:
             views.append({"scale": scale, "status": "empty"})
             continue
@@ -404,6 +529,8 @@ def render_views(snapshot: dict, focus: dict, *, scales=("local", "detail"),
                       "b64": shot["b64"], "width": shot["width"],
                       "height": shot["height"], "bytes": shot["bytes"],
                       "focus": shot["focus"], "walls": shot["walls"],
+                      "focus_box": bool(shot.get("focus_box")),
+                      "numbers": int(shot.get("numbers") or 0),
                       "numbering": bool(numbering)})
     rendered = [v for v in views if v.get("status") == "rendered"]
     return {"schema": "vision-views/1.0", "ok": bool(rendered),

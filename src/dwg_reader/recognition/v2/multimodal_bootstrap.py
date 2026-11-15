@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import math
 
+from . import component_family as FAM
 from . import component_grammar as GRAMMAR
 
 SCHEMA = "multimodal-bootstrap/1.0"
@@ -112,8 +113,13 @@ def _robust_bbox(entities):
     return _union(keep) or _union([e["bbox"] for e in structures])
 
 
-def select_regions(ir, *, max_regions=6):
-    """Overview + representative block families + spatial tiles, even with no residual."""
+def select_regions(ir, *, max_regions=6, families=(), priority=None):
+    """Overview -> 构件族（按门窗柱优先级）-> 空间分块。
+
+    ``families`` 由 :mod:`component_family` 给出时，观察对象按**构件价值**排队
+    （窗 > 柱 > 门 × 实例数 × 尚未理解的比例），不再"抓到哪个块族看哪个块族"。
+    这是本次改动的要点：首轮模型调用应该花在门窗柱上。
+    """
     entities = ir.get("entities") or []
     bbox = _robust_bbox(entities)
     if bbox is None:
@@ -138,7 +144,27 @@ def select_regions(ir, *, max_regions=6):
         return []
     regions = [overview]
     seen = set()
+    # ---- 1) 构件族优先（门窗柱）：族记录里已有代表实例与全部实例的 uid
+    for row in FAM.select_for_observation(families, limit=max(0, int(max_regions) - 2),
+                                          categories=priority):
+        family = row["family"]
+        rep = family.get("representative") or {}
+        uids = [u for u in (rep.get("uids") or ()) if u in by_uid]
+        box = _union([by_uid[u].get("bbox") for u in uids])
+        if not box:
+            continue
+        region = make("boot:family:" + str(family.get("id"))[:24], box,
+                      seeds=uids, kind="family")
+        if region is None:
+            continue
+        region["family_id"] = family.get("id")
+        region["category_guess"] = family.get("category_guess")
+        region["instances"] = family.get("n")
+        regions.append(region)
+    # ---- 2) 兜底：没有族信息时，仍按重复块族挑几个（老行为）
     for fam in (ir.get("families") or ()):
+        if families:
+            break
         if len(regions) >= int(max_regions):
             break
         uids = [u for u in fam.get("uids") or () if u in by_uid]
@@ -204,7 +230,8 @@ def _scene(raw):
     return result
 
 
-def run(*, ir, graph, snapshot, gateway, ai=None, budget=None, walls=()):
+def run(*, ir, graph, snapshot, gateway, ai=None, budget=None, walls=(),
+        families=(), priority=None):
     """Send overview then local crops to one VLM gateway, within one shared budget."""
     from . import agent_controller as AGENT
     from .. import vision as VISION
@@ -218,7 +245,8 @@ def run(*, ir, graph, snapshot, gateway, ai=None, budget=None, walls=()):
     if not snapshot:
         result["status"] = "no_snapshot"
         return result
-    regions = select_regions(ir, max_regions=int(cfg["max_regions"]))
+    regions = select_regions(ir, max_regions=int(cfg["max_regions"]),
+                             families=families, priority=priority)
     limit = min(int(cfg["max_calls"]), len(regions),
                 int(cfg.get("max_model_calls", cfg["max_calls"])))
     model_vision = bool((ai or {}).get("provider", {}).get("vision", True))
@@ -226,6 +254,12 @@ def run(*, ir, graph, snapshot, gateway, ai=None, budget=None, walls=()):
         overview = reg["kind"] == "global"
         facts = AGENT.observe(ir, graph, reg)
         facts["seed_uids"] = reg["seed_uids"]
+        if reg.get("family_id"):
+            # 族区域额外带"这个族"的事实，让模型针对一个构件族回答
+            for family in families or ():
+                if family.get("id") == reg.get("family_id"):
+                    facts["family"] = FAM.family_facts(family, ir)
+                    break
         # Only the regional geometry may be used for fitting; nothing is inferred
         # from the absolute position of a model-generated bounding box.
         if model_vision:
@@ -272,7 +306,9 @@ def run(*, ir, graph, snapshot, gateway, ai=None, budget=None, walls=()):
                     # originating insert and its expanded children.
                     fit_seeds = (reg["seed_uids"] if reg["kind"] == "family" else [])
                     result["items"].append({"region": reg, "seed_uids": fit_seeds,
-                                            "grammars": valid, "case_id": reg["id"]})
+                                            "grammars": valid, "case_id": reg["id"],
+                                            "family_id": reg.get("family_id"),
+                                            "category_guess": reg.get("category_guess")})
                 row["grammars"] = len(valid)
         result["regions"].append(row)
     result["status"] = "ok" if result["calls"] else "empty"

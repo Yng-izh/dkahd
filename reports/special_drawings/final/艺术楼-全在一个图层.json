@@ -1,0 +1,50 @@
+{
+  "drawing": "艺术楼-全在一个图层.dxf",
+  "target": "assemble",
+  "status": "ok",
+  "seconds": 6.129,
+  "counts": {
+    "column": 57,
+    "wall": 194,
+    "door": 8,
+    "room": 5
+  },
+  "status_by_category": {
+    "column": {
+      "uncertain": 57
+    },
+    "door": {
+      "uncertain": 8
+    },
+    "room": {
+      "uncertain": 2,
+      "confirmed": 3
+    },
+    "wall": {
+      "uncertain": 194
+    }
+  },
+  "needs_review_by_category": {
+    "column": 57,
+    "wall": 194
+  },
+  "room_area_warning_count": 0,
+  "unlayered": {
+    "layer": "0",
+    "entities": 5444,
+    "on_layer": 5444,
+    "ratio": 1.0,
+    "geometric": 4491
+  },
+  "wall_segments": 687,
+  "column_candidates": 78,
+  "door_candidates": 81,
+  "window_candidates": 0,
+  "region_count": 1,
+  "soft_layers": {},
+  "room_boundary_states": {
+    "hypothesis": 2,
+    "observed": 3
+  },
+  "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+}

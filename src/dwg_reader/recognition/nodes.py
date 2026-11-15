@@ -516,7 +516,9 @@ def node_walls_seg(ctx):
         # 界线是短垂线、填充是等距平行线），放进来就是成批假墙假窗。
         wall_layers = sorted({str(e.get("layer")) for e in ctx.inputs["load"]["snapshot"].get("entities") or ()
                               if e.get("layer") and not _is_noise_layer(e.get("layer"))})
-    columns = ctx.inputs.get("columns") or []
+    # 全图新增的待核矩形不能先给墙加分，再借这堵墙反过来证明自己是柱。
+    columns = [c for c in _columns_of(ctx.inputs.get("columns"))
+               if c.get("status") != "pending"]
     walls_seg, candidates, wdiag = wallrec.extract_walls_ext(
         ctx.inputs["load"]["snapshot"], layers=wall_layers,
         allow_single_line=has_symbol(plan, "wall", "single_line"),
@@ -530,46 +532,75 @@ def node_walls_seg(ctx):
             "validation": (wdiag or {}).get("stage_details") or {}}
 
 
+def _columns_of(value) -> list:
+    """``columns`` 节点输出既可能是列表也可能是 {columns, stats}：统一取出列表。"""
+    if isinstance(value, dict):
+        value = value.get("columns") or ()
+    return [c for c in value or () if isinstance(c, dict)]
+
+
 def node_columns(ctx):
+    """全图按同一几何规则找柱；图层仅保留作来源，不控制画法或准入。
+
+    同一根柱的边可以分散在多个层，包括名称看似标注/家具的层。先统一拼接，
+    再验证截面、闭合证据和结构位置；不能按层分别扫描后再合并候选。
+    """
     plan = ctx.inputs["load"]["plan"]
     snap = ctx.inputs["load"]["snapshot"]
-    col_layers = list(dict.fromkeys(list(plan["layers"]["column"]) +
-                                      list(plan.get("soft_layers", {}).get("column") or [])))
-    if not col_layers:
-        # 没有柱层声明：几何主干，全图找闭合轮廓/线段组合（一律标 geometry-only）
-        col_layers = sorted({str(e.get("layer")) for e in snap.get("entities") or ()
-                             if e.get("layer")})
+    declared = set(plan["layers"].get("column") or ()) | set(
+        plan.get("soft_layers", {}).get("column") or ())
+    # 包括块展开图元的图层；按实体类型筛选，不按图层名字猜用途。
+    all_layers = sorted({str(e.get("layer") or "0") for e in R._geo(snap)})
     scale = ctx.inputs["load"].get("scale")
-    shape_cols = set(_shape_blocks(snap, plan, "column",
-                                   scale=ctx.inputs["load"].get("scale"))) | {"_FZH"}
-    out = R.recognize_columns(snap, layers=col_layers or None, scale=scale,
+    shape_cols = set(_shape_blocks(snap, plan, "column", scale=scale)) | {"_FZH"}
+    out = R.recognize_columns(snap, layers=all_layers, scale=scale,
                               block_names=shape_cols)
-    # 柱的证据来源统一：块语义 / 闭合轮廓 / 填充边界 / 线段组合，再按空间重合去重。
-    # 仍然只扫 profile 指明的 column 图层（不恢复"扫全图矩形当柱"的过检策略）。
-    cands = (OPS.run(["closed_contour", "hatch_region"], snap, col_layers, 200.0, CONFIG)
-             if col_layers else [])
-    for r in cands:
-        b = r["bbox"]
-        half = 0.5 * max(1.0, b[2] - b[0], b[3] - b[1])
-        if any(_same_box(b, _col_bbox(c), half) for c in out):
-            continue
-        outline = [[float(p[0]), float(p[1])] for p in (r.get("outline") or [])]
-        if len(outline) < 3:
-            outline = [[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]]
-        handles = [h for h in (r.get("handles") or []) if h]
-        out.append({"outline": outline, "bbox": b,
-                    "w": b[2] - b[0], "h": b[3] - b[1],
-                    "rotation": round(float(r.get("angle") or 0.0), 1),
-                    "center": [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2],
-                    "area": r.get("area"), "evidence": r.get("kind"),
-                    "method": "hatch" if r.get("kind") == "hatch" else "contour",
-                    "layer": r.get("layer"),
-                    "handle": handles[0] if handles else None,
-                    "srcs": [{"handle": h, "type": "CONTOUR", "layer": r.get("layer")}
-                             for h in handles]})
-    # 多画法融合：块 / 线段组合 / 闭合多段线 / 闭合轮廓 / 填充边界统一去重打分
+    # 同位置的轮廓/填充是待融合的证据，不能在融合前因中心接近就丢弃。
+    for r in (OPS.run(["closed_contour", "hatch_region"], snap, all_layers,
+                      float((scale or {}).get("thickness") or 200.0), CONFIG)
+              if all_layers else []):
+        out.append(_column_from_contour(r, layer_scope="global"))
+    for rec in out:
+        layers = {str(s["layer"]) for s in rec.get("srcs") or ()
+                  if s.get("layer") is not None}
+        if rec.get("layer") is not None:
+            layers.add(str(rec["layer"]))
+        rec["layers"] = sorted(layers)
+        rec["layer_scope"] = ("global" if not declared else
+                              "declared" if layers and layers <= declared else
+                              "mixed" if layers & declared else "outside_declared")
+
     axis = R.axis_coords(snap, list(plan["layers"].get("axis") or ()))
-    return R.fuse_columns(out, walls=(), axis=axis, scale=scale)["columns"]
+    # 保留重叠的备选解释，等墙网可用后再做最终抑制。
+    fused = R.fuse_columns(out, walls=(), axis=axis, scale=scale, suppress=False)
+    stats = dict(fused["stats"])
+    stats.update({"declared_layers": len(declared),
+                  "scanned_layers": len(all_layers),
+                  "extra_layers": len(set(all_layers) - declared),
+                  "outside_declared_candidates": sum(
+                      r["layer_scope"] not in ("declared", "global") for r in out)})
+    return {"columns": fused["columns"], "stats": stats}
+
+
+def _column_from_contour(r, *, layer_scope: str) -> dict:
+    """闭合轮廓 / 填充边界 -> 统一柱候选结构（与 recognize_columns 一致）。"""
+    b = r["bbox"]
+    outline = [[float(p[0]), float(p[1])] for p in (r.get("outline") or [])]
+    if len(outline) < 3:
+        outline = [[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]]
+    handles = [h for h in (r.get("handles") or []) if h]
+    rect = r.get("rect") or {}
+    return {"outline": outline, "bbox": b,
+            "w": rect.get("width") or b[2] - b[0],
+            "h": rect.get("height") or b[3] - b[1],
+            "rotation": round(float(rect.get("angle") or r.get("angle") or 0.0), 1),
+            "center": [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2],
+            "area": r.get("area"), "evidence": r.get("kind"),
+            "method": "hatch" if r.get("kind") in ("hatch", "hatch_region") else "contour",
+            "layer": r.get("layer"), "layer_scope": layer_scope,
+            "handle": handles[0] if handles else None,
+            "srcs": [{"handle": h, "type": "CONTOUR", "layer": r.get("layer")}
+                     for h in handles]}
 
 
 def node_columns_verify(ctx):
@@ -583,18 +614,13 @@ def node_columns_verify(ctx):
     所以这里按与墙体相同的两阶段思路补一次：有了墙网，缺边候选要么得到拓扑支持
     转正，要么降级到待核（不进构件、留痕可审）。
     """
-    cols = list(ctx.inputs.get("columns") or ())
+    cols = _columns_of(ctx.inputs.get("columns"))
     walls = ctx.inputs["walls_seg"]["walls_seg"]
     axis = R.axis_coords(ctx.inputs["load"]["snapshot"],
                          list(ctx.inputs["load"]["plan"]["layers"].get("axis") or ()))
     fused = R.fuse_columns(cols, walls=walls, axis=axis,
                            scale=_scale_of(ctx))["columns"]
-    # 归并后可能少于候选数（同位置不同画法合并），按 handle 回填原始层引用
-    by_handle = {c.get("handle"): c for c in cols if c.get("handle")}
-    for c in fused:
-        src = by_handle.get(c.get("handle"))
-        if src and src.get("edges"):
-            c["edges"] = src["edges"]
+    # 融合函数保留来源、画法和边数；不能用旧候选覆盖新融合证据。
     # ---- 模式 B（柱）：同上，模型只否决。待核（pending）不送模型、也不受影响。
     pending_cols = [c for c in fused if c.get("status") == "pending"]
     accepted = [c for c in fused if c.get("status") != "pending"]
@@ -607,8 +633,11 @@ def node_columns_verify(ctx):
             snapshot=ctx.inputs["load"]["snapshot"],
             vision=(ctx.params or {}).get("llm_review_vision", True))
         kept = {id(c) for c in accepted}
-        fused = [c for c in fused
-                 if c.get("status") == "pending" or id(c) in kept]
+        for c in fused:
+            if c.get("status") != "pending" and id(c) not in kept:
+                c.update(status="pending", pending_reason="MODEL_REJECTED",
+                         category_confirmed=False)
+        pending_cols = [c for c in fused if c.get("status") == "pending"]
     return {"columns": fused,
             "stats": {"candidates": len(cols),
                       "emitted": len(accepted),
@@ -980,7 +1009,7 @@ def node_spaces_seed(ctx):
     # 撑爆限额，其余平面的面域一个都出不来（房名会全部变成"无面域"）。
     return SPACES.build_regions(walls_seg,
                                 regions=ctx.inputs["load"].get("regions") or (),
-                                columns=ctx.inputs["columns"],
+                                columns=_columns_of(ctx.inputs.get("columns")),
                                 partitions=ctx.inputs["partitions"],
                                 thick=thick,
                                 barriers=ctx.inputs.get("doors") or (),
@@ -1010,7 +1039,8 @@ def node_opening_judge(ctx):
     # 只有"疑难杂症"（证据冲突/都缺）才送模型，答完立刻写回事实库。
     decisions, plan = OPCASES.decide(
         items, digest=ctx.file_digest,
-        api_key=(ctx.params or {}).get("llm_api_key"))
+        api_key=(ctx.params or {}).get("llm_api_key"),
+        use_model=bool((ctx.params or {}).get("llm_review", True)))
     patch = OPCASES.to_records(decisions, items)
     patch.update({"status": ("ok" if decisions else "no_action"),
                   "items": items[:40],
@@ -1184,7 +1214,7 @@ def node_walls_merge(ctx):
     # 最后一道口径修正（用户给定）：**一面墙开了门窗仍然是一面墙**，只有被柱子或
     # 另一道墙拦住才断开。merge_across_openings 只认得"已采纳的洞口"，门没识别
     # 出来时同一面墙就会碎成两段；这里补上。
-    columns_all = list(ctx.inputs.get("columns") or ())
+    columns_all = _columns_of(ctx.inputs.get("columns"))
     runs_collinear = wallrec.merge_collinear(
         wall_runs, blockers=columns_all, max_gap=3000.0, min_length=250.0)
     stats = dict(ctx.inputs["walls_seg"]["wdiag"])
@@ -1539,7 +1569,8 @@ def node_assemble(ctx):
     frame = inputs["frame"]
     grid = inputs["grid"]
     north = inputs["north"]
-    columns = (inputs.get("columns_verify") or {}).get("columns") or inputs["columns"]
+    columns = _columns_of(inputs.get("columns_verify") if "columns_verify" in inputs
+                          else inputs.get("columns"))
     # C5：给墙写 id 前必须复制，避免污染 walls_merge 的输出（缓存/上游复用）
     wall_runs = [dict(w) for w in inputs["walls_merge"]["wall_runs"]]
     for k, wall in enumerate(wall_runs, 1):
@@ -2460,7 +2491,8 @@ def node_evidence_graph(ctx):
                       walls_seg=i["walls_seg"]["walls_seg"],
                       wall_model=i["wall_model"]["wall_model"],
                       spaces=i["spaces_seed"],
-                      doors=i["doors"], windows=i["windows"], columns=i["columns"],
+                      doors=i["doors"], windows=i["windows"],
+                      columns=_columns_of(i.get("columns")),
                       room_labels=(i["room_labels_seed"] or {}).get("labels") or (),
                       patterns=(i.get("pattern_discovery") or {}).get("cases") or ())
 
@@ -2472,7 +2504,7 @@ def node_quality_gate(ctx):
                       walls_seg=i["walls_seg"]["walls_seg"],
                       wall_model=i["wall_model"]["wall_model"],
                       spaces=i["spaces_seed"], doors=i["doors"], windows=i["windows"],
-                      columns=i["columns"],
+                      columns=_columns_of(i.get("columns")),
                       room_labels=(i["label_filter"] or {}).get("labels") or (),
                       evidence=i["evidence_graph"],
                       openings_selected=i["openings_select"],
@@ -2544,7 +2576,7 @@ def _layer_role_hook(inputs):
             return {}
         return EXEC.execute_layer_role(clean, snapshot=snap, texts=texts,
                                        walls_seg=walls_seg,
-                                       columns=inputs.get("columns") or ())
+                                       columns=_columns_of(inputs.get("columns")))
     return hook
 
 
@@ -2634,7 +2666,7 @@ def node_adaptive_controller(ctx):
     plans = {cid: [COMPILER.plan_from_dict(d) for d in lst]
              for cid, lst in compiled.items()}
     state = {"walls": list(i["walls_seg"]["walls_seg"]),
-             "columns": list(i.get("columns") or ()),
+             "columns": _columns_of(i.get("columns")),
              "doors": list(sel.get("doors") or ()),
              "windows": list(sel.get("windows") or ()),
              "faces": list((i.get("spaces_seed") or {}).get("faces") or ()),
@@ -2642,7 +2674,7 @@ def node_adaptive_controller(ctx):
     result = ADAPT.run(
         state=state, index=i.get("evidence_graph") or {}, cases=gate.get("cases") or (),
         ledger=(i.get("defect_detect") or {}).get("ledger") or {},
-        columns=i.get("columns") or (),
+        columns=_columns_of(i.get("columns")),
         partitions=i.get("partitions") or (),
         thick=(i.get("wall_model") or {}).get("thickness"),
         labels=(i.get("label_filter") or {}).get("labels") or (),

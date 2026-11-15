@@ -1,0 +1,24 @@
+{
+  "layers": {
+    "NOTES": {
+      "semantics": [
+        "ignore"
+      ],
+      "confidence": 0.75,
+      "reason": "注释文字及ROOM_TAG块，非实体",
+      "source": "llm"
+    }
+  },
+  "symbols": {
+    "column": [],
+    "door": []
+  },
+  "operator_hints": {},
+  "unit_hypothesis": null,
+  "scope": {},
+  "profile_version": "2.0",
+  "source": "auto-llm",
+  "dropped_layers": [],
+  "dropped_operators": [],
+  "digest": "937b066c482f0504e6bef808cb3240545297fafcc80d23dae52ea52f4a764e13"
+}

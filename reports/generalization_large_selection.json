@@ -1,0 +1,63 @@
+{
+  "doors": {
+    "n": 310,
+    "types": {
+      "arc": 310
+    },
+    "layers": {
+      "LATRINE": 1,
+      "20180112": 1,
+      "0": 205,
+      "J-洁具": 53,
+      "WALL": 1,
+      "CURTWALL": 1,
+      "FF-【活动成品家具】": 23,
+      "家具": 6,
+      "ELE": 1,
+      "LVTRY": 1,
+      "J-家具": 8,
+      "Q 墙身完成面": 8,
+      "防火分区": 1
+    }
+  },
+  "windows": {
+    "n": 6,
+    "types": {
+      "arc": 6
+    },
+    "layers": {
+      "直饮水": 4,
+      "WINDOW": 2
+    }
+  },
+  "openings_select": {
+    "doors": 93,
+    "windows": 2,
+    "door_types": {
+      "arc": 93
+    },
+    "door_layers": {
+      "0": 64,
+      "J-家具": 8,
+      "FF-【活动成品家具】": 9,
+      "J-洁具": 11,
+      "20180112": 1
+    }
+  },
+  "openings_unify": {
+    "openings": 241,
+    "doors": 239,
+    "windows": 2,
+    "dropped": 39,
+    "shadowed": 0,
+    "unplaced": 159
+  },
+  "spaces_seed": {
+    "faces": 73,
+    "observed_faces": 39,
+    "open_spaces": 0
+  },
+  "texts": {
+    "n": 1309
+  }
+}

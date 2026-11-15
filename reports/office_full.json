@@ -1,0 +1,246 @@
+{
+  "file": "办公楼.dxf",
+  "targets": [
+    "assemble"
+  ],
+  "duration_seconds": 27.74,
+  "counts": {
+    "frame": 2,
+    "grid_axis": 26,
+    "north_arrow": 1,
+    "column": 38,
+    "wall": 31,
+    "door": 30,
+    "window": 32,
+    "room": 21,
+    "stair": 2,
+    "step": 3,
+    "apron": 1
+  },
+  "partial_counts": {
+    "wall_segments": 146,
+    "column_candidates": 38,
+    "space_faces": 31
+  },
+  "total": 187,
+  "room_boundary": {
+    "hypothesis": 20,
+    "observed": 1
+  },
+  "room_status": {
+    "uncertain": 21
+  },
+  "repair": {
+    "runs": 20,
+    "applied": 0,
+    "rolled_back": 20,
+    "rejected": 0,
+    "budget": {
+      "max_cases": 12,
+      "max_runs": 24,
+      "max_ms": 20000.0,
+      "plan_tries": 2,
+      "max_llm_calls": 6,
+      "used_runs": 20,
+      "skipped_duplicate_runs": 0
+    },
+    "rollback_verdicts": {
+      "REJECT:geometry,topology,isolation": 3,
+      "NO_CHANGE": 10,
+      "REJECT:topology": 7
+    }
+  },
+  "finalstate": {
+    "provenance": {
+      "walls": 146,
+      "columns": 38,
+      "doors": 30,
+      "windows": 32,
+      "patch": "skipped",
+      "calibrated": 15
+    },
+    "unresolved": 0
+  },
+  "node_times": {
+    "load": {
+      "status": "ok",
+      "ms": 745.53
+    },
+    "columns": {
+      "status": "ok",
+      "ms": 218.5
+    },
+    "grid": {
+      "status": "ok",
+      "ms": 0.42
+    },
+    "partitions": {
+      "status": "ok",
+      "ms": 0.01
+    },
+    "raw_evidence": {
+      "status": "ok",
+      "ms": 147.59
+    },
+    "texts": {
+      "status": "ok",
+      "ms": 2.37
+    },
+    "frame": {
+      "status": "ok",
+      "ms": 2.06
+    },
+    "north": {
+      "status": "ok",
+      "ms": 56.59
+    },
+    "room_labels_seed": {
+      "status": "ok",
+      "ms": 0.79
+    },
+    "label_filter": {
+      "status": "ok",
+      "ms": 0.33
+    },
+    "stairs": {
+      "status": "ok",
+      "ms": 2.04
+    },
+    "walls_seg": {
+      "status": "ok",
+      "ms": 56.11
+    },
+    "columns_verify": {
+      "status": "ok",
+      "ms": 1.84
+    },
+    "doors": {
+      "status": "ok",
+      "ms": 3.93
+    },
+    "spaces_seed": {
+      "status": "ok",
+      "ms": 1783.11
+    },
+    "wall_model": {
+      "status": "ok",
+      "ms": 3.81
+    },
+    "windows": {
+      "status": "ok",
+      "ms": 92.83
+    },
+    "evidence_graph": {
+      "status": "ok",
+      "ms": 377.84
+    },
+    "opening_judge": {
+      "status": "ok",
+      "ms": 3.62
+    },
+    "openings_unify": {
+      "status": "ok",
+      "ms": 3.79
+    },
+    "openings_select": {
+      "status": "ok",
+      "ms": 3.38
+    },
+    "defect_detect": {
+      "status": "ok",
+      "ms": 572.53
+    },
+    "repair_options": {
+      "status": "ok",
+      "ms": 0.42
+    },
+    "quality_gate": {
+      "status": "ok",
+      "ms": 2228.68
+    },
+    "llm_reason": {
+      "status": "ok",
+      "ms": 0.02
+    },
+    "repair_planner": {
+      "status": "ok",
+      "ms": 0.04
+    },
+    "space_cases": {
+      "status": "ok",
+      "ms": 8.0
+    },
+    "space_judge": {
+      "status": "ok",
+      "ms": 0.01
+    },
+    "space_routing": {
+      "status": "ok",
+      "ms": 0.02
+    },
+    "validate_proposal": {
+      "status": "ok",
+      "ms": 0.01
+    },
+    "plan_compile": {
+      "status": "ok",
+      "ms": 0.96
+    },
+    "adaptive_controller": {
+      "status": "ok",
+      "ms": 21159.06
+    },
+    "affected_recompute": {
+      "status": "ok",
+      "ms": 0.03
+    },
+    "finalize_patch": {
+      "status": "ok",
+      "ms": 0.01
+    },
+    "final_candidate_state": {
+      "status": "ok",
+      "ms": 1.44
+    },
+    "repair_audit": {
+      "status": "ok",
+      "ms": 0.04
+    },
+    "final_audit": {
+      "status": "ok",
+      "ms": 1.2
+    },
+    "walls_merge": {
+      "status": "ok",
+      "ms": 2.69
+    },
+    "apron": {
+      "status": "ok",
+      "ms": 2.14
+    },
+    "entrance_steps": {
+      "status": "ok",
+      "ms": 0.81
+    },
+    "envelope": {
+      "status": "ok",
+      "ms": 0.06
+    },
+    "room_labels": {
+      "status": "ok",
+      "ms": 0.53
+    },
+    "rooms": {
+      "status": "ok",
+      "ms": 1.96
+    },
+    "steps": {
+      "status": "ok",
+      "ms": 1.31
+    },
+    "assemble": {
+      "status": "ok",
+      "ms": 773.89
+    }
+  }
+}

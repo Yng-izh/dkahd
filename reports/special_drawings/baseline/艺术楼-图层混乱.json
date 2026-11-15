@@ -1,0 +1,30 @@
+{
+  "drawing": "艺术楼-图层混乱.dxf",
+  "target": "assemble",
+  "status": "ok",
+  "seconds": 2.912,
+  "counts": {
+    "grid_axis": 67,
+    "column": 7,
+    "wall": 67,
+    "room": 3,
+    "stair": 3
+  },
+  "wall_segments": 141,
+  "column_candidates": 7,
+  "door_candidates": 0,
+  "window_candidates": 0,
+  "region_count": 2,
+  "soft_layers": {
+    "wall": [
+      "PUB_WALL"
+    ],
+    "column": [],
+    "door": [],
+    "window": [
+      "2"
+    ]
+  },
+  "room_boundary_states": {},
+  "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+}

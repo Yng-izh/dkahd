@@ -1,0 +1,1934 @@
+{
+ "12hztxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 433,
+  "size": 1237287
+ },
+ "1hztxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171621
+ },
+ "@1-gbcbig.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 705,
+  "size": 902841
+ },
+ "@augjpvt.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 559,
+  "size": 491027
+ },
+ "@extfont2.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 559,
+  "size": 490881
+ },
+ "amdtsymbols.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 1217
+ },
+ "acaderef.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 823
+ },
+ "adbom.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 23,
+  "size": 966
+ },
+ "addwg.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 16,
+  "size": 1684
+ },
+ "ams_dx1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171621
+ },
+ "batang.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 559,
+  "size": 631724
+ },
+ "big_font.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 627,
+  "size": 823998
+ },
+ "cadhd.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 563,
+  "size": 385574
+ },
+ "cdm.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 3930
+ },
+ "cgdh2.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 691,
+  "size": 1696435
+ },
+ "china-old.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 988794
+ },
+ "china_ds.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 433,
+  "size": 1237287
+ },
+ "ctxt1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 705,
+  "size": 902841
+ },
+ "ctxt2.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 705,
+  "size": 902841
+ },
+ "dthz.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 433,
+  "size": 1237287
+ },
+ "dtzf.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5186
+ },
+ "engineering.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 17092
+ },
+ "eref.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 793
+ },
+ "fhgs.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 35,
+  "size": 116377
+ },
+ "fs64f.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 1015325
+ },
+ "fssx.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 1385396
+ },
+ "gbhzfs.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 471,
+  "size": 1167625
+ },
+ "gbxwxt.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5264
+ },
+ "gh9.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 605,
+  "size": 603491
+ },
+ "gsc2.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 157,
+  "size": 1302203
+ },
+ "gssb.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 48,
+  "size": 1833
+ },
+ "gvht.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 465,
+  "size": 1833565
+ },
+ "hz100big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 118
+ },
+ "hz51big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz52big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz53big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz54big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz55big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz56big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz57big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz58big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz59big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz60big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz61big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz62big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz63big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz64big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz65big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz66big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz67big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz68big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz69big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz70big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz71big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz72big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz73big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz74big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz75big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz76big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz77big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz78big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz79big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz80big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz81big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz82big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz83big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz84big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz85big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz86big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz87big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz88big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz89big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hz90big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 117
+ },
+ "hztxto.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 433,
+  "size": 1237287
+ },
+ "h_china.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 988794
+ },
+ "h_hztxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "haiwenhz.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 470,
+  "size": 1261464
+ },
+ "hangeul.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 551,
+  "size": 160055
+ },
+ "hcm.shx": {
+  "type": "bigfont",
+  "encoding": "ascii",
+  "shapes": 3,
+  "size": 130
+ },
+ "hfs.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 1385396
+ },
+ "hmkxfs1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 455,
+  "size": 1691472
+ },
+ "hsa.shx": {
+  "type": "bigfont",
+  "encoding": "shift_jis",
+  "shapes": 310,
+  "size": 233298
+ },
+ "hsc.shx": {
+  "type": "bigfont",
+  "encoding": "shift_jis",
+  "shapes": 561,
+  "size": 937725
+ },
+ "hsg1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 262,
+  "size": 16428
+ },
+ "ht1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 456,
+  "size": 1416591
+ },
+ "ht64f.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 748367
+ },
+ "hthz.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 1344638
+ },
+ "htsx.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 1301367
+ },
+ "httxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 451,
+  "size": 497723
+ },
+ "hz.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 621,
+  "size": 538118
+ },
+ "hz1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 530403
+ },
+ "hzabd.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 546,
+  "size": 576890
+ },
+ "hzbf.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 433,
+  "size": 1237287
+ },
+ "hzdf2.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 231,
+  "size": 1315796
+ },
+ "hzfsorg.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "hzfsd.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "hzfse.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 433,
+  "size": 1291391
+ },
+ "hzk0.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 571,
+  "size": 2342997
+ },
+ "hznum.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 451,
+  "size": 497723
+ },
+ "hztxt-1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 483,
+  "size": 1207736
+ },
+ "hztxt-tz.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "hztxt-fs.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "hztxt-han.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "hztxt-mobo.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "hztxt1-02.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 632,
+  "size": 944683
+ },
+ "hztxt1a.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 632,
+  "size": 944683
+ },
+ "hztxt22.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 740,
+  "size": 525521
+ },
+ "hztxt3-1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 740,
+  "size": 525521
+ },
+ "hztxt3.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171621
+ },
+ "hztxt5.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "hztxt8.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 632,
+  "size": 944683
+ },
+ "hztxte.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 483,
+  "size": 1207729
+ },
+ "hztxta.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 451,
+  "size": 497723
+ },
+ "hztxtabd.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 613,
+  "size": 542913
+ },
+ "hztxtbs.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 740,
+  "size": 525521
+ },
+ "hztxtdsf.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "hztxtq.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171621
+ },
+ "hztxtt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 433,
+  "size": 1291391
+ },
+ "hztxtx.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 512,
+  "size": 435748
+ },
+ "hztxtxq.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "hztxtzzz.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 740,
+  "size": 525521
+ },
+ "hzxy1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 430,
+  "size": 963816
+ },
+ "ic-complex.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 19504
+ },
+ "ic-isocp.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 13494
+ },
+ "ic-italic.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 19916
+ },
+ "ic-italicc.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 20045
+ },
+ "ic-italict.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 29153
+ },
+ "ic-monotxt.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 9043
+ },
+ "ic-romanc.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 19057
+ },
+ "ic-romand.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 19285
+ },
+ "ic-romans.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 11530
+ },
+ "ic-romant.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 31140
+ },
+ "ic-simplex.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 11848
+ },
+ "jhd.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 387,
+  "size": 227984
+ },
+ "khtch.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 622,
+  "size": 987989
+ },
+ "kordansun.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 687,
+  "size": 1216445
+ },
+ "kordouble.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 562,
+  "size": 284345
+ },
+ "korfast.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 562,
+  "size": 221729
+ },
+ "koroldout.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 562,
+  "size": 695981
+ },
+ "koroutline.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 562,
+  "size": 284751
+ },
+ "koroutline1.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 562,
+  "size": 294848
+ },
+ "korsimple.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 732,
+  "size": 834156
+ },
+ "kshp.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 560,
+  "size": 185979
+ },
+ "kt64f.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 959730
+ },
+ "ktsx.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 1406171
+ },
+ "mst_stc.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1164596
+ },
+ "mehantxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 727,
+  "size": 356749
+ },
+ "ngsw.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 564,
+  "size": 387573
+ },
+ "pdatxt.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 16877
+ },
+ "slhztxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1163468
+ },
+ "symb_fastbig.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 2,
+  "size": 122
+ },
+ "sim.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 17776
+ },
+ "single-line fangsongbig.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 800,
+  "size": 562679
+ },
+ "single-line kaitibig.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 800,
+  "size": 1177844
+ },
+ "sinotxt1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 613,
+  "size": 542913
+ },
+ "sj.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 738,
+  "size": 309273
+ },
+ "st64f.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 825153
+ },
+ "stdb1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 753,
+  "size": 358409
+ },
+ "stdb2.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 632,
+  "size": 944683
+ },
+ "stkx.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 613,
+  "size": 542913
+ },
+ "stsx.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 1344638
+ },
+ "tk.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1164596
+ },
+ "txtr14.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8415
+ },
+ "tjhz.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "tjhzd.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 741,
+  "size": 2314173
+ },
+ "tjhzk.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 741,
+  "size": 2314173
+ },
+ "tssdeng1.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 19053
+ },
+ "tssdeng2.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 23870
+ },
+ "tssdeng21.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 24958
+ },
+ "txt1b.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8415
+ },
+ "xcoo.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1164596
+ },
+ "z.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "_宋体hztxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 451,
+  "size": 530403
+ },
+ "aaa-hztxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 433,
+  "size": 1237287
+ },
+ "aehalf.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 13743
+ },
+ "almrc.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 463,
+  "size": 1215026
+ },
+ "amgdt.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5188
+ },
+ "arch1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 585,
+  "size": 665117
+ },
+ "augjpext.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 559,
+  "size": 484981
+ },
+ "augjphlf.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 4920
+ },
+ "augjpslm.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 4572
+ },
+ "augjpspc.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 30717
+ },
+ "augjpvt.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 559,
+  "size": 491027
+ },
+ "bitch.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 587,
+  "size": 406175
+ },
+ "bigfont.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 594,
+  "size": 324294
+ },
+ "cadhl.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 564,
+  "size": 483700
+ },
+ "cai_romans.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5186
+ },
+ "cgd.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 559,
+  "size": 329293
+ },
+ "cgs.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 559,
+  "size": 223768
+ },
+ "chinax.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 585,
+  "size": 665053
+ },
+ "chineset.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 585,
+  "size": 665117
+ },
+ "chng.shx": {
+  "type": "bigfont",
+  "encoding": "shift_jis",
+  "shapes": 262,
+  "size": 20752
+ },
+ "ciwhs.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 560,
+  "size": 210575
+ },
+ "complex.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 30486
+ },
+ "cyd.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 556,
+  "size": 632572
+ },
+ "dayukp.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 585,
+  "size": 665053
+ },
+ "dayusp.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 585,
+  "size": 665117
+ },
+ "dytxt1.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8532
+ },
+ "dytxt2.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8532
+ },
+ "dytxt3.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8532
+ },
+ "extfont.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 626,
+  "size": 436560
+ },
+ "extfont2.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 559,
+  "size": 490871
+ },
+ "exthalf2.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 30122
+ },
+ "extslim2.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 30498
+ },
+ "front.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5186
+ },
+ "g12f13.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 3608
+ },
+ "gbcbig.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 705,
+  "size": 902841
+ },
+ "gbcbig01.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 705,
+  "size": 902266
+ },
+ "gbeitc.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 4911
+ },
+ "gbenor.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5186
+ },
+ "gchz.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 705,
+  "size": 902832
+ },
+ "geniso12.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 3608
+ },
+ "gothice.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 37923
+ },
+ "gothicg.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 36618
+ },
+ "gothici.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 33741
+ },
+ "greekc.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 11419
+ },
+ "greeks.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8089
+ },
+ "gs.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 738,
+  "size": 309277
+ },
+ "hans.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 482,
+  "size": 172125
+ },
+ "hd1.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 547,
+  "size": 322462
+ },
+ "hd2.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 387,
+  "size": 227984
+ },
+ "hdg.shx": {
+  "type": "bigfont",
+  "encoding": "shift_jis",
+  "shapes": 263,
+  "size": 19727
+ },
+ "hdh.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 536,
+  "size": 247593
+ },
+ "hgdtxt.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 387,
+  "size": 227984
+ },
+ "hgs.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 577,
+  "size": 297950
+ },
+ "hgtxt.shx": {
+  "type": "bigfont",
+  "encoding": "shift_jis",
+  "shapes": 310,
+  "size": 209217
+ },
+ "hhzfs.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 447,
+  "size": 2981169
+ },
+ "hhzkt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 447,
+  "size": 3052827
+ },
+ "hnm.shx": {
+  "type": "bigfont",
+  "encoding": "ascii",
+  "shapes": 3,
+  "size": 130
+ },
+ "hopchn01.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 543,
+  "size": 1964672
+ },
+ "hopchn02.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 513,
+  "size": 1508864
+ },
+ "hs.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 134,
+  "size": 249023
+ },
+ "hs2.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 310,
+  "size": 233298
+ },
+ "hsw.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 462,
+  "size": 215571
+ },
+ "hz2.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 433,
+  "size": 1237290
+ },
+ "hzd.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 485,
+  "size": 1199310
+ },
+ "hzf.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1133356
+ },
+ "hzfsbak.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 465,
+  "size": 2023019
+ },
+ "hztxt-pm.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 740,
+  "size": 525521
+ },
+ "hztxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171621
+ },
+ "hztxt21.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "hztxt31.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 740,
+  "size": 525521
+ },
+ "hztxt_1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 613,
+  "size": 542913
+ },
+ "hztxtj1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 620,
+  "size": 530403
+ },
+ "hztxtwz.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "intecad.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 516,
+  "size": 1327090
+ },
+ "isock.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5117
+ },
+ "isocp.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 7322
+ },
+ "isocp2.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 7271
+ },
+ "isocp3.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 7271
+ },
+ "isoct.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 7243
+ },
+ "isoct2.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 7243
+ },
+ "isoct3.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 7242
+ },
+ "italic.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 27325
+ },
+ "italicc.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 26625
+ },
+ "italict.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 37709
+ },
+ "je.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 424,
+  "size": 842894
+ },
+ "jg_hztxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 470,
+  "size": 1261464
+ },
+ "kfnt.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 738,
+  "size": 309273
+ },
+ "korgothic.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 364,
+  "size": 1461781
+ },
+ "ktxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171621
+ },
+ "letter.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171621
+ },
+ "lfk.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 585,
+  "size": 665117
+ },
+ "monotxt.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8816
+ },
+ "msdefault.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 25969
+ },
+ "nhztxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171617
+ },
+ "nhztxt1.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 481,
+  "size": 997717
+ },
+ "okj.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 585,
+  "size": 665117
+ },
+ "ptxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1171621
+ },
+ "romanc.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 23057
+ },
+ "romanc1.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 23920
+ },
+ "romand.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 22534
+ },
+ "romans.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 16086
+ },
+ "romans2.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 14883
+ },
+ "romant.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 39728
+ },
+ "scriptc.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 26587
+ },
+ "scripts.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 20244
+ },
+ "scsw.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 748,
+  "size": 828827
+ },
+ "shc.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 525,
+  "size": 39946
+ },
+ "shsw.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 562,
+  "size": 196087
+ },
+ "simplex.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 16602
+ },
+ "simplex2.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 16605
+ },
+ "spec_bar.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 46,
+  "size": 1767
+ },
+ "spec_sl.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 46,
+  "size": 1536
+ },
+ "special.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 46,
+  "size": 1536
+ },
+ "stedia.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5516
+ },
+ "thcbig.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 705,
+  "size": 902266
+ },
+ "theitc.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 4911
+ },
+ "thenor.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5188
+ },
+ "tradchbig.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 800,
+  "size": 1212429
+ },
+ "tssdchn.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1164629
+ },
+ "tssdeng.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 16877
+ },
+ "txt-2002.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8489
+ },
+ "txt-old.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8415
+ },
+ "txt-y.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5304
+ },
+ "txt.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8489
+ },
+ "txt14.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8415
+ },
+ "txt15.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8489
+ },
+ "txt20.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8483
+ },
+ "txt55.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8489
+ },
+ "txt_1.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 8415
+ },
+ "txt_2.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 4911
+ },
+ "visiohg.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 745,
+  "size": 941973
+ },
+ "visiojp.shx": {
+  "type": "bigfont",
+  "encoding": "cp949",
+  "shapes": 605,
+  "size": 978052
+ },
+ "visiotc.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 585,
+  "size": 665053
+ },
+ "whgdtxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 324,
+  "size": 223699
+ },
+ "whgtxt.shx": {
+  "type": "bigfont",
+  "encoding": "shift_jis",
+  "shapes": 530,
+  "size": 196069
+ },
+ "whtgtxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 537,
+  "size": 648211
+ },
+ "whtmtxt.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 537,
+  "size": 916632
+ },
+ "wlc-c.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 705,
+  "size": 895822
+ },
+ "wlc-e1.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5186
+ },
+ "wlc-e2.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 4911
+ },
+ "~hzdx.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 464,
+  "size": 1164596
+ },
+ "中文.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 705,
+  "size": 902841
+ },
+ "宋体ttfbig.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 800,
+  "size": 2209218
+ },
+ "宋体big.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 800,
+  "size": 1934360
+ },
+ "寒鹰中文.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 255,
+  "size": 589169
+ },
+ "工程汉字.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 705,
+  "size": 902832
+ },
+ "斜体西文.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 4911
+ },
+ "楷体ttfbig.shx": {
+  "type": "bigfont",
+  "encoding": "gbk",
+  "shapes": 800,
+  "size": 2889124
+ },
+ "正体西文.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5188
+ },
+ "西文.shx": {
+  "type": "unifont",
+  "encoding": "unicode",
+  "shapes": 0,
+  "size": 5186
+ }
+}

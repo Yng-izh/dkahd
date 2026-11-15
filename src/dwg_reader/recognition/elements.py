@@ -241,9 +241,11 @@ def _rects_from_lines(snapshot, layers, *, short_min=150.0, short_max=2000.0,
         short_min = min(short_min, th.get("pier_short_min") or short_min)
 
     hs, vs = [], []
+    source_layers = {}
     for e in _geo(snapshot):
-        if e.get("type") != "LINE" or e.get("layer") not in layers:
+        if e.get("type") != "LINE" or str(e.get("layer") or "0") not in layers:
             continue
+        source_layers[e["handle"]] = e.get("layer") or "0"
         (x1, y1), (x2, y2) = e["start"], e["end"]
         if abs(y1 - y2) <= 1.5 and abs(x2 - x1) > 50:
             hs.append((min(x1, x2), max(x1, x2), y1, e["handle"]))
@@ -267,39 +269,62 @@ def _rects_from_lines(snapshot, layers, *, short_min=150.0, short_max=2000.0,
                     "bbox": [x0, ylo, x1, yhi], "w": w, "h": h,
                     "rotation": 0.0, "center": [(x0 + x1) / 2.0, (ylo + yhi) / 2.0],
                     "handle": handles[0], "edges": edges,
-                    "srcs": [{"handle": hd, "type": "LINE"} for hd in handles if hd]})
+                    "srcs": [{"handle": hd, "type": "LINE",
+                              "layer": source_layers.get(hd)} for hd in handles if hd]})
 
-    # ---- 两条平行边 + 端部封口（水平边给上下界，竖直边给左右界）
-    for i in range(len(hs)):
-        ax0, ax1, y0, h0 = hs[i]
-        for j in range(i + 1, len(hs)):
-            bx0, bx1, y1, h1 = hs[j]
-            if abs(ax0 - bx0) > 5 or abs(ax1 - bx1) > 5 or abs(y0 - y1) < 50:
+    # 全图查找不能再遍历所有线对。按端点跨度及侧向位置建索引，
+    # 只查询尺寸允许的邻域；索引不含图层，同一矩形允许跨层拼接。
+    def pairs(lines):
+        buckets = {}
+        for line in lines:
+            lo, hi, pos, _ = line
+            # 两端各允许 5 单位偏差，预筛要包含该余量，最终尺寸仍由 _emit 校验。
+            if not (max(0.0, short_min - 10.0) <= hi - lo <= long_max):
                 continue
-            ylo, yhi = min(y0, y1), max(y0, y1)
-            x0, x1 = min(ax0, bx0), max(ax1, bx1)
-            left = [v for v in vs if abs(v[2] - x0) <= 5 and v[0] <= ylo + 5 and v[1] >= yhi - 5]
-            right = [v for v in vs if abs(v[2] - x1) <= 5 and v[0] <= ylo + 5 and v[1] >= yhi - 5]
-            if left and right:
-                _emit(x0, x1, ylo, yhi, [h0, h1, left[0][3], right[0][3]], 4)
-            elif left or right:
-                _emit(x0, x1, ylo, yhi, [h0, h1, (left or right)[0][3]], 3)
+            cell = (math.floor(lo / 5), math.floor(hi / 5),
+                    math.floor(pos / long_max))
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for dz in (-1, 0, 1):
+                        for other in buckets.get((cell[0] + dx, cell[1] + dy,
+                                                  cell[2] + dz), ()):
+                            if (abs(lo - other[0]) <= 5 and abs(hi - other[1]) <= 5
+                                    and 50 <= abs(pos - other[2]) <= long_max):
+                                yield other, line
+            buckets.setdefault(cell, []).append(line)
 
-    # ---- 竖向为主：两条竖直边 + 端部横向封口（高窄柱、构造柱）
-    for i in range(len(vs)):
-        ay0, ay1, x0, v0 = vs[i]
-        for j in range(i + 1, len(vs)):
-            by0, by1, x1, v1 = vs[j]
-            if abs(ay0 - by0) > 5 or abs(ay1 - by1) > 5 or abs(x0 - x1) < 50:
-                continue
-            xlo, xhi = min(x0, x1), max(x0, x1)
-            ylo, yhi = min(ay0, by0), max(ay1, by1)
-            bot = [h for h in hs if abs(h[2] - ylo) <= 5 and h[0] <= xlo + 5 and h[1] >= xhi - 5]
-            top = [h for h in hs if abs(h[2] - yhi) <= 5 and h[0] <= xlo + 5 and h[1] >= xhi - 5]
-            if bot and top:
-                _emit(xlo, xhi, ylo, yhi, [v0, v1, bot[0][3], top[0][3]], 4)
-            elif bot or top:
-                _emit(xlo, xhi, ylo, yhi, [v0, v1, (bot or top)[0][3]], 3)
+    def closure_index(lines):
+        index = {}
+        for line in lines:
+            index.setdefault(math.floor(line[2] / 5), []).append(line)
+        return index
+
+    def closure(index, pos, lo, hi):
+        cell = math.floor(pos / 5)
+        for shift in (-1, 0, 1):
+            for line in index.get(cell + shift, ()):
+                if abs(line[2] - pos) <= 5 and line[0] <= lo + 5 and line[1] >= hi - 5:
+                    return line
+        return None
+
+    horizontal, vertical = closure_index(hs), closure_index(vs)
+    for (ax0, ax1, y0, h0), (bx0, bx1, y1, h1) in pairs(hs):
+        ylo, yhi = min(y0, y1), max(y0, y1)
+        x0, x1 = min(ax0, bx0), max(ax1, bx1)
+        left, right = closure(vertical, x0, ylo, yhi), closure(vertical, x1, ylo, yhi)
+        if left and right:
+            _emit(x0, x1, ylo, yhi, [h0, h1, left[3], right[3]], 4)
+        elif left or right:
+            _emit(x0, x1, ylo, yhi, [h0, h1, (left or right)[3]], 3)
+
+    for (ay0, ay1, x0, v0), (by0, by1, x1, v1) in pairs(vs):
+        xlo, xhi = min(x0, x1), max(x0, x1)
+        ylo, yhi = min(ay0, by0), max(ay1, by1)
+        bot, top = closure(horizontal, ylo, xlo, xhi), closure(horizontal, yhi, xlo, xhi)
+        if bot and top:
+            _emit(xlo, xhi, ylo, yhi, [v0, v1, bot[3], top[3]], 4)
+        elif bot or top:
+            _emit(xlo, xhi, ylo, yhi, [v0, v1, (bot or top)[3]], 3)
 
     return out
 
@@ -320,7 +345,7 @@ def _rotated_rects_from_lines(snapshot, layers, *, scale=None):
         short_min, long_max = 150.0, 2000.0
     vertices, segments = {}, []
     for rec in _geo(snapshot):
-        if rec.get("type") != "LINE" or rec.get("layer") not in layers:
+        if rec.get("type") != "LINE" or str(rec.get("layer") or "0") not in layers:
             continue
         a, b = rec.get("start"), rec.get("end")
         if not a or not b:
@@ -388,7 +413,11 @@ def _rotated_rects_from_lines(snapshot, layers, *, scale=None):
                                     "rotation": math.degrees(math.atan2(vectors[0][1], vectors[0][0])) % 180,
                                     "center": [sum(q[0] for q in xy) / 4, sum(q[1] for q in xy) / 4],
                                     "handle": handles[0], "edges": 4,
-                                    "srcs": [{"handle": h, "type": "LINE"} for h in handles if h]})
+                                    "srcs": [{"handle": segments[t][2].get("handle"),
+                                              "type": "LINE",
+                                              "layer": segments[t][2].get("layer") or "0"}
+                                             for t in sorted(ids)
+                                             if segments[t][2].get("handle")]})
     return results
 
 
@@ -404,7 +433,7 @@ def _rects_from_lwpolyline(snapshot, layers):
     for e in _geo(snapshot):
         if e.get("type") != "LWPOLYLINE" or not e.get("closed"):
             continue
-        if e.get("layer") not in layers:
+        if str(e.get("layer") or "0") not in layers:
             continue
         pts = [[float(p[0]), float(p[1])] for p in e.get("points", ())]
         if len(pts) == 5 and math.dist(pts[0], pts[-1]) < 2.0:
@@ -436,7 +465,8 @@ def _rects_from_lwpolyline(snapshot, layers):
                     "center": [sum(p[0] for p in pts) / 4,
                                sum(p[1] for p in pts) / 4],
                     "handle": e["handle"],
-                    "srcs": [{"handle": e["handle"], "type": "LWPOLYLINE"}]})
+                    "srcs": [{"handle": e["handle"], "type": "LWPOLYLINE",
+                              "layer": e.get("layer") or "0"}]})
     return out
 
 
@@ -511,6 +541,9 @@ def recognize_columns(snapshot, layers=None, *, scale=None, block_names=None):
                     "handle": e["handle"], "method": "block",
                     "layer": e.get("layer"),
                     "named": bool(e.get("name") == "_FZH"),
+                    "category_confirmed": e.get("name") == "_FZH",
+                    "category_basis": "catalog_block" if e.get("name") == "_FZH" else None,
+                    "block_name": e.get("name"),
                     "footprint": (footprint.get(e.get("name")) or {}).get("why"),
                     "srcs": [{"handle": e["handle"], "type": "INSERT",
                               "layer": e.get("layer"), "role": "柱块参照"}]})
@@ -601,8 +634,27 @@ def _near(values, v, tol) -> bool:
     return any(abs(float(u) - v) <= tol for u in values or ())
 
 
+def _column_evidence(rec):
+    """保留每种画法的原始来源；重复解释同一图元不算两份独立证据。"""
+    if rec.get("method_evidence"):
+        return [{"method": row["method"],
+                 "handles": sorted(set(str(h) for h in row.get("handles") or () if h))}
+                for row in rec["method_evidence"] if row.get("method")]
+    handles = sorted({str(s["handle"]) for s in rec.get("srcs") or () if s.get("handle")}
+                     | ({str(rec["handle"])} if rec.get("handle") else set()))
+    methods = set(rec.get("methods") or ()) | {rec.get("method") or "contour"}
+    return [{"method": method, "handles": handles} for method in sorted(methods)]
+
+
+def _independent_column_methods(rows):
+    """没有来源或共享来源的两种画法不能相互背书。"""
+    return any(a["method"] != b["method"] and a.get("handles") and b.get("handles")
+               and set(a["handles"]).isdisjoint(b["handles"])
+               for i, a in enumerate(rows) for b in rows[i + 1:])
+
+
 def fuse_columns(cands, *, walls=(), axis=(), tol_touch=COL_TOUCH_MM,
-                 scale=None) -> dict:
+                 scale=None, suppress=True) -> dict:
     """柱候选多画法融合：统一判据 + 同位置去重 + 打分（防过检）。
 
     判据（缺一条就降级，不直接删）：
@@ -626,8 +678,10 @@ def fuse_columns(cands, *, walls=(), axis=(), tol_touch=COL_TOUCH_MM,
         r = dict(rec)
         w, h = _col_size(r)
         r["w"], r["h"] = w, h
-        r["methods"] = [r.get("method") or "contour"]
-        r.setdefault("srcs", [])
+        r["method_evidence"] = _column_evidence(r)
+        r["methods"] = sorted({row["method"] for row in r["method_evidence"]})
+        r["srcs"] = [dict(s) for s in r.get("srcs") or ()]
+        r.pop("pending_reason", None)  # 每阶段按当前证据重新判断，不能沿用旧原因。
         pool.append(r)
 
     merged = []
@@ -638,18 +692,39 @@ def fuse_columns(cands, *, walls=(), axis=(), tol_touch=COL_TOUCH_MM,
         hit = None
         for m in merged:
             mx, my = _col_center(m)
-            if abs(mx - cx) <= limit and abs(my - cy) <= limit:
+            mw, mh = sorted(_col_size(m))
+            rw, rh = sorted(_col_size(rec))
+            same_section = (abs(mw - rw) <= max(5.0, 0.05 * min(mw, rw))
+                            and abs(mh - rh) <= max(5.0, 0.05 * min(mh, rh)))
+            if same_section and abs(mx - cx) <= limit and abs(my - cy) <= limit:
                 hit = m
                 break
         if hit is None:
             rec["center"] = [cx, cy]
             merged.append(rec)
             continue
+        if rec.get("category_confirmed") is True and rec.get("category_basis"):
+            hit["category_confirmed"] = True
+            hit["category_basis"] = rec["category_basis"]
+            hit["block_name"] = rec.get("block_name")
         hit["methods"] = sorted(set(hit["methods"]) | set(rec["methods"]))
+        known = {(e["method"], tuple(e["handles"])) for e in hit["method_evidence"]}
+        for evidence in rec["method_evidence"]:
+            key = (evidence["method"], tuple(evidence["handles"]))
+            if key not in known:
+                hit["method_evidence"].append(evidence)
+                known.add(key)
+        if hit.get("layer_scope") != rec.get("layer_scope"):
+            hit["layer_scope"] = "mixed"
+        hit["layers"] = sorted(set(hit.get("layers") or ()) | set(rec.get("layers") or ()))
         seen = {(s.get("handle"), s.get("type")) for s in hit.get("srcs") or ()}
         for s in rec.get("srcs") or ():
-            if (s.get("handle"), s.get("type")) not in seen:
-                hit["srcs"].append(s)
+            key = (s.get("handle"), s.get("type"))
+            if key not in seen:
+                hit["srcs"].append(dict(s))
+                seen.add(key)
+        if rec.get("edges") is not None:
+            hit["edges"] = max(int(hit.get("edges") or 0), int(rec["edges"]))
         # A rotated INSERT has a precise transformed outline.  A larger
         # axis-aligned bbox from derived graphics must never overwrite it.
         # Prefer a block's affine geometry; otherwise keep the first valid
@@ -666,13 +741,17 @@ def fuse_columns(cands, *, walls=(), axis=(), tol_touch=COL_TOUCH_MM,
         w, h = _col_size(rec)
         short, long_ = min(w, h), max(w, h)
         score, notes = 0.0, []
-        for method in rec["methods"]:
-            score += COL_METHOD_W.get(method, 0.15)
+        independent = _independent_column_methods(rec["method_evidence"])
+        method_scores = [COL_METHOD_W.get(m, 0.15) for m in rec["methods"]]
+        score += sum(method_scores) if independent else max(method_scores, default=0.0)
         if any(m != "block" for m in rec["methods"]):
             score += COL_BOUNDARY_W
-            notes.append("closed_boundary")
-        if len(rec["methods"]) >= 2:
-            notes.append("multi_method")
+            notes.append("boundary_observed")
+        if independent:
+            notes.append("independent_methods")
+        elif len(rec["methods"]) >= 2:
+            notes.append("shared_source_methods")
+        # 图层只在 layers/layer_scope 留作来源，不参与分数或确认门槛。
         ratio = long_ / (short or 1.0)
         # 方柱/矩形柱：短边要够"柱"，长短比 ≤ 3
         plausible = (short_min <= short <= short_max and long_ <= long_max
@@ -707,7 +786,11 @@ def fuse_columns(cands, *, walls=(), axis=(), tol_touch=COL_TOUCH_MM,
             if not s0 or not e0:
                 continue
             d = _pt_seg(cx, cy, s0[0], s0[1], e0[0], e0[1])
-            if d <= tol_touch + 0.5 * max(w, h):
+            half_wall = 0.5 * float(wall.get("thickness") or 0.0)
+            # 柱心到墙线的距离应该约等于"半个短边 + 半个墙厚"。以前用 max(w,h)，
+            # 一个 3 米长的轮廓能被判定成"贴着"1.7 米外的墙，房间里的家具因此
+            # 全都拿到了拓扑支持。
+            if d <= tol_touch + 0.5 * min(w, h) + half_wall:
                 strong = (str(wall.get("evidence_state") or "") in ("strong", "confirmed")
                           or str(wall.get("status") or "") == "confirmed")
                 if strong:
@@ -726,27 +809,41 @@ def fuse_columns(cands, *, walls=(), axis=(), tol_touch=COL_TOUCH_MM,
         missing_edge = int(rec.get("edges") or 4) <= 3
         if missing_edge:
             notes.append("missing_edge")
-            if (on_axis or touches):
+            if on_axis or touches:
                 notes.append("missing_edge_topo_supported")
-            if len(rec["methods"]) < 2:
-                notes.append("missing_edge_single_method")
         score = round(min(1.0, score), 3)
         rec["score"] = score
-        rec["evidence"] = sorted(set(notes))
         rec["status"] = ("confirmed" if score >= COL_CONFIRM
                          else "uncertain" if score >= COL_REVIEW else "pending")
+        # 所有图层适用相同门槛。仅仅形状像柱不够，但已经找到的候选始终保留。
+        # 第二阶段取得墙网后会重新计算；缺边需独立来源补证，不能自补第四条边。
+        reason = None
+        if not (plausible or elongated):
+            reason = "SECTION_OUT_OF_RANGE"
+        elif missing_edge and not independent:
+            reason = "missing_edge_single_method"
+        # 几何闭合与类别是两项独立判断。贴墙、轴网和双画法都不能证明类别。
+        rec["geometry_status"] = "pending" if reason else "verified"
+        rec["geometry_reason"] = reason
+        semantic = (rec.get("category_confirmed") is True and
+                    rec.get("category_basis") in
+                    ("catalog_block", "model_family", "model_recheck", "model_arbitration"))
+        rec["category_confirmed"] = bool(semantic)
+        if reason is None and not semantic:
+            reason = "CATEGORY_UNVERIFIED"
+        if reason:
+            rec["status"] = "pending"
+            rec["pending_reason"] = reason
+            notes.append(reason.lower())
         if elongated and rec["status"] == "confirmed":
-            # 长条形不能当"已确认的方柱"：证据成立，但形态是墙垛
             rec["status"] = "uncertain"
         rec["section_type"] = ("elongated" if elongated
                                else "regular" if plausible else "odd")
-        # 上下文证据的强度要如实记录：模式 B 只信"strong"（贴已确认的墙）
         rec["touches_wall"] = touches
         rec["touches_wall_state"] = touch_state
-        if missing_edge and len(rec["methods"]) < 2 and rec["status"] != "pending":
-            # 缺边 + 只有一种画法 -> 只留待核，不进构件（防止靠"补第 4 条边"过检）
-            rec["status"] = "pending"
-            rec["pending_reason"] = "missing_edge_single_method"
+        rec["on_axis"] = on_axis
+        rec["independent_methods"] = bool(independent)
+        rec["evidence"] = sorted(set(notes))
         # 置信度跟着证据走：单一画法（尤其只有轮廓/填充）不会因为"看得见"就是高分
         rec["confidence"] = round(min(0.95, 0.40 + 0.60 * score), 3)
         rec["needs_review"] = rec["status"] != "confirmed"
@@ -757,10 +854,14 @@ def fuse_columns(cands, *, walls=(), axis=(), tol_touch=COL_TOUCH_MM,
     # ---- 非极大值抑制：一组线能枚举出多个互相包含的矩形（1810×300 / 600 / 1200），
     # 中心距去重（0.5×短边）挡不住它们。这不是"调容差"，是同一个解被枚举了三次。
     before = len(out)
-    out = _suppress_overlapping_columns(out)
+    if suppress:
+        out = _suppress_overlapping_columns(out)
     suppressed = before - len(out)
 
     stats = {"candidates": len(pool), "fused": len(out), "suppressed": suppressed,
+             "by_scope": {},
+             "outside_declared": sum(1 for c in out
+                                     if str(c.get("layer_scope")) != "declared"),
              "confirmed": sum(1 for c in out if c["status"] == "confirmed"),
              "uncertain": sum(1 for c in out if c["status"] == "uncertain"),
              "pending": sum(1 for c in out if c["status"] == "pending"),
@@ -768,6 +869,8 @@ def fuse_columns(cands, *, walls=(), axis=(), tol_touch=COL_TOUCH_MM,
     for c in out:
         for m in c["methods"]:
             stats["by_method"][m] = stats["by_method"].get(m, 0) + 1
+        scope = str(c.get("layer_scope") or "declared")
+        stats["by_scope"][scope] = stats["by_scope"].get(scope, 0) + 1
     return {"columns": out, "stats": stats}
 
 
@@ -798,7 +901,9 @@ def _suppress_overlapping_columns(recs):
     if not recs:
         return recs
     keep = []
-    ranked = sorted(recs, key=lambda r: (-float(r.get("score") or 0.0),
+    # 待核备选不能凭高分抢先压掉已验证候选。
+    ranked = sorted(recs, key=lambda r: (r.get("status") == "pending",
+                                         -float(r.get("score") or 0.0),
                                          -_box_area(r.get("bbox") or ())))
     for rec in ranked:
         box = rec.get("bbox") or ()

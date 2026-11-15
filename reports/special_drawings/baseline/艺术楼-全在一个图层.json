@@ -1,0 +1,15 @@
+{
+  "drawing": "艺术楼-全在一个图层.dxf",
+  "target": "assemble",
+  "status": "ok",
+  "seconds": 1.355,
+  "counts": {},
+  "wall_segments": 0,
+  "column_candidates": 0,
+  "door_candidates": 0,
+  "window_candidates": 0,
+  "region_count": 1,
+  "soft_layers": {},
+  "room_boundary_states": {},
+  "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+}

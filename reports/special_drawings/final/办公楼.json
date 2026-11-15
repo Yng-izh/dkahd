@@ -1,0 +1,76 @@
+{
+  "drawing": "办公楼.dxf",
+  "target": "assemble",
+  "status": "ok",
+  "seconds": 5.031,
+  "counts": {
+    "frame": 2,
+    "grid_axis": 26,
+    "north_arrow": 1,
+    "column": 38,
+    "wall": 31,
+    "door": 30,
+    "window": 32,
+    "room": 21,
+    "stair": 2,
+    "step": 3,
+    "apron": 1
+  },
+  "status_by_category": {
+    "apron": {
+      "confirmed": 1
+    },
+    "column": {
+      "confirmed": 38
+    },
+    "door": {
+      "confirmed": 17,
+      "uncertain": 13
+    },
+    "frame": {
+      "confirmed": 2
+    },
+    "grid_axis": {
+      "confirmed": 26
+    },
+    "north_arrow": {
+      "confirmed": 1
+    },
+    "room": {
+      "uncertain": 20,
+      "confirmed": 1
+    },
+    "stair": {
+      "confirmed": 2
+    },
+    "step": {
+      "confirmed": 1,
+      "uncertain": 2
+    },
+    "wall": {
+      "confirmed": 31
+    },
+    "window": {
+      "uncertain": 32
+    }
+  },
+  "needs_review_by_category": {},
+  "room_area_warning_count": 0,
+  "unlayered": null,
+  "wall_segments": 146,
+  "column_candidates": 38,
+  "door_candidates": 30,
+  "window_candidates": 36,
+  "region_count": 23,
+  "soft_layers": {
+    "wall": [],
+    "column": [],
+    "door": [],
+    "window": []
+  },
+  "room_boundary_states": {
+    "hypothesis": 20,
+    "observed": 1
+  },
+  "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+}

@@ -1,0 +1,61 @@
+{
+  "drawing": "测试-二维DWG.dxf",
+  "target": "assemble",
+  "status": "ok",
+  "seconds": 28.293,
+  "counts": {
+    "frame": 2,
+    "column": 67,
+    "wall": 309,
+    "door": 65,
+    "window": 2,
+    "room": 41,
+    "stair": 9
+  },
+  "status_by_category": {
+    "column": {
+      "uncertain": 67
+    },
+    "door": {
+      "confirmed": 46,
+      "uncertain": 19
+    },
+    "frame": {
+      "confirmed": 2
+    },
+    "room": {
+      "confirmed": 13,
+      "uncertain": 28
+    },
+    "stair": {
+      "uncertain": 9
+    },
+    "wall": {
+      "confirmed": 309
+    },
+    "window": {
+      "uncertain": 2
+    }
+  },
+  "needs_review_by_category": {
+    "column": 67
+  },
+  "room_area_warning_count": 0,
+  "unlayered": null,
+  "wall_segments": 590,
+  "column_candidates": 84,
+  "door_candidates": 218,
+  "window_candidates": 6,
+  "region_count": 15,
+  "soft_layers": {
+    "wall": [],
+    "column": [],
+    "door": [],
+    "window": []
+  },
+  "room_boundary_states": {
+    "observed": 16,
+    "hypothesis": 25
+  },
+  "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+}

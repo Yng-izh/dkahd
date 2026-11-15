@@ -1,0 +1,68 @@
+{
+  "drawing": "会所-图层混乱.dxf",
+  "target": "assemble",
+  "status": "ok",
+  "seconds": 3.83,
+  "counts": {
+    "frame": 2,
+    "grid_axis": 16,
+    "column": 59,
+    "wall": 37,
+    "door": 58,
+    "window": 58,
+    "room": 8,
+    "stair": 3
+  },
+  "status_by_category": {
+    "column": {
+      "confirmed": 14,
+      "uncertain": 45
+    },
+    "door": {
+      "confirmed": 8,
+      "uncertain": 50
+    },
+    "frame": {
+      "confirmed": 2
+    },
+    "grid_axis": {
+      "confirmed": 16
+    },
+    "room": {
+      "uncertain": 8
+    },
+    "stair": {
+      "uncertain": 3
+    },
+    "wall": {
+      "confirmed": 37
+    },
+    "window": {
+      "uncertain": 58
+    }
+  },
+  "needs_review_by_category": {
+    "column": 45,
+    "window": 45,
+    "room": 4
+  },
+  "room_area_warning_count": 4,
+  "unlayered": null,
+  "wall_segments": 95,
+  "column_candidates": 59,
+  "door_candidates": 59,
+  "window_candidates": 60,
+  "region_count": 12,
+  "soft_layers": {
+    "wall": [
+      "S_E_STAIR"
+    ],
+    "column": [],
+    "door": [],
+    "window": []
+  },
+  "room_boundary_states": {
+    "hypothesis": 8
+  },
+  "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+}

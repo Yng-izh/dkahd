@@ -83,6 +83,24 @@ cad_ir（统一 uid/几何/多尺度区域）+ geometry_graph（平行/共线/�
 dwg-reader v2 图纸.dxf -o v2.json --store .dkahd/experiments
 ```
 
+### 档位（v2-component-focus，0.9.0 起）
+
+v2 默认走**门窗柱专用**档：房间退出主流程，旧 DAG 也不再一路跑到 `assemble`。
+
+| 档位 | 旧 DAG 目标节点 | 房间 | v2 求解器 |
+|---|---|---|---|
+| `openings_columns`（默认） | `texts` / `walls_seg` / `wall_model` / `columns_verify` / `doors` / `windows` / `openings_select` / `walls_merge` / `grid` / `pattern_discovery` | 不算 | `component_resolver`（门窗柱） |
+| `openings_columns_lean` | `texts` / `walls_seg` / `walls_merge` / `columns_verify` / `doors` / `windows` | 不算 | 同上，口径为**候选**口径 |
+| `full` | `assemble`（旧行为） | 算 | `global_resolver`（通用） |
+
+因此 focused 档的数字是**候选口径**（`base.caliber == "candidate"`），与 v1 的导出
+口径不能直接相减；要比就比同一口径下的两次运行。
+
+```bash
+dwg-reader v2 图纸.dxf --profile openings_columns -o v2.json
+dwg-reader v2 图纸.dxf --profile full -o v2-full.json
+```
+
 ## 运行
 
 ```bash

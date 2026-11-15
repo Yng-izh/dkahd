@@ -1,0 +1,361 @@
+{
+ "08d779a1c9528f024a7f7d198ac51feafdf0a69e8609881826211d4f5ac87f75": {
+  "door:D1": {
+   "verdict": "keep",
+   "reason": "ok",
+   "stage": "text"
+  },
+  "door:D2": {
+   "verdict": "reject",
+   "reason": "事实像家具",
+   "stage": "text"
+  },
+  "door:D3": {
+   "verdict": "unsure",
+   "reason": "拿不准",
+   "stage": "text"
+  }
+ },
+ "33b56d4ae41bb8a57f9b23aabc43e4180e2596eca5fb9dacf4c6a316a8701404": {
+  "door:D1": {
+   "verdict": "reject",
+   "reason": "文字级误判",
+   "stage": "text"
+  }
+ },
+ "4e6b05e4a6e95d2de5061b297770f381a9ffc756d27392e91f30ded18f516299": {
+  "verdict": "keep",
+  "reason": "截图看得清是门"
+ },
+ "20767ad73936546ccb99e454fef7b68222f7e2dee76171fc3c6da94dd8d2b308": {
+  "door:D0": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D1": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D2": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D3": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D4": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D5": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D6": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D7": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D8": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D9": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D10": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D11": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D12": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D13": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D14": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D15": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D16": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D17": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D18": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D19": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D20": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D21": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D22": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D23": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D24": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D25": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D26": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D27": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D28": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D29": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D30": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D31": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D32": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D33": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D34": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D35": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D36": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D37": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D38": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D39": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D40": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D41": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D42": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D43": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D44": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D45": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D46": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D47": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D48": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D49": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D50": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D51": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D52": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D53": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D54": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D55": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D56": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D57": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D58": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  },
+  "door:D59": {
+   "verdict": "unsure",
+   "reason": "x",
+   "stage": "text"
+  }
+ },
+ "21de1f4012253d1b0b38253266582181809a779dcdac2802b4110bc056569b09": {
+  "door:D1": {
+   "verdict": "keep",
+   "reason": "ok",
+   "stage": "text"
+  },
+  "door:D2": {
+   "verdict": "reject",
+   "reason": "事实像家具",
+   "stage": "text"
+  },
+  "door:D3": {
+   "verdict": "unsure",
+   "reason": "拿不准",
+   "stage": "text"
+  }
+ },
+ "aa6c70d62693d4f256504ba46d56a0f6548a1d05acf09e7dbf0da737aa8369ac": {
+  "door:D1": {
+   "verdict": "reject",
+   "reason": "截图里像家具",
+   "stage": "text"
+  },
+  "door:D2": {
+   "verdict": "reject",
+   "reason": "截图里像家具",
+   "stage": "text"
+  }
+ }
+}

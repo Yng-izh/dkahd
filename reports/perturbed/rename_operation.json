@@ -1,0 +1,15 @@
+{
+  "src": "/mnt/data/办公楼.dxf",
+  "dst": "reports/perturbed/office_renamed.dxf",
+  "ops": [
+    "rename_layers"
+  ],
+  "applied": [
+    {
+      "op": "rename_layers",
+      "layers": 47,
+      "entities": 3024,
+      "created": 47
+    }
+  ]
+}

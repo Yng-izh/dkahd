@@ -33,7 +33,9 @@ ERROR_CODES = ("UNAVAILABLE", "BUDGET_EXHAUSTED", "TIMEOUT", "HTTP_ERROR",
                "PARSE_ERROR", "EMPTY_RESPONSE", "TOO_MANY_IMAGES")
 
 #: 请求配额（逻辑预算，不是几何阈值）：图像字节数 / 不可信文本截断长度
-LIMITS = {"image_bytes": 6_000_000, "untrusted_chars": 400}
+#: ``max_images`` 是一次请求里最多几张局部图：族观察要"代表紧视图 + 代表细节图 +
+#: 两个不同成员"，3 张装不下，模型只能看一个样本却要回答整族。
+LIMITS = {"image_bytes": 6_000_000, "untrusted_chars": 400, "max_images": 6}
 
 
 def untrusted(text, limit: int = None) -> dict:
@@ -169,7 +171,7 @@ class ModelGateway:
                 # 授权没开：图不上传，只记一笔"想传但没传"，调用照发（纯结构输入）
                 self.images_dropped += len(images)
             else:
-                if len(images) > 3:
+                if len(images) > int(LIMITS["max_images"]):
                     return GatewayResult(ok=False, code="TOO_MANY_IMAGES",
                                          prompt_hash=prompt_hash,
                                          detail=str(len(images)))
@@ -289,5 +291,5 @@ def gateway_from_config(cfg: dict) -> ModelGateway:
                         model=cred["model"], vision_model=cred["vision_model"],
                         allow_remote_images=cred["allow_remote_images"],
                         timeout=float(prov.get("timeout_seconds") or 60.0),
-                        retries=int(prov.get("retries") or 1),
+                        retries=int(prov.get("retries", 1)),
                         budget=dict((cfg or {}).get("budget") or {}))

@@ -64,7 +64,8 @@ SUPPORTS = {("wall", "window"), ("wall", "door"), ("wall", "column"),
             ("step", "door"), ("step", "apron")}
 
 #: 空间类构件（房间）不与结构构件争夺同一块地：它们由墙网派生，允许共存
-DERIVED_CATEGORIES = frozenset({"room", "grid_axis", "frame"})
+DERIVED_CATEGORIES = frozenset({"room", "grid_axis", "frame", "stair",
+                            "step", "apron", "north_arrow"})
 
 
 def _r(v, nd: int = 3) -> float:
@@ -216,6 +217,10 @@ def solve(pool, *, thickness: float = 200.0, budget=None, weights=None) -> dict:
     budget = dict(BUDGET, **(budget or {}))
     rows = [h for h in (pool.get("hypotheses") if isinstance(pool, dict) else pool) or ()
             if isinstance(h, dict)]
+    # 全量档与 focused 档遵守同一柱类别确认契约。
+    from .component_resolver import _column_semantics_ok
+    rows = [h for h in rows if h.get("status") != "pending"
+            and (h.get("category") != "column" or _column_semantics_ok(h))]
     rows = rows[:int(budget["max_candidates"])]
     singles = {h["id"]: score(h, weights=weights) for h in rows}
     graph = build_conflicts({"hypotheses": rows}, thickness=thickness)
@@ -301,13 +306,16 @@ def solve(pool, *, thickness: float = 200.0, budget=None, weights=None) -> dict:
 
 
 # --------------------------------------------------------------------- 分阶段
-STAGES = ("walls", "openings", "spaces")
+STAGES = ("walls", "openings", "spaces", "aux")
 
-#: 每个阶段关心哪些类别
+#: 每个阶段关心哪些类别。``aux`` 是"派生但必须输出"的一档：楼梯/台阶/散水/
+#: 图框/轴网/指北针。以前它们进了候选池却**不属于任何阶段**，于是求解器从来没
+#: 选中过它们（实测楼梯 7 个在池子里、最终结果 0 个）。这是个真 bug，不是口径。
 STAGE_CATEGORIES = {
     "walls": ("wall", "column"),
     "openings": ("door", "window"),
     "spaces": ("room",),
+    "aux": ("stair", "step", "apron", "frame", "north_arrow", "grid_axis"),
 }
 
 

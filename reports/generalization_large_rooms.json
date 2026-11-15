@@ -1,0 +1,38 @@
+{
+  "texts": {
+    "count": 1309,
+    "sample": "{'handle': 'A17D24', 'type': 'TEXT', 'layer': 'TK', 'text': '广东省建科建筑设计院有限公司', 'raw': '广东省建科建筑设计院有限公司', 'x': -21180564.10056456, 'y': -1285914.81281456, 'h': 900.0, 'rot': 0.0, 'parts': ['A17D24'], 'x2': -21167964.10056456, 'cx': -21174264.10056456}"
+  },
+  "room_labels_seed": {
+    "labels": 940,
+    "excluded": 200,
+    "stats": "{'total': 1309, 'profile': 211, 'fallback': 729, 'excluded': 369}"
+  },
+  "label_filter": {
+    "status": "unavailable",
+    "labels": 938,
+    "annotations": 2,
+    "stats": "{'candidates': 938, 'to_llm': 938, 'llm': {}}"
+  },
+  "room_labels": {
+    "labels": 0,
+    "areas": 0
+  },
+  "rooms": {
+    "count": 0,
+    "sample": null
+  },
+  "spaces_seed": {
+    "faces": 73,
+    "observed_faces": 39,
+    "open_spaces": 0,
+    "grid": "{'res': 20.0, 'bbox': [-21315250.1, -1341594.6, -21189128.7, -1301442.8], 'nx': 6368, 'ny'",
+    "stats": "{'faces': 73, 'observed_faces': 39, 'hypothesis_faces': 19, 'sealed': 508, 'candidates': 7"
+  },
+  "space_routing": {
+    "open_labels": 0,
+    "repair_cases": 0,
+    "uncertain": 0,
+    "counts": "{'open_space': 0, 'try_repair': 0, 'uncertain': 0}"
+  }
+}

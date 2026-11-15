@@ -1,0 +1,144 @@
+{
+  "version": "20261109-hardening",
+  "baseline_previous_version": {
+    "office": {
+      "wall": 31,
+      "column": 38,
+      "door": 30,
+      "window": 32,
+      "room": 21
+    },
+    "rotated30": {
+      "wall": 50,
+      "column": 42,
+      "door": 30,
+      "window": 15,
+      "room": 6
+    },
+    "large": {
+      "wall": 298,
+      "column": 67,
+      "door": 65,
+      "window": 2,
+      "room": 26
+    }
+  },
+  "tested_on": {
+    "office": {
+      "runtime_s": 5.33,
+      "counts": {
+        "frame": 2,
+        "grid_axis": 26,
+        "north_arrow": 1,
+        "column": 38,
+        "wall": 31,
+        "door": 30,
+        "window": 32,
+        "room": 21,
+        "stair": 2,
+        "step": 3,
+        "apron": 1
+      },
+      "status": "ok"
+    },
+    "rotated30": {
+      "runtime_s": 14.926,
+      "counts": {
+        "frame": 2,
+        "grid_axis": 26,
+        "north_arrow": 1,
+        "column": 38,
+        "wall": 42,
+        "door": 30,
+        "window": 30,
+        "room": 20,
+        "stair": 2,
+        "step": 2,
+        "apron": 1
+      },
+      "status": "ok"
+    },
+    "large": {
+      "runtime_s": 30.969,
+      "counts": {
+        "frame": 2,
+        "column": 67,
+        "wall": 309,
+        "door": 65,
+        "window": 2,
+        "room": 36,
+        "stair": 9
+      },
+      "status": "ok"
+    }
+  },
+  "rotation_geometry": {
+    "wall": {
+      "original_count": 31,
+      "rotated_count": 42,
+      "geometry_overlap_precision": 0.9316,
+      "geometry_overlap_recall": 0.9851,
+      "iou": 0.9187
+    },
+    "column": {
+      "original_count": 38,
+      "rotated_count": 38,
+      "geometry_overlap_precision": 0.9999,
+      "geometry_overlap_recall": 0.9999,
+      "iou": 0.9999
+    },
+    "door": {
+      "original_count": 30,
+      "rotated_count": 30,
+      "geometry_overlap_precision": 0.8575,
+      "geometry_overlap_recall": 0.8274,
+      "iou": 0.7274
+    },
+    "window": {
+      "original_count": 32,
+      "rotated_count": 30,
+      "geometry_overlap_precision": 0.9999,
+      "geometry_overlap_recall": 0.9356,
+      "iou": 0.9356
+    },
+    "room": {
+      "original_count": 21,
+      "rotated_count": 20,
+      "geometry_overlap_precision": 0.8911,
+      "geometry_overlap_recall": 0.9109,
+      "iou": 0.8197
+    }
+  },
+  "tests": {
+    "collected": 274,
+    "passed": 269,
+    "skipped": 5,
+    "failed": 0
+  },
+  "reference_count_ranges": {
+    "large_wall": [
+      297,
+      303
+    ],
+    "large_column": [
+      65,
+      69
+    ],
+    "large_door": [
+      55,
+      76
+    ],
+    "large_room": [
+      45,
+      60
+    ]
+  },
+  "remaining_failures": [
+    "large room count 36 < reference lower bound 45",
+    "large wall count 309 > reference upper bound 303",
+    "office rotated wall count 42 != 31",
+    "rotated window 30 vs 32",
+    "rotated room 20 vs 21"
+  ],
+  "interpretation": "Count ranges are approximate and not ground-truth object matching; geometry overlap measures equivariance, not identification accuracy."
+}

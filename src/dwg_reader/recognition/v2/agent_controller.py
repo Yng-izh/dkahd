@@ -34,7 +34,11 @@ BUDGET = {"max_regions": 8, "max_model_calls": 8, "max_rounds": 2,
 FAILURE_CODES = ("NO_HOST_WALL", "GEOMETRY_SELF_INTERSECTION", "DUPLICATE_CONFIRMED",
                  "INSUFFICIENT_INDEPENDENT_EVIDENCE", "NO_VALID_CANDIDATE",
                  "MUTUALLY_EXCLUSIVE", "SAME_FOOTPRINT", "HOST_TOO_FAR",
-                 "INVALID_GRAMMAR", "NO_PART", "NO_RELATION")
+                 "INVALID_GRAMMAR", "NO_PART", "NO_RELATION",
+                 # v2-component-focus 新增：族没读懂 / 传播零命中 / 家具嫌疑 / 模型否掉
+                 "FAMILY_UNREAD", "FAMILY_CONFLICT", "PROPAGATION_EMPTY",
+                 "FURNITURE_SUSPECTED",
+                 "MODEL_REJECT")
 
 SYSTEM = ("你是 CAD 构件的**语法设计者**。你只描述'构件由哪些部分、怎么组合'，"
           "不提供任何坐标、尺寸或阈值。几何由确定性拟合器从原始图元算出来。"
@@ -231,17 +235,46 @@ def propose_grammars(facts: dict, *, gateway, views=None, budget=None,
 def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None,
         walls=(), columns=(), doors=(), windows=(), stairs=(), steps=(),
         aprons=(), frames=(), grid=None, north=None, faces=(), pattern_cases=(),
-        budget=None, rooms: bool = True, space_walls=(), labels=None) -> dict:
-    """一轮或多轮：观察 -> 要语法 -> 拟合 -> 联合求解 -> 反馈。
+        budget=None, rooms=None, space_walls=(), labels=None, profile=None,
+        families=None, rules=None, observation_state=None, drawing_identity=None) -> dict:
+    """观察 -> 要判断 -> 拟合 -> 联合求解 -> 复查。
 
-    ``ai`` 是 :mod:`ai_config` 的配置（``mode=off`` 时不会调用模型，但**仍然**
-    用内置语法跑一遍候选生成+联合求解，这条路径本身就是确定性算法）。
+    两条执行路径：
+
+    * **focused（``recognition_profile=openings_columns``）**：先做构件族发现，让
+      模型只对族给语义，再由专用拟合器 + 全图传播找出所有实例，最后用门窗柱专用
+      求解器裁决。房间完全不参与。
+    * **full**：老路径——按区域要构件语法，通用联合求解。
+
+    ``ai`` 是 :mod:`ai_config` 的配置（``mode=off`` 时不会调用模型，但仍然用内置
+    语法与专用拟合器跑一遍；这条路径本身就是确定性算法）。
     """
-    from .. import ai_config as AIC
     from .. import vision as VISION
+    from . import cad_ir as IRMOD
+    from . import component_family as FAMILY
+    from . import component_resolver as FOCUS_RESOLVER
+    from . import conflict_arbiter as ARBITER
+    from . import multimodal_detector as DETECTOR
+    from . import multimodal_bootstrap as BOOT
+    from . import profiles as PROFILES
+    from . import observation_state as OBS
+
+    def _handles_for(uids) -> list:
+        """uid → 图元 handle：渲染高亮要的是 handle，以前这里传的是 uid，永远对不上。"""
+        by_uid = IRMOD.by_uid(ir)
+        out = []
+        for uid in uids or ():
+            handle = (by_uid.get(uid) or {}).get("handle")
+            if handle:
+                out.append(str(handle))
+        return out
 
     started = time.perf_counter()
+    prof = PROFILES.resolve(profile)
+    focused = PROFILES.focused(prof)
     budget = dict(BUDGET, **(budget or {}))
+    if rooms is None:
+        rooms = bool(prof.get("rooms"))
     ai_cfg = dict(ai or {})
     mode = str(ai_cfg.get("mode") or "off")
     model_on = bool(mode in ("propose", "enhance") and gateway is not None
@@ -254,114 +287,487 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
     failures: list[dict] = []
     visited: list[str] = []
     ai_items: list[dict] = []
+    readings: list[dict] = []
+    dropped: list[dict] = []
+    #: 每次模型请求的留档：提示词原文、图片元数据、模型原始答复。没有它，
+    #: "模型为什么这样判"只能靠猜（上次跑完只剩一个类别字符串）。
+    model_audit: list[dict] = []
     calls = 0
+    detector_calls = 0
+    arbitration: dict = {"status": "off", "stats": {}, "verdicts": []}
+    constraints: dict = {}
     bootstrap = {"status": "off", "calls": 0, "images_seen": 0,
                  "regions": [], "items": [], "scene": {}}
-    # First-pass vision has its own scene/region selection and sees objects
-    # even if the legacy recognizer has already explained every entity.
+    family_result = {"schema": FAMILY.SCHEMA, "families": [],
+                     "stats": {"families": 0, "instances": 0}}
+    rule_sets = rules or {"doors": doors, "windows": windows, "columns": columns}
+    # 图内洞口宽度分布：给模型的"分位"用（没有它就无从判断一个宽度合不合理）
+    widths = [float(rec.get("width") or 0.0)
+              for bucket in ("doors", "windows")
+              for rec in (rule_sets.get(bucket) or ())
+              if float((rec or {}).get("width") or 0.0) > 0]
+
+    # ---- 1) 构件族发现（门窗柱优先）
+    if families is None and prof.get("families"):
+        family_result = FAMILY.discover(ir, graph=graph_obj, walls=walls,
+                                        rules=rule_sets,
+                                        limit=int(budget.get("max_families") or 0) or None)
+        families = family_result["families"]
+    # Family geometry may be reused; semantic decisions belong to this run only.
+    from copy import deepcopy
+    families = deepcopy(list(families or ()))
+    for family in families:
+        for key in ("confirmed", "model", "verdict", "model_negative",
+                    "category_confirmed", "category_basis", "category", "subtype"):
+            family.pop(key, None)
+        family["confirmed"] = False
+    family_result["families"] = families
+
+    identity = OBS.fingerprint(
+        snapshot=snapshot, ir=ir, families=families, profile=prof,
+        budget=budget, ai=ai_cfg, gateway=gateway, drawing_identity=drawing_identity,
+        context={"walls": walls, "rules": rule_sets})
+    previous_coverage = OBS.validate(observation_state, identity, families)
+    observed_ids = set(previous_coverage["attempted_ids"])
+    successful_ids = set(previous_coverage["successful_ids"])
+    category_counts = dict(previous_coverage["category_counts"])
+    # Failed preflight/rendering must not become persisted observed coverage.
+    considered_ids = set(observed_ids)
+
+    # ---- 2) 首轮视觉（整图 + 族优先）
     if model_on and snapshot:
-        from . import multimodal_bootstrap as BOOT
         bootstrap = BOOT.run(
             ir=ir, graph=graph_obj, snapshot=snapshot, gateway=gateway,
-            ai=ai_cfg, walls=walls,
+            ai=ai_cfg, walls=walls, families=families,
+            priority=("window", "column", "door") if focused else None,
             budget={"max_model_calls": int(budget["max_model_calls"]),
-                    "max_calls": min(5, int(budget["max_model_calls"]))})
+                    "max_calls": int(prof.get("bootstrap_calls", 5)),
+                    "max_regions": 6})
         calls += int(bootstrap["calls"])
         if mode == "enhance":
             ai_items.extend(bootstrap["items"])
 
-    for round_no in range(1, int(budget["max_rounds"]) + 1):
-        ranking = region_priority(ir, graph_obj, cases=pattern_cases)
-        todo = [row for row in ranking if row["region"]["id"] not in visited]
-        todo = todo[:int(budget["max_regions"])]
-        round_rows: list[dict] = []
-        for row in todo:
-            region = row["region"]
-            visited.append(region["id"])
-            facts = observe(ir, graph_obj, region, cases=pattern_cases)
-            views = {"ok": False, "reason": "NO_SNAPSHOT", "views": [], "rendered": 0}
-            if snapshot and bool((ai_cfg.get("provider") or {}).get("vision", True)):
-                views = VISION.render_views(
-                    snapshot, {"bbox": region.get("bbox")},
-                    scales=("local", "detail"), walls=walls, thickness=thickness,
-                    focus_handles=facts.get("seed_uids") or ())
-                vision_rows.append(dict(VISION.views_summary(views),
-                                        region=region["id"]))
-            elif snapshot:
-                views = VISION.render_views({"bbox": region.get("bbox")},
-                                            {"bbox": region.get("bbox")},
-                                            scales=())
-            proposal = {"status": "off", "grammars": [], "errors": [], "images": 0}
-            if model_on and calls < int(budget["max_model_calls"]):
-                proposal = propose_grammars(facts, gateway=gateway, views=views,
-                                            budget=budget, failures=failures,
-                                            tools={"graph": graph_obj})
-                calls += 1
-            grammars = list(proposal.get("grammars") or ())
-            # 模型没给出可用语法时，退到内置模板（确定性，不花调用）
-            if not grammars:
-                for case in facts.get("cases") or ():
-                    tpl = G.for_kind(str(case.get("kind") or ""))
-                    if tpl:
-                        grammars.append(tpl)
-            if grammars and mode == "enhance":
-                ai_items.append({"region": region, "seed_uids": facts.get("seed_uids"),
-                                 "grammars": [g for g in grammars
-                                              if g.get("category")],
-                                 "case_id": (facts.get("cases") or [{}])[0].get("case_id")})
-            round_rows.append({"region": region["id"], "priority": row["score"],
-                               "entities": facts.get("entities"),
-                               "grammars": len(grammars),
-                               "model_status": proposal.get("status"),
-                               "images": proposal.get("images"),
-                               "errors": proposal.get("errors")})
-            if (time.perf_counter() - started) > float(budget["max_walltime_seconds"]):
+    # ---- 3) 构件级理解：模型只判断"族是什么"，不报坐标
+    family_observation = {"min_families": 0, "max_families": 0, "observed": 0,
+                          "unobserved": 0, "stopped": "off", "reserved_calls": 0}
+    if model_on and focused and prof.get("detector") and families:
+        min_families = int(prof.get("detector_families") or 0)
+        # 上限是"最多看多少族"，不再等于"至少也要停在这里"：以前 limit=4 之后
+        # 循环就结束，剩下 9 个柱候选族和 3 次未用调用一起浪费掉。
+        max_families = max(min_families, int(
+            prof.get("detector_max_families") or DETECTOR.BUDGET["max_families"]))
+        total_calls = int(budget["max_model_calls"])
+        recheck_reserve = max(0, int(budget.get("max_recheck", 4)))
+        # 给"疑难复查"留出调用：族观察不能把预算吃光，复查也不能被饿死
+        reserve = min(recheck_reserve, max(0, total_calls - calls - min_families))
+        audit_rows: list = []
+        while len(readings) < max_families:
+            left = total_calls - calls
+            if left <= reserve:
+                family_observation["stopped"] = "BUDGET"
                 break
+            row = FAMILY.next_observation(
+                families, observed=considered_ids, category_counts=category_counts,
+                categories=PROFILES.categories(prof))
+            if row is None:
+                family_observation["stopped"] = "EXHAUSTED"
+                break
+            family = row["family"]
+            considered_ids.add(str(family.get("id")))
+            gateway_calls_before = getattr(gateway, "calls", None)
+            reading = DETECTOR.read_family(
+                family, ir=ir, graph=graph_obj, gateway=gateway,
+                snapshot=snapshot, walls=walls, failures=failures, widths=widths,
+                budget={"images_per_family": int(
+                            prof.get("images_per_family") or 3),
+                        "samples": int(prof.get("family_samples") or 3),
+                        "closeup": min(max(0, int(prof.get("family_closeup", 1))),
+                                       max(0, left - reserve - 1))})
+            reading_calls = max(0, int(reading.get("calls", 1)))
+            # Gateway preflight can reject ask() without an actual request.
+            gateway_calls_after = getattr(gateway, "calls", None)
+            actual_attempts = (max(0, gateway_calls_after - gateway_calls_before)
+                               if isinstance(gateway_calls_before, int)
+                               and isinstance(gateway_calls_after, int)
+                               else reading_calls)
+            if actual_attempts > 0:
+                observed_ids.add(str(family["id"]))
+                category_counts = OBS.category_counts(observed_ids, families)
+                if reading.get("status") == "ok":
+                    successful_ids.add(str(family["id"]))
+            calls += reading_calls
+            detector_calls += reading_calls
+            readings.append({"family": family.get("id"),
+                             "status": reading.get("status"),
+                             "category": reading.get("category"),
+                             "subtype": reading.get("subtype"),
+                             "confidence": reading.get("confidence"),
+                             "negatives": reading.get("negatives"),
+                             "images": reading.get("images"),
+                             "calls": reading_calls,
+                             "reason": reading.get("reason"),
+                             "family_consistent": reading.get("family_consistent"),
+                             "outliers": reading.get("outliers"),
+                             "scope": reading.get("scope"),
+                             "agrees_with_geometry_guess": reading.get(
+                                 "agrees_with_geometry_guess"),
+                             "grammar_error": reading.get("grammar_error"),
+                             "wall_relation": (reading.get("facts") or {}).get("wall_relation"),
+                             "width_percentile": (reading.get("facts") or {}).get(
+                                 "opening_width_percentile"),
+                             "geometry_guess": reading.get("geometry_guess"),
+                             "representative": (family.get("representative") or {}).get("id"),
+                             "representative_reason": family.get("representative_reason")})
+            # 请求留档：提示词原文 + 每张图元数据 + 模型原始答复
+            audit_rows.append({"family": family.get("id"),
+                               "status": reading.get("status"),
+                               "request": reading.get("request"),
+                               "reply": reading.get("gateway"),
+                               "raw": reading.get("raw"),
+                               "raw_text": reading.get("raw_text"),
+                               "calls": reading_calls,
+                               "closeup": reading.get("closeup")})
+            if reading.get("status") == "ok":
+                category = reading.get("category")
+                confidence = str(reading.get("confidence") or "").lower()
+                need = str(prof.get("propagate_confidence") or "high").lower()
+                order = {"low": 0, "medium": 1, "high": 2}
+                enough = (confidence == "high" if category == "column"
+                          else order.get(confidence, -1) >= order.get(need, 2))
+                # 推广影响大的族必须**两次独立判读一致**才允许整族推广：
+                # 实测同一张图上同一个族两次分别被说成"扶手椅符号"和"双扇门"、
+                # "填充补丁"和"柱墩"，单次 high 就推广会把 66 扇门/28 根柱一次性写进结果。
+                corroborate = int(prof.get("corroborate_instances") or 0)
+                big = corroborate > 0 and int(family.get("n") or 0) >= corroborate
+                # Scope can only narrow, including negative answers. The current
+                # propagator does not enforce explicit representative scope for
+                # all categories, so retain these families pending below.
+                def restrict_scope(answer):
+                    if (answer.get("authorization_scope") == "representative_only"
+                            or answer.get("scope") == "representative_only"
+                            or answer.get("family_consistent") is False
+                            or answer.get("outliers")):
+                        family["authorization_scope"] = "representative_only"
 
-        pool_now = ENGINES.generate(ir, graph_obj, walls=walls, columns=columns,
-                                    doors=doors, windows=windows, stairs=stairs,
-                                    steps=steps, aprons=aprons, frames=frames,
-                                    grid=grid, pattern_cases=pattern_cases,
-                                    ai_grammars=ai_items, faces=faces)
-        resolution = RESOLVER.staged(
+                restrict_scope(reading)
+                family_scope = family.get("authorization_scope", "family") == "family"
+                needs_second = bool(big and family_scope and enough
+                                    and category in ("door", "window", "column"))
+                second = None
+                if (needs_second
+                        and calls < total_calls - reserve):
+                    second = DETECTOR.read_family(
+                        family, ir=ir, graph=graph_obj, gateway=gateway,
+                        snapshot=snapshot, walls=walls, failures=failures,
+                        widths=widths,
+                        budget={"images_per_family": int(
+                                    prof.get("images_per_family") or 3),
+                                "samples": int(prof.get("family_samples") or 3),
+                                "closeup": 0, "verification": True})
+                    second_calls = max(0, int(second.get("calls", 1)))
+                    calls += second_calls
+                    detector_calls += second_calls
+                    restrict_scope(second)
+                    audit_rows.append({"family": family.get("id"),
+                                       "verification": "second_read",
+                                       "status": second.get("status"),
+                                       "request": second.get("request"),
+                                       "reply": second.get("gateway"),
+                                       "raw": second.get("raw"),
+                                       "raw_text": second.get("raw_text"),
+                                       "calls": second_calls,
+                                       "closeup": second.get("closeup")})
+                    readings[-1]["second_read"] = {
+                        "status": second.get("status"),
+                        "category": second.get("category"),
+                        "confidence": second.get("confidence"),
+                        "calls": second_calls,
+                        "scope": second.get("authorization_scope") or second.get("scope"),
+                        "images": second.get("images")}
+                agreed = not needs_second
+                if needs_second and second is None:
+                    failures.append({"code": "FAMILY_UNREAD",
+                                     "family": family.get("id"),
+                                     "detail": "CORROBORATION_BUDGET_UNAVAILABLE"})
+                if second is not None:
+                    second_cat = (second.get("category")
+                                  if second.get("status") == "ok" else None)
+                    second_conf = str((second or {}).get("confidence") or "").lower()
+                    second_enough = (
+                        second_conf == "high" if second_cat == "column"
+                        else order.get(second_conf, -1) >= order.get(need, 2))
+                    same_category = bool(second_cat == category)
+                    agreed = bool(same_category and second_enough)
+                    family["confirmations"] = 2 if agreed else 1
+                    if not agreed:
+                        family["model_disagreement"] = {
+                            "first": [category, confidence],
+                            "second": [second_cat, second_conf]}
+                        # 两次类别不同才是真冲突；类别一致但把握不够只是没到门槛
+                        failures.append({
+                            "code": ("FAMILY_UNREAD" if same_category or second_cat is None
+                                     else "FAMILY_CONFLICT"),
+                            "family": family.get("id"),
+                            "detail": "%s/%s vs %s/%s" % (
+                                category, confidence, second_cat, second_conf)})
+                family_scope = family.get("authorization_scope", "family") == "family"
+                readings[-1]["authorization_scope"] = family.get("authorization_scope", "family")
+                singleton = (len(family.get("instances") or ()) == 1
+                             and int(family.get("n") or 1) == 1)
+                authorized = family_scope or singleton
+                if not authorized:
+                    family["pending_reason"] = "REPRESENTATIVE_SCOPE_REQUIRES_REVIEW"
+                if category == "none" or category in ("wall",):
+                    # 模型说这是墙/家具/图例：整个族否掉，不推广
+                    if authorized:
+                        family["verdict"] = "reject"
+                    family["model_negative"] = reading.get("negatives")
+                else:
+                    family["category"] = category
+                    family["subtype"] = reading.get("subtype")
+                    family["model"] = {"category": category,
+                                       "subtype": reading.get("subtype"),
+                                       "confidence": confidence}
+                    # 模型说成员不一致：只授权代表实例，整族不许自动推广
+                    family["model_consistent"] = reading.get("family_consistent")
+                    family["model_outliers"] = reading.get("outliers")
+                    # 只有模型确认到指定把握的族才允许推广（默认 high）
+                    family["confirmed"] = bool(enough and agreed and authorized)
+                    if not family["confirmed"] and agreed:
+                        failures.append({"code": "FAMILY_UNREAD",
+                                         "family": family.get("id"),
+                                         "detail": (family["pending_reason"] if not authorized
+                                                    else "confidence=%s < %s" % (confidence, need))})
+            else:
+                failures.append({"code": "FAMILY_UNREAD",
+                                 "family": family.get("id"),
+                                 "detail": reading.get("reason")})
+        model_audit.extend(audit_rows)
+        family_observation.update({
+            "min_families": min_families, "max_families": max_families,
+            "observed": len(readings),
+            "unobserved": max(0, len(FAMILY.observation_queue(
+                families, categories=PROFILES.categories(prof))) - len(readings)),
+            "reserved_calls": reserve,
+            "by_category": dict(category_counts),
+            "calls_remaining": max(0, total_calls - calls)})
+        if family_observation["stopped"] == "off":
+            family_observation["stopped"] = "MAX_FAMILIES"
+
+    def _arbitration_rows(pool_dict, *, targets, per_category=24):
+        """挑给模型看的候选：每个目标类别按分数取前 N 个（足够覆盖冲突即可）。"""
+        wanted = set(targets or ())
+        buckets: dict = {}
+        for hyp in pool_dict.get("hypotheses") or ():
+            cat = str(hyp.get("category"))
+            if cat in wanted:
+                buckets.setdefault(cat, []).append(hyp)
+        rows: list = []
+        for cat, items in buckets.items():
+            items.sort(key=lambda h: -float(h.get("score") or 0.0))
+            rows.extend(items[:per_category])
+        rows.sort(key=lambda h: -float(h.get("score") or 0.0))
+        return rows
+
+    def _constraints_from(arb, rows_all):
+        """裁决 -> 求解约束。
+
+        * 模型说"不要"的：硬约束排除（它看过图与位置事实）；
+        * 模型说"要"的：保留明确裁决，由求解器独立检查几何资格；
+        * 类别改判：先进入待拟合，不沿用旧类别几何计数。
+        """
+        return _arbitration_constraints(arb, rows_all)
+
+    def _merge(new_rows):
+        seen = {(row.get("code"), str(row.get("detail") or "")) for row in failures}
+        out = list(failures)
+        for row in new_rows:
+            key = (row.get("code"), str(row.get("detail") or ""))
+            if key not in seen:
+                seen.add(key)
+                out.append(row)
+        return out
+
+    def _pool():
+        return ENGINES.generate(
+            ir, graph_obj, walls=walls, columns=columns, doors=doors,
+            windows=windows, stairs=stairs, steps=steps, aprons=aprons,
+            frames=frames, grid=grid, pattern_cases=pattern_cases,
+            ai_grammars=ai_items, faces=faces, families=families,
+            propagate=bool(prof.get("propagate")) and bool(families),
+            categories=(PROFILES.categories(prof) if focused else None))
+
+    def _resolve(pool_now, constraints=None):
+        if focused:
+            return FOCUS_RESOLVER.staged(pool_now, thickness=thickness,
+                                         profile=prof, budget=budget,
+                                         constraints=constraints)
+        return RESOLVER.staged(
             pool_now, thickness=thickness, faces=faces,
             space_builder=(lambda selected: SPACE.solve(
                 selected=list(space_walls) or selected,
                 texts=ir.get("texts") or (), labels=labels,
                 bbox=ir.get("bbox"), thick=thickness)) if rooms else None)
-        failures = _failure_digest(pool_now, resolution)
-        rounds.append({"round": round_no, "regions": round_rows,
+
+    pool_now = {"hypotheses": []}
+    resolution: dict = {}
+    if focused:
+        pool_now = _pool()
+        # ---- 3.5) 逻辑冲突：**先**把完整候选摆给模型按位置裁决，再按结论重解。
+        # 以前是"先按分数淘汰、再把剩下的交给模型"：同位置的另一种解释早被删掉，
+        # 模型根本看不到选项，只能对着半张桌子点头。
+        arbitration = {"status": "off", "stats": {}, "verdicts": []}
+        if model_on and prof.get("arbitration") and calls < int(budget["max_model_calls"]):
+            rows_all = _arbitration_rows(pool_now, targets=PROFILES.categories(prof))
+            arbitration = ARBITER.run(
+                rows_all, ir=ir, gateway=gateway, snapshot=snapshot, walls=walls,
+                grid=grid,
+                budget={"points": min(int(prof.get("arbitration_points") or 4),
+                                      max(0, int(budget["max_model_calls"]) - calls))})
+            calls += int((arbitration.get("stats") or {}).get("calls", (arbitration.get("stats") or {}).get("decided")) or 0)
+            constraints = _constraints_from(arbitration, rows_all)
+        resolution = _resolve(pool_now, constraints)
+        failures = _merge(_failure_digest(pool_now, resolution))
+        rounds.append({"round": 1, "regions": [],
                        "pool": ENGINES.summary(pool_now),
-                       "resolution": RESOLVER.summary(resolution),
+                       "resolution": FOCUS_RESOLVER.summary(resolution),
+                       "arbitration": ARBITER.summary(arbitration),
+                       "constraints": {"drop": len((constraints or {}).get("drop") or ()),
+                                       "keep": len((constraints or {}).get("keep") or ())},
                        "failures": failures[:8]})
-        if not failures or not model_on:
-            break
-        if (time.perf_counter() - started) > float(budget["max_walltime_seconds"]):
-            break
 
-    pool_now = ENGINES.generate(ir, graph_obj, walls=walls, columns=columns,
-                                doors=doors, windows=windows, stairs=stairs,
-                                steps=steps, aprons=aprons, frames=frames,
-                                grid=grid, pattern_cases=pattern_cases,
-                                ai_grammars=ai_items,
-                                faces=faces) if rounds else (pool or {"hypotheses": []})
-    resolution = RESOLVER.staged(
-        pool_now, thickness=thickness, faces=faces,
-        space_builder=(lambda selected: SPACE.solve(
-            selected=list(space_walls) or selected,
-            texts=ir.get("texts") or (), labels=labels,
-            bbox=ir.get("bbox"), thick=thickness)) if rooms else None)
+        # ---- 4) 疑难构件主动复查（模型只否决/改判，不生成几何）
+        if model_on and calls < int(budget["max_model_calls"]):
+            remaining = int(budget["max_model_calls"]) - calls
+            recheck_limit = min(remaining, int(budget.get("max_recheck", 4)))
+            uncertain = [h for h in pool_now.get("hypotheses") or ()
+                         if h.get("status") in ("uncertain", "pending")
+                         and (h.get("evidence") or {}).get("pending_reason")
+                         != "MODEL_FAMILY_REJECTED"][:recheck_limit]
+            if uncertain:
+                recheck = DETECTOR.recheck(uncertain, ir=ir, gateway=gateway,
+                                           snapshot=snapshot, walls=walls,
+                                           failures=failures, budget=dict(
+                                               budget, recheck=recheck_limit,
+                                               max_model_calls=remaining))
+                calls += int(recheck["calls"])
+                model_audit.extend(recheck.get("audit") or [])
+                verdicts = recheck.get("verdicts") or []
+                resolution, dropped = _apply_verdicts(resolution, verdicts, candidates=pool_now.get("hypotheses"),
+                                                       resolve=lambda rows: _resolve({"hypotheses": rows}, constraints))
+                rounds[-1]["reinspect"] = {"calls": recheck["calls"],
+                                           "verdicts": verdicts}
+    else:
+        for round_no in range(1, int(budget["max_rounds"]) + 1):
+            ranking = region_priority(ir, graph_obj, cases=pattern_cases)
+            todo = [row for row in ranking if row["region"]["id"] not in visited]
+            todo = todo[:int(budget["max_regions"])]
+            round_rows: list[dict] = []
+            for row in todo:
+                region = row["region"]
+                visited.append(region["id"])
+                facts = observe(ir, graph_obj, region, cases=pattern_cases)
+                views = {"ok": False, "reason": "NO_SNAPSHOT", "views": [], "rendered": 0}
+                if snapshot and bool((ai_cfg.get("provider") or {}).get("vision", True)):
+                    views = VISION.render_views(
+                        snapshot, {"bbox": region.get("bbox")},
+                        scales=("local", "detail"), walls=walls, thickness=thickness,
+                        focus_handles=_handles_for(facts.get("seed_uids")))
+                    vision_rows.append(dict(VISION.views_summary(views),
+                                            region=region["id"]))
+                elif snapshot:
+                    views = VISION.render_views({"bbox": region.get("bbox")},
+                                                {"bbox": region.get("bbox")},
+                                                scales=())
+                proposal = {"status": "off", "grammars": [], "errors": [], "images": 0}
+                if model_on and calls < int(budget["max_model_calls"]):
+                    proposal = propose_grammars(facts, gateway=gateway, views=views,
+                                                budget=budget, failures=failures,
+                                                tools={"graph": graph_obj})
+                    calls += 1
+                grammars = list(proposal.get("grammars") or ())
+                if not grammars:
+                    for case in facts.get("cases") or ():
+                        tpl = G.for_kind(str(case.get("kind") or ""))
+                        if tpl:
+                            grammars.append(tpl)
+                if grammars and mode == "enhance":
+                    ai_items.append({"region": region,
+                                     "seed_uids": facts.get("seed_uids"),
+                                     "grammars": [g for g in grammars if g.get("category")],
+                                     "case_id": (facts.get("cases") or [{}])[0].get("case_id")})
+                round_rows.append({"region": region["id"], "priority": row["score"],
+                                   "entities": facts.get("entities"),
+                                   "grammars": len(grammars),
+                                   "model_status": proposal.get("status"),
+                                   "images": proposal.get("images"),
+                                   "errors": proposal.get("errors")})
+                if (time.perf_counter() - started) > float(budget["max_walltime_seconds"]):
+                    break
 
+            pool_now = _pool()
+            resolution = _resolve(pool_now)
+            failures = _failure_digest(pool_now, resolution)
+            rounds.append({"round": round_no, "regions": round_rows,
+                           "pool": ENGINES.summary(pool_now),
+                           "resolution": RESOLVER.summary(resolution),
+                           "failures": failures[:8]})
+            if not failures or not model_on:
+                break
+            if (time.perf_counter() - started) > float(budget["max_walltime_seconds"]):
+                break
+
+    saved_coverage = OBS.make(identity, observed_ids, successful_ids, families)
+    coverage = OBS.coverage(saved_coverage, previous_coverage, families,
+                            [str(row["family"]["id"]) for row in FAMILY.observation_queue(
+                                families, categories=PROFILES.categories(prof))])
+    family_observation.update(coverage=coverage,
+                              observed=coverage["round"]["attempted"]["count"],
+                              unobserved=coverage["unseen"]["count"],
+                              by_category=coverage["round"]["attempted"]["by_category"])
     vision_ok = any(v.get("ok") for v in vision_rows)
-    return {"schema": SCHEMA,
+    return {"schema": SCHEMA, "observation_state": saved_coverage,
             "status": "ok" if (pool_now.get("hypotheses") or []) else "no_candidate",
+            "profile": PROFILES.summary(prof),
             "pool": pool_now, "resolution": resolution, "rounds": rounds,
+            "families": {"schema": FAMILY.SCHEMA,
+                         "stats": family_result.get("stats") or {},
+                         "top": FAMILY.summary(family_result).get("top") or [],
+                         "count": len(families),
+                         "confirmed": [f.get("id") for f in families
+                                       if f.get("confirmed")],
+                         "unconfirmed": len([f for f in families
+                                             if not f.get("confirmed")
+                                             and f.get("verdict") != "reject"]),
+                         "rejected": [f.get("id") for f in families
+                                      if f.get("verdict") == "reject"]},
+            "arbitration": {"schema": ARBITER.SCHEMA,
+                            "stats": (arbitration or {}).get("stats") or {},
+                            "verdicts": ARBITER.summary(arbitration).get("verdicts"),
+                            "constraints": {
+                                "drop": sorted((constraints or {}).get("drop") or ()),
+                                "keep": sorted((constraints or {}).get("keep") or ()),
+                                "categories": (constraints or {}).get("categories") or {},
+                            }},
+            "unresolved": (pool_now.get("unresolved") or [])[:80],
+            "detector": {"readings": readings,
+                         "calls": detector_calls,
+                         "observation": family_observation,
+                         "understood": sum(1 for r in readings
+                                           if r.get("status") == "ok"
+                                           and r.get("category") not in (None, "none"))},
+            # 每次请求的提示词、图片元数据与模型原始答复（可留存、可复盘）
+            "model_audit": model_audit,
+            "dropped": dropped,
             "vision": {"ok": vision_ok or bootstrap["images_seen"] > 0,
                        "regions": vision_rows,
                        "model_on": model_on,
                        "images_seen": int(bootstrap["images_seen"]) + int(
                            sum(int(r.get("images") or 0)
-                               for rd in rounds for r in rd.get("regions") or ())),
+                               for rd in rounds for r in rd.get("regions") or ()))
+                       + sum(int(r.get("images") or 0)
+                              + int((r.get("second_read") or {}).get("images") or 0)
+                              for r in readings),
                        "renderer": VISION.health()},
             "ai": {"mode": ai_cfg.get("mode") or "off", "model_on": model_on,
                    "calls": calls, "walltime_s": round(
@@ -370,6 +776,74 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
             "bootstrap": {k: v for k, v in bootstrap.items() if k != "items"},
             "failures": failures[:12],
             "budget": budget}
+
+
+def _has_hard_definition(hyp: dict) -> bool:
+    """块参照/图库里定义好的构件：这是硬事实，模型说"不是"只能降级，不能删除。"""
+    ev = hyp.get("evidence") or {}
+    geom = hyp.get("geometry") or {}
+    if "block" in (ev.get("methods") or ()):
+        return True
+    if ev.get("block_defined") or ev.get("catalog_block"):
+        return True
+    if str(ev.get("family_kind") or "") == "block" and ev.get("block_hit"):
+        return True
+    return bool(geom.get("block_defined"))
+
+
+def _arbitration_constraints(arb, rows_all):
+    """Only explicit answers for shown candidates can confirm a category."""
+    known = {h.get("id") for h in rows_all or ()}
+    drop, keep, categories = set(), set(), {}
+    for verdict in arb.get("verdicts") or ():
+        result = verdict.get("result") or {}
+        if result.get("status") != "ok":
+            continue
+        invalid = {v.get("label") for v in result.get("invalid") or ()}
+        shown = {v.get("label"): v.get("id") for v in result.get("shown") or ()}
+        for label, decision in (result.get("per_candidate") or {}).items():
+            hid = shown.get(label)
+            if hid not in known or label in invalid or decision.get("why") == "legacy":
+                continue
+            if decision.get("keep") is False:
+                drop.add(hid)
+            elif decision.get("keep") is True:
+                keep.add(hid)
+            category = decision.get("category")
+            if category in ("door", "window", "column", "none"):
+                categories[hid] = category
+    return {"drop": drop, "keep": keep - drop, "categories": categories}
+
+
+def _apply_verdicts(resolution: dict, verdicts, *, candidates=None, resolve=None) -> tuple[dict, list]:
+    """Apply explicit semantic decisions, then solve geometry/conflicts again."""
+    from . import component_resolver as FOCUS_RESOLVER
+    decisions = {v.get("id"): v for v in verdicts or () if isinstance(v, dict)}
+    final = dict(resolution.get("final") or {})
+    rows = list(candidates if candidates is not None else final.get("selected") or ())
+    accepted, dropped = [], []
+    for hyp in rows:
+        decision = decisions.get(hyp.get("id")) or {}
+        verdict, category = decision.get("verdict"), decision.get("category")
+        if verdict == "reject":
+            dropped.append({"id": hyp.get("id"), "category": hyp.get("category"),
+                            "why": "MODEL_REJECT"})
+            continue
+        valid = (verdict == "keep" and category in ("door", "window", "column")
+                 and decision.get("confidence") in ("high", "medium", "low"))
+        if valid and category != hyp.get("category"):
+            hyp = dict(hyp, status="pending", evidence=dict(
+                hyp.get("evidence") or {}, category_confirmed=False,
+                requested_category=category, geometry_status="pending",
+                v1_reason="REFIT_REQUIRED"))
+        elif valid and category == "column" and FOCUS_RESOLVER.column_geometry_ok(hyp):
+            hyp = dict(hyp, status="candidate", evidence=dict(
+                hyp.get("evidence") or {}, category_confirmed=True,
+                category_basis="model_recheck"))
+        accepted.append(hyp)
+    solved = resolve(accepted) if resolve else FOCUS_RESOLVER.staged(accepted)
+    solved["rejected"] = list(solved.get("rejected") or ()) + dropped
+    return dict(resolution, **solved), dropped
 
 
 # --------------------------------------------------------------------- 反馈
@@ -400,6 +874,16 @@ def _failure_digest(pool, resolution) -> list[dict]:
         counts = (info.get("conflicts") or {})
         if counts.get("conflicts"):
             _add("MUTUALLY_EXCLUSIVE", stage=stage)
+    propagation = (((pool or {}).get("engines") or {}).get("propagation") or {})
+    if propagation.get("status") == "no_candidate":
+        _add("PROPAGATION_EMPTY")
+    # 家具嫌疑：被选中的柱/门缺结构位置证据——这类要主动复查，而不是留着充数
+    for hyp in ((resolution or {}).get("final") or {}).get("selected") or ():
+        codes = [str(n.get("code") if isinstance(n, dict) else n)
+                 for n in ((hyp.get("evidence") or {}).get("negatives") or ())]
+        if "NO_STRUCTURAL_CONTEXT" in codes or "FURNITURE_CLUSTER" in codes:
+            _add("FURNITURE_SUSPECTED", category=hyp.get("category"))
+            break
     return out
 
 
@@ -415,6 +899,10 @@ _HINTS = {
     "INVALID_GRAMMAR": "语法非法（用了闭集外的原语/关系）",
     "NO_PART": "语法里的原语在图里一个都没匹配上",
     "NO_RELATION": "原语匹配上了但关系不成立",
+    "FAMILY_UNREAD": "构件族没有拿到可用的语义判断",
+    "PROPAGATION_EMPTY": "已确认的族在整张图里没有推广出实例",
+    "FURNITURE_SUSPECTED": "候选更像家具/图例（缺结构位置证据）",
+    "MODEL_REJECT": "模型复查判定不是该构件",
 }
 
 

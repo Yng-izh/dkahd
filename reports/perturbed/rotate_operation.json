@@ -1,0 +1,29 @@
+{
+  "src": "/mnt/data/办公楼.dxf",
+  "dst": "reports/perturbed/office_rotated30.dxf",
+  "ops": [
+    "rotate"
+  ],
+  "applied": [
+    {
+      "op": "rotate",
+      "entities": 4113,
+      "failed": 0,
+      "failed_sample": [],
+      "bbox_before": [
+        -3000114.989,
+        -11938732.534,
+        12013498.637,
+        11984995.36
+      ],
+      "bbox_after": [
+        -7845006.416,
+        -11413692.33,
+        9314920.539,
+        11479291.554
+      ],
+      "span_ratio": 0.956915,
+      "degrees": 30.0
+    }
+  ]
+}

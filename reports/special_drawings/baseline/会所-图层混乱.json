@@ -1,0 +1,31 @@
+{
+  "drawing": "会所-图层混乱.dxf",
+  "target": "assemble",
+  "status": "ok",
+  "seconds": 4.218,
+  "counts": {
+    "frame": 2,
+    "grid_axis": 16,
+    "column": 59,
+    "wall": 41,
+    "door": 58,
+    "window": 1,
+    "room": 2,
+    "stair": 3
+  },
+  "wall_segments": 95,
+  "column_candidates": 59,
+  "door_candidates": 59,
+  "window_candidates": 3,
+  "region_count": 12,
+  "soft_layers": {
+    "wall": [
+      "S_E_STAIR"
+    ],
+    "column": [],
+    "door": [],
+    "window": []
+  },
+  "room_boundary_states": {},
+  "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+}

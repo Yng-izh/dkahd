@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import importlib
 
-__version__ = "0.8.2"
+__version__ = "0.9.0"
 
 #: 公开名字 -> (子模块, 模块内属性名)
 _LAZY: dict[str, tuple[str, str]] = {

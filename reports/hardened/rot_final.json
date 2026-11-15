@@ -1,0 +1,32 @@
+{
+  "drawing": "office_rotated30.dxf",
+  "target": "assemble",
+  "status": "ok",
+  "seconds": 14.926,
+  "counts": {
+    "frame": 2,
+    "grid_axis": 26,
+    "north_arrow": 1,
+    "column": 38,
+    "wall": 42,
+    "door": 30,
+    "window": 30,
+    "room": 20,
+    "stair": 2,
+    "step": 2,
+    "apron": 1
+  },
+  "wall_segments": 160,
+  "column_candidates": 38,
+  "door_candidates": 30,
+  "window_candidates": 34,
+  "region_count": 40,
+  "soft_layers": {
+    "wall": [],
+    "column": [],
+    "door": [],
+    "window": []
+  },
+  "room_boundary_states": {},
+  "note": "Candidate and instance counts are not precision/recall without instance-level GT."
+}

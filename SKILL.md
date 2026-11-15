@@ -636,6 +636,7 @@ DIMENSION 实体的测量值，对应图纸的尺寸标注。
 
 | 版本 | 日期 | 变更 |
 | --- | --- | --- |
+| 0.9.0 | 2026-11-13 | **v2-component-focus**：识别核心单位从"区域→语法"改成"构件族→语义→全图传播"。新增 `profiles`（档位：openings_columns / lean / full）、`component_family`（重复块/门弧/线束/线对/闭合轮廓，配对用局部间距）、`multimodal_detector`（只判类别/子类型/组成/反面特征）、`fitters/{door,window,column}`（各按实例自身尺度，带家具/图例反面证据）、`instance_propagator`（旋转/镜像/缩放/跨图层推广）、`component_resolver`（分类别权重与冲突）。修掉楼梯/台阶/散水/图框/轴网"进池子却从不被选中"的老 bug（求解器缺 aux 阶段）。`dwg-reader v2 --profile`，focused 档不跑房间面域/房间路由/装配导出。 |
 | 0.8.2 | 2026-11-13 | 截图上传改为**默认授权**（`allow_remote_images` 默认 true，网关构造同为 true）：本地渲染的 ROI 小图会随请求发给配置好的模型端点；不用就 `--no-ai-vision` 或配置 `allow_remote_images: false`。实测（住院楼-图层混乱，propose，1 次调用 / 1 张图）：链路通、模型确实看到图，但语法未匹配到任何图元（NO_PART/NO_RELATION），构件数不变。 |
 | 0.8.1 | 2026-11-12 | v2 补齐 **11 类构件**：楼梯/台阶/散水/图框/轴网/指北针 接入规则引擎；新增 `v2/space_solver.py` —— 房间由**选中的墙网**重算面域（分块栅格，避免整图一次栅格化 OOM）再挂房名，单向链不反推墙；`global_resolver` 支持注入 `space_builder` 与"派生类不互斥"（房间/轴网/图框与结构构件共存）。已知缺口：房间只做"面域+挂靠"，不含多标签剖分与空间路由，数量低于 v1（住院楼 14 vs 44）。 |
 | 0.8.0 | 2026-11-12 | **v2 编排层（新架构，旧 DAG 不动）**：`cad_ir`（统一几何表示/稳定 uid/多尺度区域）、`geometry_graph`（平行/共线/相接/相交/包含/同族/贴空间）、`component_grammar`（构件几何语法的封闭原语与关系）、`geometry_fitter`（语法在原始图元上兑现）、`proposal_engines`（规则/模式/AI 三引擎并行出候选）、`global_resolver`（冲突图+分阶段联合求解+多状态）、`agent_controller`（选区域/要语法/失败反馈）、`experiment_store`（实验比较与规则复用）。新增 `dwg-reader v2` 与 `v2.run_drawing()`；多尺度视觉视图（全局/局部/细节）+ `vision.health()` 可诊断；Pillow 声明为 `vision` extra。旧 `recognize()`/`run_recognition()` 输出不变。 |

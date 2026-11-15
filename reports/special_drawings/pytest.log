@@ -1,0 +1,11 @@
+........................................................................ [ 25%]
+.....................................................................s.. [ 51%]
+....................................................s................... [ 76%]
+........................................................sss.......       [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_fonts.py:8: font assets absent
+SKIPPED [1] tests/test_pipeline.py:35: ODA File Converter 未安装，跳过 DWG 转换测试
+SKIPPED [1] tests/test_wall_quality.py:82: 缺少办公楼.dxf 或外部工作区 profile：work/profiles/office.json
+SKIPPED [1] tests/test_wall_quality.py:94: 缺少 t5 测试图
+SKIPPED [1] tests/test_wall_quality.py:109: 缺少 t5 测试图
+277 passed, 5 skipped in 12.30s
