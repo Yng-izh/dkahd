@@ -70,6 +70,7 @@ PROFILES = {
         "images_per_family": 4,           # 代表紧视图+细节图，再加两个有差异的成员
         "family_samples": 3,              # 每族看几个实例（代表 + 2 个不同成员）
         "family_closeup": 1,              # 模型说看不清时允许补看几次
+        "family_overview": True,          # 另加一张全部成员的分布总览图（同一次调用）
         # 成员数达到这个规模的族，推广影响大：必须两次独立判读一致才允许整族推广
         "corroborate_instances": 8,
         "note": "门窗柱为主输出；墙/轴网只做宿主与几何约束；房间退出主流程",
@@ -95,6 +96,7 @@ PROFILES = {
         "images_per_family": 3,
         "family_samples": 2,
         "family_closeup": 1,
+        "family_overview": True,
         "corroborate_instances": 8,
         "note": "同上，但不跑洞口语义裁决与残余扫描：更快，计数口径是候选口径",
     },
@@ -170,7 +172,7 @@ def summary(profile) -> dict:
             "detector": bool(profile.get("detector")),
             "observation": {key: profile.get(key) for key in (
                 "detector_families", "detector_max_families", "bootstrap_calls",
-                "images_per_family", "family_samples", "family_closeup",
+                "images_per_family", "family_samples", "family_closeup", "family_overview",
                 "corroborate_instances", "propagate_confidence", "arbitration",
                 "arbitration_points", "walltime_seconds")},
             "note": profile.get("note")}

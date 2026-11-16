@@ -170,24 +170,100 @@ def _rejection_details(resolution: dict, pool: dict) -> list[dict]:
     return rows
 
 
-def _pending_report(resolution: dict, pool: dict) -> dict:
-    """待核候选与未决项：**与确认构件分开报**，不能混成一个数字。"""
+#: 待定候选里算"待核"的原因码（与确认构件分开报）
+PENDING_CODES = ("PENDING_EVIDENCE", "PENDING_UNVERIFIED", "NEGATIVE_EVIDENCE",
+                 "PROPAGATION_WEAK_EVIDENCE", "MODEL_REJECT_KEPT_AS_PENDING",
+                 "CATEGORY_UNVERIFIED", "GEOMETRY_UNVERIFIED", "REFIT_REQUIRED")
+
+#: 完整待定清单最多列多少条（超出只计数，``truncated`` 标明）
+PENDING_ITEMS_MAX = 2000
+
+
+def _family_lookup(families) -> dict:
+    """``uid -> (family_id, instance_id)``：待定候选按图元归到构件族。"""
+    owner: dict = {}
+    for family in families or ():
+        fid = family.get("id")
+        for inst in family.get("instances") or ():
+            for uid in inst.get("uids") or ():
+                owner.setdefault(str(uid), (fid, inst.get("id")))
+    return owner
+
+
+def _pending_report(resolution: dict, pool: dict, *, families=(),
+                    readings=()) -> dict:
+    """待核候选与未决项：**与确认构件分开报**，不能混成一个数字。
+
+    除计数与样本外，给出**完整清单**（每条带 bbox、所属族与实例），并按来源归组：
+
+    * ``observed_family``：所属族被模型读过且答复有效，但没有达到推广条件；
+    * ``observed_failed``：所属族被尝试读过，但请求失败或答复无效；
+    * ``unobserved_family``：所属族本轮没被读到（预算没轮到）；
+    * ``orphan``：不属于任何构件族（孤立候选，族推广永远覆盖不到它）。
+    """
+    by_id = {h["id"]: h for h in (pool or {}).get("hypotheses") or ()
+             if h.get("id") is not None}
     rows = [r for r in _rejection_details(resolution, pool)
-            if str(r.get("why")) in ("PENDING_EVIDENCE", "PENDING_UNVERIFIED",
-                                     "NEGATIVE_EVIDENCE", "PROPAGATION_WEAK_EVIDENCE",
-                                     "MODEL_REJECT_KEPT_AS_PENDING", "CATEGORY_UNVERIFIED",
-                                     "GEOMETRY_UNVERIFIED", "REFIT_REQUIRED")]
+            if str(r.get("why")) in PENDING_CODES]
     unresolved = (pool or {}).get("unresolved") or []
+    owner = _family_lookup(families)
+    read = {}
+    for reading in readings or ():
+        fid = reading.get("family")
+        if fid is not None:
+            read[fid] = reading
     by_cat: dict = {}
+    groups: dict = {}
+    by_family: dict = {}
+    items = []
     for r in rows:
-        by_cat[str(r.get("category"))] = by_cat.get(str(r.get("category")), 0) + 1
+        category = str(r.get("category"))
+        by_cat[category] = by_cat.get(category, 0) + 1
+        hyp = by_id.get(r.get("id")) or {}
+        fid, iid = hyp.get("family_id"), None
+        if not fid:
+            for uid in hyp.get("uids") or ():
+                if str(uid) in owner:
+                    fid, iid = owner[str(uid)]
+                    break
+        if not fid:
+            group = "orphan"
+        elif fid in read:
+            group = ("observed_family" if read[fid].get("status") == "ok"
+                     else "observed_failed")
+        else:
+            group = "unobserved_family"
+        bucket = groups.setdefault(group, {})
+        bucket[category] = bucket.get(category, 0) + 1
+        if fid:
+            row = by_family.setdefault(fid, {"family": fid, "group": group,
+                                             "count": 0, "categories": {}})
+            row["count"] += 1
+            row["categories"][category] = row["categories"].get(category, 0) + 1
+            if fid in read:
+                row["reading"] = {k: read[fid].get(k) for k in
+                                  ("status", "category", "confidence", "scope")}
+        if len(items) < PENDING_ITEMS_MAX:
+            items.append({"id": r.get("id"), "category": r.get("category"),
+                          "why": r.get("why"), "codes": r.get("codes"),
+                          "score": hyp.get("score", r.get("score")),
+                          "engine": hyp.get("engine"), "bbox": hyp.get("bbox"),
+                          "family": fid, "instance": iid, "group": group,
+                          "handles": list(hyp.get("source_handles") or ())[:8],
+                          "layers": r.get("layers")})
     return {"counts": by_cat, "total": len(rows),
             "unresolved": len(unresolved),
+            "groups": groups,
+            "by_family": sorted(by_family.values(),
+                                key=lambda row: (-row["count"], str(row["family"]))),
+            "items": items,
+            "truncated": len(rows) > len(items),
             "sample": [{k: r.get(k) for k in
                         ("id", "category", "why", "codes", "pending_reason",
                          "v1_reason", "v1_status", "notes", "layers")}
                        for r in rows[:12]],
-            "note": "这些候选证据不足（待核/否证），不计入确认构件"}
+            "note": "这些候选证据不足（待核/否证），不计入确认构件；"
+                    "groups 按所属构件族是否被读过归组，layers 仅作诊断，不参与判定"}
 
 
 def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
@@ -335,7 +411,9 @@ def analyze(*, snapshot: dict, scale=None, plan=None, walls=(), columns=(),
             "model_audit": (agent or {}).get("model_audit") or [],
             "reinspect": reinspect_info,
             "arbitration": arb_info,
-            "pending": _pending_report(resolution, pool),
+            "pending": _pending_report(
+                resolution, pool, families=(agent or {}).get("_families") or (),
+                readings=(detector_info or {}).get("readings") or ()),
             "propagated": _propagated_report(pool, resolution),
             "rejected": [{k: r.get(k) for k in
                           ("id", "category", "why", "codes", "score", "pending_reason",

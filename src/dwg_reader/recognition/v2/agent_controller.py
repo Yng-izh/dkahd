@@ -381,6 +381,7 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
                 budget={"images_per_family": int(
                             prof.get("images_per_family") or 3),
                         "samples": int(prof.get("family_samples") or 3),
+                        "overview": bool(prof.get("family_overview")),
                         "closeup": min(max(0, int(prof.get("family_closeup", 1))),
                                        max(0, left - reserve - 1))})
             reading_calls = max(0, int(reading.get("calls", 1)))
@@ -413,6 +414,12 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
                                  "agrees_with_geometry_guess"),
                              "grammar_error": reading.get("grammar_error"),
                              "wall_relation": (reading.get("facts") or {}).get("wall_relation"),
+                             # 全部成员的排列/墙线交接/填充：与模型无关的独立几何证据
+                             "layout": {key: (reading.get("facts") or {}).get(key)
+                                        for key in ("member_layout", "wall_interaction",
+                                                    "fill_types")
+                                        if key in (reading.get("facts") or {})},
+                             "overview": bool(reading.get("overview")),
                              "width_percentile": (reading.get("facts") or {}).get(
                                  "opening_width_percentile"),
                              "geometry_guess": reading.get("geometry_guess"),
@@ -463,6 +470,7 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
                         budget={"images_per_family": int(
                                     prof.get("images_per_family") or 3),
                                 "samples": int(prof.get("family_samples") or 3),
+                                "overview": bool(prof.get("family_overview")),
                                 "closeup": 0, "verification": True})
                     second_calls = max(0, int(second.get("calls", 1)))
                     calls += second_calls
@@ -750,6 +758,8 @@ def run(*, ir: dict, graph=None, pool=None, gateway=None, ai=None, snapshot=None
                                 "categories": (constraints or {}).get("categories") or {},
                             }},
             "unresolved": (pool_now.get("unresolved") or [])[:80],
+            # 内部用（不进最终结果）：全部族及成员，供待定候选按族归组
+            "_families": families,
             "detector": {"readings": readings,
                          "calls": detector_calls,
                          "observation": family_observation,

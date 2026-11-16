@@ -417,8 +417,15 @@ def test_large_family_needs_two_agreeing_reads_before_propagation(family_observa
     assert all(request["images"] for request in gateway.requests)
     primary_images, verification_images = [row["request"]["images"]
                                            for row in result["model_audit"]]
-    primary_ids = {image["instance"] for image in primary_images}
-    verification_ids = {image["instance"] for image in verification_images}
+    # 分布总览图覆盖全部成员（不属于某个抽样实例），两次判读都带且都在第一张
+    for images in (primary_images, verification_images):
+        assert images[0]["role"] == "family_overview"
+        assert [i for i, m in enumerate(images)
+                if m["role"] == "family_overview"] == [0]
+    primary_ids = {image["instance"] for image in primary_images
+                   if image["role"] != "family_overview"}
+    verification_ids = {image["instance"] for image in verification_images
+                        if image["role"] != "family_overview"}
     assert len(primary_ids) == len(verification_ids) == 3
     assert primary_ids.isdisjoint(verification_ids)
     assert all(image["focus"] > 0

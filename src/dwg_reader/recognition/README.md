@@ -76,6 +76,20 @@ v2底座显式关闭旧洞口模型路径；该节点现在遵守llm_review=Fals
 每轮最终计数属于该轮，不能累加为整图结果。大族仍需不同成员复核，高置信和作用域规则不变。
 显式网关重试0与显式墙钟预算会被保留，档位不再抬高已有时间上限。
 
+### 族布局证据、分布总览与完整待定清单（2026-11-15）
+
+- `v2/family_layout.py` 从**全部成员**算三组几何事实，进族判读提示词（`component-detector/2.1`），
+  也写进 `detector.readings[*].layout` 作独立证据：`member_layout`（成员中心成行成列比例、
+  行列内间距重复度、最近邻/尺寸、重叠重复画、分布范围/全图）、`wall_interaction`（每个成员
+  边外侧的线在边界终止/穿过/齐平延续/无交接的比例，及已接受墙轴线的同类统计）、`fill_types`。
+  只给比例与关系量，不下类别结论，不读层名/块名。
+- `family_overview=True`（`openings_columns` 与 lean 档）时，每次族判读在局部图前加一张
+  全部成员同时高亮的分布总览图（`role="family_overview"`，同一次调用，不增加调用数）；
+  一个成员都没高亮的总览不发送。
+- `pending` 增加完整 `items`（bbox、所属族/实例、引擎、handle）、`groups`
+  （`observed_family` / `observed_failed` / `unobserved_family` / `orphan`）与 `by_family`；
+  原 `counts`/`total`/`sample` 不变。判定门槛（柱族需 high、大族复读）未改动。
+
 ## 1. 目录职责
 
 | 文件 | 行数 | 职责 |

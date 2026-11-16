@@ -785,7 +785,8 @@ def width_percentile(width, widths) -> dict:
             "median": SH._r(rows[len(rows) // 2])}
 
 
-def family_facts(family: dict, ir: dict, *, walls=(), widths=()) -> dict:
+def family_facts(family: dict, ir: dict, *, walls=(), widths=(),
+                 layout: bool = False) -> dict:
     """给模型看的族事实：只给几何关系，**不给程序猜的类别，也不给层名/块名**。
 
     以前这里带了一个 ``geometry_guess``（按"非弧、非闭合 → 窗"的默认值猜的），
@@ -796,6 +797,9 @@ def family_facts(family: dict, ir: dict, *, walls=(), widths=()) -> dict:
 
     ``block_instance`` 只回答"这个成员是不是块参照"（是否展开成重复几何），
     不带块名——块名本身是 CAD 里的自由文本，不能当作类别证据。
+
+    ``layout=True`` 时再加三组**全部成员**的事实（见 :mod:`family_layout`）：
+    成员排列（成行成列/间距重复）、墙线在成员边界上的交接方式、填充类型。
     """
     by_uid = IR.by_uid(ir)
     rep = family.get("representative") or {}
@@ -823,6 +827,9 @@ def family_facts(family: dict, ir: dict, *, walls=(), widths=()) -> dict:
     if rect:
         facts["opening_width_percentile"] = width_percentile(max(rect["w"], rect["h"]),
                                                              widths)
+    if layout:
+        from . import family_layout as LAYOUT
+        facts.update(LAYOUT.facts(family, ir, walls))
     return facts
 
 

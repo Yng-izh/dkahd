@@ -432,11 +432,13 @@ def summary(cases) -> dict:
 # --------------------------------------------------------------------- 多尺度视图
 #: 观察层次：全局（布局/重复规律）、局部（构件与墙柱关系）、细节（线/弧/填充）、
 #: closeup（只框住目标本身的最近视图，用于模型说"看不清"时的补看）
-VIEW_SCALES = ("global", "local", "detail", "closeup")
+#: overview（族分布总览：调用方给的取景框就是全部成员的外接框，所有成员同时高亮）
+VIEW_SCALES = ("global", "local", "detail", "closeup", "overview")
 
 #: 每个尺度的取景与分辨率（比率，不是图纸阈值）
 VIEW_SPEC = {
     "global": {"pad_thickness": 0.0, "width": 640, "shrink": 1.0},
+    "overview": {"pad_thickness": 0.0, "width": 1024, "shrink": 1.0},
     "local": {"pad_thickness": 6.0, "width": 720, "shrink": 1.0},
     "detail": {"pad_thickness": 1.0, "width": 900, "shrink": 1.0},
     "closeup": {"pad_thickness": 0.25, "width": 900, "shrink": 1.0},

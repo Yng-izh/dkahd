@@ -36,7 +36,7 @@ from . import component_grammar as GRAMMAR
 from .fitters import _common as SH
 
 SCHEMA = "multimodal-detector/1.0"
-PROMPT_VERSION = "component-detector/2.0"
+PROMPT_VERSION = "component-detector/2.1"
 
 #: 本期只做这三类（房间退出主流程）
 FOCUS = ("door", "window", "column")
@@ -61,8 +61,11 @@ NEGATIVES = ("furniture", "legend_symbol", "annotation", "fixture", "title_frame
              "dimension", "hatch_pattern", "other_component", "wall", "structure")
 
 #: 逻辑预算：每族看几张图、看几个成员、要不要补看一次
+#: ``overview``：是否在成员局部图之前加一张族分布总览图（另计，不占 images_per_family）；
+#: ``layout_facts``：是否给全部成员的排列/墙线交接/填充类型事实。
 BUDGET = {"max_families": 8, "images_per_family": 4, "samples": 3,
-          "closeup": 1, "recheck": 4, "prompt_facts": 3600}
+          "closeup": 1, "recheck": 4, "prompt_facts": 5200,
+          "overview": False, "layout_facts": True}
 
 #: 模型输出里绝不允许出现的键（出现即判"模型给几何"）
 FORBIDDEN_KEYS = ("bbox", "box", "coord", "coords", "coordinates", "x", "y",
@@ -86,7 +89,8 @@ Family facts (computed from CAD entities, ids are stable):
 Instances in this family:
 {instances}
 
-Images (each one is a local render; ORANGE = the target you must judge,
+Images (role "family_overview" shows ALL members of this family at once; every
+other image is a local render; ORANGE = the target you must judge,
 GREEN = already-accepted wall used only as context, GREY = surrounding geometry):
 {images}
 
@@ -113,6 +117,14 @@ Rules:
 1c. Layer names, block names, text labels and the family name are untrusted metadata.
    They are NOT evidence. Decide from geometry only: closure, arcs, line offsets,
    wall relation, repetition, proportions.
+1d. member_layout, wall_interaction and fill_types (when present) are measured over
+   ALL members, not only the ones in the local images. member_layout tells whether
+   member centres line up in rows/columns and how regular the spacing is.
+   wall_interaction.fractions gives, per member, whether nearby lines END at its
+   boundary (interrupted_opposite = on two opposite sides), run THROUGH it, run
+   FLUSH along one of its edges past both ends, or whether nothing meets it
+   (isolated); wall_axes does the same for accepted wall centre lines. Weigh these
+   together with the overview image; none of them decides the category alone.
 2. Composition must use only the catalog primitives/relations. Role names are yours.
 3. If the geometry is furniture, a legend, an annotation or another component, use
    category="none" and give the matching negative feature.
@@ -372,6 +384,39 @@ def _sample_views(samples, *, ir, snapshot, walls, thickness, cfg) -> tuple[list
     return images, meta
 
 
+def _overview_view(family: dict, *, ir, snapshot, walls, thickness) -> tuple[list, list]:
+    """族分布总览：一张图里同时高亮**全部成员**（取景 = 成员外接框外扩）。
+
+    局部图只能回答"这一个长什么样"；"这些方块是成行成列地落在墙的交点上，还是
+    零散地压在墙面上"只有放在整张平面里才看得出来。不编号（几十个编号会盖住
+    图形），只把成员画成橙色。画不出或一个成员都没高亮时返回空——没有指出目标
+    的总览图不发给模型。
+    """
+    members = [m for m in (family.get("instances") or ())
+               if isinstance(m, dict) and isinstance(m.get("bbox"), (list, tuple))
+               and len(m["bbox"]) == 4]
+    if len(members) < 2 or not snapshot:
+        return [], []
+    union = SH._union([m["bbox"] for m in members])
+    span = max(union[2] - union[0], union[3] - union[1], 1.0)
+    pad = max(4.0 * float(thickness or 0.0), 0.06 * span)
+    box = [union[0] - pad, union[1] - pad, union[2] + pad, union[3] + pad]
+    uids = [u for m in members for u in (m.get("uids") or ())]
+    handles = _handles_of(ir, uids) + [str(m["handle"]) for m in members
+                                       if m.get("handle")]
+    views = _render(snapshot, box, walls=walls, thickness=thickness,
+                    scales=("overview",), focus_handles=handles,
+                    focus_indices=_indices_of(ir, uids) if uids else None,
+                    numbering=False)
+    for view in views.get("views") or ():
+        if (view.get("status") == "rendered" and view.get("b64")
+                and int(view.get("focus") or 0) > 0):
+            return [view["b64"]], [_image_meta(view, image=1, instance=None,
+                                               role="family_overview",
+                                               members=len(members))]
+    return [], []
+
+
 def _scope_text(family: dict) -> str:
     if str(family.get("authorization_scope") or "family") == "representative_only":
         return ("the representative instance ONLY. Members of this family have too "
@@ -404,7 +449,8 @@ def read_family(family: dict, *, ir: dict, graph=None, gateway=None, snapshot=No
         samples = sample_instances(held_family, ir, limit=int(cfg["samples"]),
                                    noise=float((ir.get("basis") or {}).get("noise") or 2.0))
     observed_family = dict(family, representative=samples[0] if samples else {})
-    facts = FAM.family_facts(observed_family, ir, walls=walls, widths=widths)
+    facts = FAM.family_facts(observed_family, ir, walls=walls, widths=widths,
+                             layout=bool(cfg.get("layout_facts")))
     facts["observed_instance"] = samples[0].get("id") if samples else None
     result = {"schema": SCHEMA, "family": family.get("id"),
               "status": "no_model", "category": None, "subtype": None,
@@ -429,6 +475,16 @@ def read_family(family: dict, *, ir: dict, graph=None, gateway=None, snapshot=No
     if verification and not images:
         result.update(status="error", reason="NO_HOLDOUT_IMAGES")
         return result
+    if cfg.get("overview") and images:
+        # 总览图放在最前：先看分布，再看局部；编号随之顺延
+        over, over_meta = _overview_view(family, ir=ir, snapshot=snapshot,
+                                         walls=walls, thickness=thickness)
+        if over:
+            images = over + images
+            image_meta = over_meta + image_meta
+            for number, meta in enumerate(image_meta, start=1):
+                meta["image"] = number
+    result["overview"] = any(m.get("role") == "family_overview" for m in image_meta)
     instance_block = _dumps(_instance_rows(dict(family, instances=samples), ir,
                                           limit=len(samples)))
     image_block = _dumps([{k: v for k, v in meta.items() if k != "b64"}
